@@ -2,7 +2,8 @@ import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 
 // Define a TypeScript interface for the props
-interface CellProps {
+export interface CellProps {
+  id: string;
   title: string;
   description: string;
   imageUrl: string;

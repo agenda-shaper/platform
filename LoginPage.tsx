@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import utils from "./utils"; // Import your utils module
+
 import {
   View,
   Text,
@@ -13,15 +15,32 @@ import {
 } from "react-native";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
 
-  const handleLogin = () => {
-    // Add your authentication logic here
-    // You can use email and password state values to make an API call or perform authentication checks
-    // For this example, we'll just log the email and password to the console
-    console.log("Email:", email);
-    console.log("Password:", password);
+  const handleLogin = async () => {
+    try {
+      // Make a POST request to your server's login endpoint
+      const response = await utils.post("/users/auth", {
+        action: "login",
+        data: { identifier, password },
+      });
+
+      if (response.ok) {
+        // Login was successful
+        const data = await response.json();
+        console.log("Login successful", data);
+
+        // You can navigate to the user's dashboard or perform any other action here
+      } else {
+        // Login failed, display an error message
+        const errorData = await response.json();
+        setError(errorData.error);
+      }
+    } catch (error) {
+      console.error("Error during login", error);
+    }
   };
 
   return (
@@ -31,12 +50,12 @@ const LoginPage = () => {
         style={styles.container}
       >
         <View>
-          <Text style={styles.heading}>Log In</Text>
+          <Text style={styles.heading}>Log In </Text>
           <TextInput
             style={styles.input}
             placeholder="Email or Username"
-            value={email}
-            onChangeText={(text) => setEmail(text)}
+            value={identifier}
+            onChangeText={(text) => setIdentifier(text)}
           />
           <TextInput
             style={styles.input}

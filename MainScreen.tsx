@@ -1,60 +1,29 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, FlatList, StyleSheet } from "react-native";
-import Cell from "./Cell"; // Import your Cell component
+import Cell, { CellProps } from "./Cell"; // Import your Cell component
+import utils from "./utils"; // Import your utility module
 
 const MainScreen = () => {
-  // Sample data for the cells
-  const data = [
-    {
-      id: "1",
-      title: "Cell 1",
-      description: "Description for Cell 1",
-      imageUrl:
-        "https://nationaltoday.com/wp-content/uploads/2022/10/456841065-min-1200x834.jpg",
-    },
-    {
-      id: "2",
-      title: "Cell 2",
-      description: "Description for Cell 2",
-      imageUrl:
-        "https://nationaltoday.com/wp-content/uploads/2022/10/456841065-min-1200x834.jpg",
-    },
-    {
-      id: "3",
-      title: "Cell 3",
-      description: "Description for Cell 3",
-      imageUrl:
-        "https://nationaltoday.com/wp-content/uploads/2022/10/456841065-min-1200x834.jpg",
-    },
-    {
-      id: "4",
-      title: "Cell 4",
-      description: "Description for Cell 4",
-      imageUrl:
-        "https://nationaltoday.com/wp-content/uploads/2022/10/456841065-min-1200x834.jpg",
-    },
-    {
-      id: "99",
-      title: "Cell 99",
-      description: "Description for Cell 99",
-      imageUrl:
-        "https://nationaltoday.com/wp-content/uploads/2022/10/456841065-min-1200x834.jpg",
-    },
-    {
-      id: "6",
-      title: "Cell 6",
-      description: "Description for Cell 6",
-      imageUrl:
-        "https://nationaltoday.com/wp-content/uploads/2022/10/456841065-min-1200x834.jpg",
-    },
-    {
-      id: "7",
-      title: "Cell 7",
-      description: "Description for Cell 7",
-      imageUrl:
-        "https://nationaltoday.com/wp-content/uploads/2022/10/456841065-min-1200x834.jpg",
-    },
-  ];
+  const [data, setData] = useState<CellProps[]>([]);
+
+  useEffect(() => {
+    // Fetch data from your API here
+    const fetchData = async () => {
+      try {
+        const response = await utils.get("/algorithm/fetch"); // Replace with your actual API endpoint
+        console.log(response);
+        const result = await response.json();
+        console.log(result);
+
+        const { cells } = result;
+        setData(cells);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -62,12 +31,13 @@ const MainScreen = () => {
         data={data}
         renderItem={({ item }) => (
           <Cell
+            id={item.id} // Pass the "id" as a prop
             title={item.title}
             description={item.description}
             imageUrl={item.imageUrl}
           />
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()} // Use the "id" as the key
         contentContainerStyle={styles.list}
       />
     </View>
