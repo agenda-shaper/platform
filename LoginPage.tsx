@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import utils from "./utils"; // Import your utils module
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   View,
@@ -22,7 +23,7 @@ const LoginPage = () => {
   const handleLogin = async () => {
     try {
       // Make a POST request to your server's login endpoint
-      const response = await utils.post("/users/auth", {
+      const response = await utils.auth({
         action: "login",
         data: { identifier, password },
       });
@@ -31,6 +32,7 @@ const LoginPage = () => {
         // Login was successful
         const data = await response.json();
         console.log("Login successful", data);
+        await AsyncStorage.setItem("token", data.token);
 
         // You can navigate to the user's dashboard or perform any other action here
       } else {

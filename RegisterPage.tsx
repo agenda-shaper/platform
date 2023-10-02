@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import utils from "./utils"; // Import your utils module
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   View,
@@ -20,73 +21,49 @@ const RegisterPage = () => {
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(""); // Add state for error message
+  type Check = [boolean, string];
 
   const handleRegister = async () => {
-    // Reset the error message
     setErrorMessage("");
-
-    // Input validation checks
-    if (!utils.validator.isEmail(email)) {
-      setErrorMessage("Invalid email format");
-      return;
+    const checks: Check[] = [
+      [utils.validator.isEmail(email), "Invalid email format"],
+      [
+        utils.validator.isAlphanumeric(username),
+        "Username can only contain letters and numbers",
+      ],
+      [
+        utils.validator.isLength(username, { min: 3, max: 16 }),
+        "Username must be between 3 and 16 characters long",
+      ],
+      [
+        utils.validator.isLength(password, { min: 8, max: 64 }),
+        "Password must be between 8 and 64 characters long",
+      ],
+      [password === repeatPassword, "Passwords do not match"],
+    ];
+    for (let [check, message] of checks) {
+      if (!check) {
+        setErrorMessage(message);
+        return;
+      }
     }
-
-    if (!utils.validator.isAlphanumeric(username)) {
-      setErrorMessage("Username can only contain letters and numbers");
-      return;
-    }
-    if (!utils.validator.isLength(username, { max: 16 })) {
-      setErrorMessage("Username must be maximum 16 characters long");
-      return;
-    }
-    if (!utils.validator.isLength(username, { min: 3 })) {
-      setErrorMessage("Username must be at least 3 characters long");
-      return;
-    }
-
-    if (!utils.validator.isLength(password, { min: 8 })) {
-      setErrorMessage("Password must be at least 8 characters long");
-      return;
-    }
-    if (!utils.validator.isLength(password, { max: 64 })) {
-      setErrorMessage("Password must be maximum 64 characters long");
-      return;
-    }
-
-    if (password.length < 8) {
-      setErrorMessage("Password must be at least 8 characters long."); // Set the error message
-      return;
-    }
-
-    if (password !== repeatPassword) {
-      // Passwords do not match, display an error message
-      setErrorMessage("Passwords do not match"); // Set the error message
-      return;
-    }
-
     try {
-      // Make a POST request to your server's registration endpoint
-      const response = await utils.post("/users/auth", {
+      const response = await utils.auth({
         action: "register",
         data: { email, username, password },
       });
-      //console.log(response);
       if (response.ok) {
-        // Registration was successful
         const data = await response.json();
-        console.log("Registration successful", data);
+        console.log("Registration successful", await data);
 
-        // You can navigate to the login page or perform any other action here
+        // Store the token
+        await AsyncStorage.setItem("token", data.token);
       } else {
-        // Registration failed, display an error message
-        const errorData = await response.json();
-        console.log(errorData);
-        const errorMessage = errorData.message; // Assuming the server returns an error message field
-        setErrorMessage(errorMessage); // Set the error message in state
+        setErrorMessage((await response.json()).message);
       }
     } catch (error) {
       console.error("Error during registration", error);
-      setErrorMessage("An error occurred during registration"); // Set a generic error message
+      setErrorMessage("An unknown error occurred during registration");
     }
   };
 
