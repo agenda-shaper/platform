@@ -12,8 +12,9 @@ const Tab = createBottomTabNavigator();
 const Navigator: React.FC = () => {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Main" component={MainScreen} />
       <Tab.Screen name="Login" component={LoginPage} />
+      <Tab.Screen name="Main" component={MainScreen} />
+
       <Tab.Screen name="Chat" component={ChatScreen} />
       <Tab.Screen name="Register" component={RegisterPage} />
 
