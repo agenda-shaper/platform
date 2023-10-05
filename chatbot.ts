@@ -1,57 +1,48 @@
 import EventSource from "react-native-event-source";
+
 interface Message {
   role: string;
   content: string;
-  createdAt: number;
 }
 
-export async function sendMessageToAcyToo(messageContent: string) {
-  // Create a new message
-  const message = {
-    role: "user",
-    content: messageContent,
-    createdAt: Date.now(),
-  };
-
-  // Create a new request
+export async function sendMessageToAI(messages: Message[]) {
+  // Create a new request with the entire conversation history
   const req = {
     key: "", // Replace with your key
-    model: "GPT3p5Turbo", // Or any other model you want to use
-    messages: [message],
-    temperature: 1.0,
-    password: "", // Replace with your password
+    messages: messages,
+    model: { id: "gpt-3.5-turbo", name: "GPT-3.5" },
+    prompt:
+      "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+    temperature: 0.7,
   };
 
   try {
     // Send the request to the chatbot
-    const res = await fetch("https://chat.acytoo.com/api/completions", {
+    const res = await fetch("https://chat.aivvm.com/api/chat", {
       method: "POST",
       headers: {
-        "Content-Type": "text/plain;charset=UTF-8",
-        Accept: "*/*",
-        "Cache-Control": "no-cache",
-        "Proxy-Connection": "keep-alive",
+        Accept: "application/json",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(req),
     });
 
-    // Check for errors
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
     }
 
-    // Create an EventSource
-    const eventSource = new EventSource(res.url);
+    let data = await res.text();
+    console.log(data);
 
-    // Listen for messages
-    eventSource.addEventListener("message", (event) => {
-      console.log("Received message:", event.data);
-    });
+    const aiResponse: Message = {
+      role: "assistant",
+      content: data,
+    };
 
-    // Listen for errors
-    eventSource.addEventListener("error", (event) => {
-      console.error("Error:", event);
-    });
+    // pop the temp msg
+    messages.pop();
+
+    return [...messages, aiResponse];
   } catch (error) {
     console.error("Error:", error);
   }

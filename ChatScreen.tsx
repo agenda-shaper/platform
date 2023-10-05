@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Markdown from "@valasolutions/react-native-markdown";
+import utils from "./utils"; // Import your utils module
 import {
   View,
   Text,
@@ -6,49 +9,77 @@ import {
   Button,
   FlatList,
   StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import { sendMessageToAcyToo } from "./chatbot"; // Import the chatbot function
+import { sendMessageToAI } from "./chatbot"; // Import the chatbot function
+
+interface Message {
+  role: string;
+  content: string;
+}
 
 const ChatScreen = () => {
-  const [messages, setMessages] = useState<
-    { role: string; content: string; createdAt: number }[]
-  >([]);
+  const insets = useSafeAreaInsets();
+
+  const [messages, setMessages] = useState<{ role: string; content: string }[]>(
+    []
+  );
   const [inputMessage, setInputMessage] = useState<string>("");
 
   const handleMessageSend = async () => {
     if (inputMessage.trim() === "") return; // Don't send empty messages
-    // const newMessages = [
-    //   ...messages,
-    //   { role: "user", content: inputMessage, createdAt: Date.now() },
-    // ];
-    // setMessages(newMessages);
-    console.log(inputMessage);
     setInputMessage("");
-    await sendMessageToAcyToo(inputMessage);
-
-    // Send the message to the chatbot and get the response
-    //const aiResponse = await sendMessageToAcyToo(newMessages);
-    // if (aiResponse) {
-    //   setMessages((prevMessages) => [
-    //     ...prevMessages,
-    //     { role: "ai", content: aiResponse, createdAt: Date.now() },
-    //   ]);
-    // }
+    let newMessages = [
+      ...messages,
+      {
+        role: "user",
+        content: inputMessage,
+      },
+      {
+        // temp message
+        role: "assistant",
+        content: "...",
+      },
+    ];
+    setMessages(newMessages);
+    const aiRespondedMessages = await sendMessageToAI(newMessages);
+    if (aiRespondedMessages) {
+      setMessages(aiRespondedMessages);
+      const lastTwoMessages = aiRespondedMessages.slice(-2);
+      const response = await utils.post("/chat/send", {
+        messageFields: lastTwoMessages,
+      });
+      if (response.ok) {
+        console.log("Saving successful");
+      } else {
+        console.log((await response.json()).message);
+      }
+    } else {
+      // err
+      newMessages.pop();
+      newMessages.pop();
+      setMessages([...newMessages]);
+    }
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+      //keyboardVerticalOffset={64}
+      keyboardVerticalOffset={insets.top + 45} // Adjust this value as needed
+    >
       <FlatList
         data={messages}
         renderItem={({ item }) => (
           <View
             style={item.role === "user" ? styles.userMessage : styles.aiMessage}
           >
-            <Text>{item.content}</Text>
+            <Markdown>{item.content}</Markdown>
           </View>
         )}
         keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={styles.messageList}
       />
       <View style={styles.inputContainer}>
         <TextInput
@@ -59,7 +90,7 @@ const ChatScreen = () => {
         />
         <Button title="Send" onPress={handleMessageSend} />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -99,9 +130,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 16,
     padding: 8,
-  },
-  messageList: {
-    paddingVertical: 16, // Add spacing between messages and screen
   },
 });
 
