@@ -11,7 +11,6 @@ const MainScreen = () => {
     const fetchData = async () => {
       try {
         const response = await utils.get("/cells/fetch"); // Replace with your actual API endpoint
-        console.log(response);
         const result = await response.json();
         console.log(result);
 

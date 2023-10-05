@@ -5,20 +5,20 @@ import {
   ChatResponse,
   Message,
   ModelType,
-} from '../base';
-import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from 'axios';
-import { CreateAxiosProxy } from '../../utils/proxyAgent';
-import es from 'event-stream';
+} from "../base";
+import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from "axios";
+import { CreateAxiosProxy } from "../../chatbot_utils/proxyAgent";
+import es from "event-stream";
 import {
   ErrorData,
   Event,
   EventStream,
   MessageData,
   parseJSON,
-} from '../../utils';
-import { createHash } from 'crypto';
-import moment from 'moment';
-import { v4 } from 'uuid';
+} from "../../chatbot_utils";
+import { createHash } from "crypto";
+import moment from "moment";
+import { v4 } from "uuid";
 
 interface RealReq {
   messages: Message[];
@@ -37,9 +37,9 @@ class Utils {
       63, 103, 59, 117, 115, 108, 41, 67, 76,
     ];
 
-    const base_string: string = `${json_data['t']}:${json_data['m']}:'WI,2rU#_r:r~aF4aJ36[.Z(/8Rv93Rf':${json_data['m'].length}`;
+    const base_string: string = `${json_data["t"]}:${json_data["m"]}:'WI,2rU#_r:r~aF4aJ36[.Z(/8Rv93Rf':${json_data["m"].length}`;
 
-    return createHash('sha256').update(base_string).digest('hex');
+    return createHash("sha256").update(base_string).digest("hex");
   }
 
   static format_timestamp(timestamp: number): string {
@@ -57,30 +57,30 @@ export class AILS extends Chat {
     super(options);
     this.client = CreateAxiosProxy(
       {
-        baseURL: 'https://api.caipacity.com',
+        baseURL: "https://api.caipacity.com",
         headers: {
-          authority: 'api.caipacity.com',
-          accept: '*/*',
-          'accept-language':
-            'en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3',
-          authorization: 'Bearer free',
-          'client-id': v4(),
-          'client-v': '0.1.249',
-          'content-type': 'application/json',
-          origin: 'https://ai.ls',
-          referer: 'https://ai.ls/',
-          'sec-ch-ua':
+          authority: "api.caipacity.com",
+          accept: "*/*",
+          "accept-language":
+            "en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3",
+          authorization: "Bearer free",
+          "client-id": v4(),
+          "client-v": "0.1.249",
+          "content-type": "application/json",
+          origin: "https://ai.ls",
+          referer: "https://ai.ls/",
+          "sec-ch-ua":
             '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
-          'sec-ch-ua-mobile': '?0',
-          'sec-ch-ua-platform': '"Windows"',
-          'sec-fetch-dest': 'empty',
-          'sec-fetch-mode': 'cors',
-          'sec-fetch-site': 'cross-site',
-          'user-agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": '"Windows"',
+          "sec-fetch-dest": "empty",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-site": "cross-site",
+          "user-agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
         },
       } as CreateAxiosDefaults,
-      false,
+      false
     );
   }
 
@@ -96,11 +96,11 @@ export class AILS extends Chat {
   public async askStream(req: ChatRequest, stream: EventStream) {
     const now = moment().valueOf();
     const data = {
-      model: 'gpt-3.5-turbo',
+      model: "gpt-3.5-turbo",
       temperature: 1,
       stream: true,
       messages: req.messages,
-      d: moment().format('YYYY-MM-DD'),
+      d: moment().format("YYYY-MM-DD"),
       t: `${now}`,
       s: Utils.hash({
         t: now,
@@ -108,37 +108,37 @@ export class AILS extends Chat {
       }),
     };
     try {
-      const res = await this.client.post('/v1/chat/completions', data, {
-        responseType: 'stream',
+      const res = await this.client.post("/v1/chat/completions", data, {
+        responseType: "stream",
       } as AxiosRequestConfig);
       res.data.pipe(es.split(/\r?\n\r?\n/)).pipe(
         es.map(async (chunk: any, cb: any) => {
-          const dataStr = chunk.replace('data: ', '');
+          const dataStr = chunk.replace("data: ", "");
           if (!dataStr) {
             return;
           }
-          if (dataStr === '[DONE]') {
-            stream.write(Event.done, { content: '' });
+          if (dataStr === "[DONE]") {
+            stream.write(Event.done, { content: "" });
             stream.end();
             return;
           }
           const data = parseJSON(dataStr, {} as any);
           if (!data?.choices) {
-            stream.write(Event.error, { error: 'not found data.choices' });
+            stream.write(Event.error, { error: "not found data.choices" });
             stream.end();
             return;
           }
           const [
             {
-              delta: { content = '' },
+              delta: { content = "" },
               finish_reason,
             },
           ] = data.choices;
-          if (finish_reason === 'stop') {
+          if (finish_reason === "stop") {
             return;
           }
           stream.write(Event.message, { content });
-        }),
+        })
       );
     } catch (e: any) {
       console.error(e.message);

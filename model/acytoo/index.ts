@@ -1,9 +1,9 @@
-import { Chat, ChatOptions, ChatRequest, ModelType } from '../base';
-import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from 'axios';
-import { CreateAxiosProxy } from '../../utils/proxyAgent';
-import es from 'event-stream';
-import { Event, EventStream } from '../../utils';
-import moment from 'moment';
+import { Chat, ChatOptions, ChatRequest, ModelType } from "../base";
+import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from "axios";
+import { CreateAxiosProxy } from "../../chatbot_utils/proxyAgent";
+import es from "event-stream";
+import { Event, EventStream } from "../../chatbot_utils";
+import moment from "moment";
 
 interface Message {
   role: string;
@@ -25,12 +25,12 @@ export class AcyToo extends Chat {
   constructor(options?: ChatOptions) {
     super(options);
     this.client = CreateAxiosProxy({
-      baseURL: 'https://chat.acytoo.com',
+      baseURL: "https://chat.acytoo.com",
       headers: {
-        'Content-Type': 'text/plain;charset=UTF-8',
-        accept: '*/*',
-        'Cache-Control': 'no-cache',
-        'Proxy-Connection': 'keep-alive',
+        "Content-Type": "text/plain;charset=UTF-8",
+        accept: "*/*",
+        "Cache-Control": "no-cache",
+        "Proxy-Connection": "keep-alive",
       },
     } as CreateAxiosDefaults);
   }
@@ -46,7 +46,7 @@ export class AcyToo extends Chat {
 
   async preHandle(
     req: ChatRequest,
-    options?: { token?: boolean; countPrompt?: boolean },
+    options?: { token?: boolean; countPrompt?: boolean }
   ): Promise<ChatRequest> {
     return super.preHandle(req, { token: true, countPrompt: false });
   }
@@ -56,31 +56,31 @@ export class AcyToo extends Chat {
     const data: RealReq = {
       temperature: 1.0,
       model: req.model,
-      key: '',
+      key: "",
       messages: req.messages.map((v) => ({
         ...v,
         createdAt: moment().valueOf() + i++ * 100,
       })),
-      password: '',
+      password: "",
     };
     try {
-      const res = await this.client.post('/api/completions', data, {
-        responseType: 'stream',
+      const res = await this.client.post("/api/completions", data, {
+        responseType: "stream",
       } as AxiosRequestConfig);
       res.data.pipe(
         es.map(async (chunk: any, cb: any) => {
           const content: string = chunk.toString();
-          const idx = content.indexOf('\n\nY');
+          const idx = content.indexOf("\n\nY");
           if (idx > -1) {
             stream.write(Event.message, { content: content.slice(0, idx) });
             res.data.destroy();
             return;
           }
           stream.write(Event.message, { content: chunk.toString() });
-        }),
+        })
       );
-      res.data.on('close', () => {
-        stream.write(Event.done, { content: '' });
+      res.data.on("close", () => {
+        stream.write(Event.done, { content: "" });
         stream.end();
       });
     } catch (e: any) {

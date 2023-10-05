@@ -4,10 +4,10 @@ import {
   ChatRequest,
   ChatResponse,
   ModelType,
-} from '../base';
-import { Browser, Page, Protocol } from 'puppeteer';
-import { BrowserPool, BrowserUser } from '../../utils/puppeteer';
-import * as fs from 'fs';
+} from "../base";
+import { Browser, Page, Protocol } from "puppeteer";
+import { BrowserPool, BrowserUser } from "../../chatbot_utils/puppeteer";
+import * as fs from "fs";
 import {
   DoneData,
   ErrorData,
@@ -18,15 +18,15 @@ import {
   randomStr,
   randomUserAgent,
   sleep,
-} from '../../utils';
-import { v4 } from 'uuid';
-import moment from 'moment';
-import { AxiosInstance, AxiosRequestConfig } from 'axios';
-import es from 'event-stream';
-import { CreateAxiosProxy } from '../../utils/proxyAgent';
-import { CreateAxiosDefaults } from 'axios/index';
+} from "../../chatbot_utils";
+import { v4 } from "uuid";
+import moment from "moment";
+import { AxiosInstance, AxiosRequestConfig } from "axios";
+import es from "event-stream";
+import { CreateAxiosProxy } from "../../chatbot_utils/proxyAgent";
+import { CreateAxiosDefaults } from "axios/index";
 
-const TimeFormat = 'YYYY-MM-DD HH:mm:ss';
+const TimeFormat = "YYYY-MM-DD HH:mm:ss";
 
 type Account = {
   id: string;
@@ -71,15 +71,15 @@ interface Part {
 
 class RamAccountPool {
   private pool: Account[] = [];
-  private readonly account_file_path = './run/account_ram.json';
+  private readonly account_file_path = "./run/account_ram.json";
   private using = new Set<string>();
 
   constructor() {
     if (fs.existsSync(this.account_file_path)) {
-      const accountStr = fs.readFileSync(this.account_file_path, 'utf-8');
+      const accountStr = fs.readFileSync(this.account_file_path, "utf-8");
       this.pool = parseJSON(accountStr, [] as Account[]);
     } else {
-      fs.mkdirSync('./run', { recursive: true });
+      fs.mkdirSync("./run", { recursive: true });
       this.syncfile();
     }
   }
@@ -107,7 +107,7 @@ class RamAccountPool {
       if (
         (item.useTimes < 10 ||
           moment(item.last_use_time).isBefore(
-            moment().subtract(1, 'd').subtract(2, 'h'),
+            moment().subtract(1, "d").subtract(2, "h")
           )) &&
         !this.using.has(item.id)
       ) {
@@ -152,17 +152,17 @@ export class Ram extends Chat implements BrowserUser<Account> {
     this.pagePool = new BrowserPool<Account>(maxSize, this, false);
     this.client = CreateAxiosProxy(
       {
-        baseURL: 'https://chat.ramxn.dev/backend-api',
+        baseURL: "https://chat.ramxn.dev/backend-api",
         headers: {
-          'Content-Type': 'application/json',
-          Accept: 'text/event-stream',
-          Origin: 'https://chat.ramxn.dev',
-          Referer: 'https://chat.ramxn.dev',
-          'Cache-Control': 'no-cache',
-          'User-Agent': this.useragent,
+          "Content-Type": "application/json",
+          Accept: "text/event-stream",
+          Origin: "https://chat.ramxn.dev",
+          Referer: "https://chat.ramxn.dev",
+          "Cache-Control": "no-cache",
+          "User-Agent": this.useragent,
         },
       } as CreateAxiosDefaults,
-      false,
+      false
     );
   }
 
@@ -186,28 +186,28 @@ export class Ram extends Chat implements BrowserUser<Account> {
 
   async init(
     id: string,
-    browser: Browser,
+    browser: Browser
   ): Promise<[Page | undefined, Account]> {
     const account = this.accountPool.getByID(id);
     try {
       if (!account) {
-        throw new Error('account undefined, something error');
+        throw new Error("account undefined, something error");
       }
       const [page] = await browser.pages();
       await page.setUserAgent(this.useragent);
 
-      await page.goto('https://chat.ramxn.dev/chat/');
+      await page.goto("https://chat.ramxn.dev/chat/");
       await sleep(10000);
-      account.cookie = await page.cookies('https://chat.ramxn.dev');
+      account.cookie = await page.cookies("https://chat.ramxn.dev");
       if (account.cookie.length === 0) {
-        throw new Error('ram got cookie failed');
+        throw new Error("ram got cookie failed");
       }
       this.accountPool.syncfile();
       setTimeout(() => browser.close().catch(), 1000);
-      console.log('register ram successfully');
+      console.log("register ram successfully");
       return [page, account];
     } catch (e: any) {
-      console.warn('something error happened,err:', e);
+      console.warn("something error happened,err:", e);
       return [] as any;
     }
   }
@@ -215,19 +215,19 @@ export class Ram extends Chat implements BrowserUser<Account> {
   public async askStream(req: ChatRequest, stream: EventStream) {
     const [page, account, done, destroy] = this.pagePool.get();
     if (!account || !page || !account.cookie || account.cookie.length === 0) {
-      stream.write(Event.error, { error: 'please wait init.....about 1 min' });
+      stream.write(Event.error, { error: "please wait init.....about 1 min" });
       stream.end();
       return;
     }
     const data: RealReq = {
-      api_key: '',
-      action: 'ask',
+      api_key: "",
+      action: "ask",
       conversation_id: v4(),
-      jailbreak: 'default',
+      jailbreak: "default",
       meta: {
         id: randomStr(15),
         content: {
-          content_type: 'ask',
+          content_type: "ask",
           conversation: req.messages.slice(0, req.messages.length - 1),
           internet_access: false,
           parts: [req.messages[req.messages.length - 1]],
@@ -238,12 +238,12 @@ export class Ram extends Chat implements BrowserUser<Account> {
     try {
       account.useTimes += 1;
       this.accountPool.syncfile();
-      const res = await this.client.post('/v2/conversation', data, {
-        responseType: 'stream',
+      const res = await this.client.post("/v2/conversation", data, {
+        responseType: "stream",
         headers: {
           Cookie: account.cookie
             .map((item) => `${item.name}=${item.value}`)
-            .join('; '),
+            .join("; "),
         },
       } as AxiosRequestConfig);
       res.data.pipe(
@@ -252,11 +252,11 @@ export class Ram extends Chat implements BrowserUser<Account> {
           if (!res) {
             return;
           }
-          stream.write(Event.message, { content: res || '' });
-        }),
+          stream.write(Event.message, { content: res || "" });
+        })
       );
-      res.data.on('close', () => {
-        stream.write(Event.done, { content: '' });
+      res.data.on("close", () => {
+        stream.write(Event.done, { content: "" });
         stream.end();
         if (account.useTimes >= 500) {
           destroy();
@@ -265,7 +265,7 @@ export class Ram extends Chat implements BrowserUser<Account> {
         }
       });
     } catch (e: any) {
-      console.error('ram ask stream failed, err', e);
+      console.error("ram ask stream failed, err", e);
       stream.write(Event.error, { error: e.message });
       stream.end();
       destroy(true);

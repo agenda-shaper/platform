@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import utils from "./utils"; // Import your utils module
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { NavigationProp } from "./navigationTypes";
 
 import {
   View,
@@ -18,11 +20,24 @@ import {
 const LoginPage = () => {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
+  const [errorMessage, setError] = useState("");
+
+  const navigation = useNavigation<NavigationProp>();
 
   const handleLogin = async () => {
     try {
+      if (
+        !utils.validator.isEmail(identifier) &&
+        !utils.validator.isAlphanumeric(identifier)
+      ) {
+        setError("Invalid email or username format");
+        return;
+      } else if (!password) {
+        setError("Please enter your password");
+        return;
+      }
       // Make a POST request to your server's login endpoint
+
       const response = await utils.auth({
         action: "login",
         data: { identifier, password },
@@ -34,11 +49,14 @@ const LoginPage = () => {
         console.log("Login successful", data);
         await AsyncStorage.setItem("token", data.token);
 
+        // Navigate to the MainScreen
+        navigation.navigate("Main");
+
         // You can navigate to the user's dashboard or perform any other action here
       } else {
         // Login failed, display an error message
         const errorData = await response.json();
-        setError(errorData.error);
+        setError(errorData.message);
       }
     } catch (error) {
       console.error("Error during login", error);
@@ -69,6 +87,9 @@ const LoginPage = () => {
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Log In</Text>
           </TouchableOpacity>
+          {errorMessage ? ( // Display the error message conditionally
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+          ) : null}
           <Text style={styles.registerText}>
             <Text>Don't have an account? </Text>
             <Text style={{ color: "blue" }}>Register</Text>
@@ -110,6 +131,11 @@ const styles = StyleSheet.create({
   registerText: {
     textAlign: "left",
     marginTop: 16,
+  },
+  errorMessage: {
+    color: "red", // Style the error message as needed
+    textAlign: "center",
+    marginTop: 8,
   },
 });
 

@@ -4,10 +4,10 @@ import {
   ChatRequest,
   ChatResponse,
   ModelType,
-} from '../base';
-import { Browser, Page } from 'puppeteer';
-import { BrowserPool, BrowserUser } from '../../utils/puppeteer';
-import * as fs from 'fs';
+} from "../base";
+import { Browser, Page } from "puppeteer";
+import { BrowserPool, BrowserUser } from "../../chatbot_utils/puppeteer";
+import * as fs from "fs";
 import {
   DoneData,
   ErrorData,
@@ -16,11 +16,11 @@ import {
   MessageData,
   parseJSON,
   sleep,
-} from '../../utils';
-import { v4 } from 'uuid';
-import moment from 'moment';
-import { CreateAxiosProxy } from '../../utils/proxyAgent';
-import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from 'axios';
+} from "../../chatbot_utils";
+import { v4 } from "uuid";
+import moment from "moment";
+import { CreateAxiosProxy } from "../../chatbot_utils/proxyAgent";
+import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from "axios";
 
 type PageData = {
   gpt4times: number;
@@ -28,7 +28,7 @@ type PageData = {
 
 const MaxGptTimes = 20;
 
-const TimeFormat = 'YYYY-MM-DD HH:mm:ss';
+const TimeFormat = "YYYY-MM-DD HH:mm:ss";
 
 interface Message {
   role: string;
@@ -57,24 +57,24 @@ interface ModelInfo {
 
 const modelMap = {
   [ModelType.ClaudeInstance]: {
-    id: 'claude-instant',
-    name: 'CLAUDE-INSTANT',
+    id: "claude-instant",
+    name: "CLAUDE-INSTANT",
   },
   [ModelType.Claude100k]: {
-    id: 'claude-instant-100k',
-    name: 'CLAUDE-INSTANT-100K',
+    id: "claude-instant-100k",
+    name: "CLAUDE-INSTANT-100K",
   },
   [ModelType.Claude]: {
-    id: 'claude+',
-    name: 'CLAUDE+',
+    id: "claude+",
+    name: "CLAUDE+",
   },
   [ModelType.GPT4]: {
-    id: 'gpt-4',
-    name: 'GPT-4',
+    id: "gpt-4",
+    name: "GPT-4",
   },
   [ModelType.GPT3p5Turbo]: {
-    id: 'gpt-3.5-turbo',
-    name: 'GPT-3.5-TURBO',
+    id: "gpt-3.5-turbo",
+    name: "GPT-3.5-TURBO",
   },
 } as Record<ModelType, ModelInfo>;
 
@@ -101,15 +101,15 @@ type HistoryData = {
 
 class MagicAccountPool {
   private pool: Account[] = [];
-  private readonly account_file_path = './run/account_Magic.json';
+  private readonly account_file_path = "./run/account_Magic.json";
   private using = new Set<string>();
 
   constructor() {
     if (fs.existsSync(this.account_file_path)) {
-      const accountStr = fs.readFileSync(this.account_file_path, 'utf-8');
+      const accountStr = fs.readFileSync(this.account_file_path, "utf-8");
       this.pool = parseJSON(accountStr, [] as Account[]);
     } else {
-      fs.mkdirSync('./run', { recursive: true });
+      fs.mkdirSync("./run", { recursive: true });
       this.syncfile();
     }
   }
@@ -158,7 +158,7 @@ export class Magic extends Chat implements BrowserUser<Account> {
   private accountPool: MagicAccountPool;
   private client: AxiosInstance;
   private ua =
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.67';
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.67";
 
   constructor(options?: ChatOptions) {
     super(options);
@@ -167,15 +167,15 @@ export class Magic extends Chat implements BrowserUser<Account> {
     this.pagePool = new BrowserPool<Account>(maxSize, this);
     this.client = CreateAxiosProxy(
       {
-        baseURL: 'https://magic.ninomae.top/api/',
+        baseURL: "https://magic.ninomae.top/api/",
         headers: {
-          'Content-Type': 'application/json',
-          Origin: 'https://magic.ninomae.top',
-          Referer: 'https://magic.ninomae.top',
-          'User-Agent': this.ua,
+          "Content-Type": "application/json",
+          Origin: "https://magic.ninomae.top",
+          Referer: "https://magic.ninomae.top",
+          "User-Agent": this.ua,
         },
       } as CreateAxiosDefaults,
-      false,
+      false
     );
   }
 
@@ -207,32 +207,32 @@ export class Magic extends Chat implements BrowserUser<Account> {
 
   async init(
     id: string,
-    browser: Browser,
+    browser: Browser
   ): Promise<[Page | undefined, Account]> {
     const account = this.accountPool.getByID(id);
     try {
       if (!account) {
-        throw new Error('account undefined, something error');
+        throw new Error("account undefined, something error");
       }
       const [page] = await browser.pages();
       this.ua = await browser.userAgent();
       await page.setViewport({ width: 1920, height: 1080 });
-      await page.goto('https://magic.ninomae.top');
+      await page.goto("https://magic.ninomae.top");
       await page.waitForSelector(
-        '.relative > .absolute > .stretch > .relative > .m-0',
+        ".relative > .absolute > .stretch > .relative > .m-0"
       );
       const cookies = await page.cookies();
       account.cookies = cookies
         .map((item) => `${item.name}=${item.value}`)
-        .join(';');
+        .join(";");
       if (!account.cookies) {
-        throw new Error('cookies got failed!');
+        throw new Error("cookies got failed!");
       }
       this.accountPool.syncfile();
-      console.log('register Magic successfully');
+      console.log("register Magic successfully");
       return [page, account];
     } catch (e: any) {
-      console.warn('something error happened,err:', e);
+      console.warn("something error happened,err:", e);
       return [] as any;
     }
   }
@@ -240,33 +240,33 @@ export class Magic extends Chat implements BrowserUser<Account> {
   public async askStream(req: ChatRequest, stream: EventStream) {
     const [page, account, done, destroy] = this.pagePool.get();
     if (!account || !page) {
-      stream.write(Event.error, { error: 'please wait init.....about 1 min' });
+      stream.write(Event.error, { error: "please wait init.....about 1 min" });
       stream.end();
       return;
     }
     const data: RealReq = {
-      key: '',
-      prompt: '',
+      key: "",
+      prompt: "",
       messages: req.messages,
       model: modelMap[req.model],
       temperature: 1,
     };
     try {
-      const res = await this.client.post('/chat', data, {
+      const res = await this.client.post("/chat", data, {
         headers: {
           Cookie: account.cookies,
-          'User-Agent': this.ua,
+          "User-Agent": this.ua,
         },
-        responseType: 'stream',
+        responseType: "stream",
       } as AxiosRequestConfig);
-      res.data.on('data', (chunk: any) => {
+      res.data.on("data", (chunk: any) => {
         stream.write(Event.message, { content: chunk.toString() });
       });
-      res.data.on('close', () => {
-        stream.write(Event.done, { content: '' });
+      res.data.on("close", () => {
+        stream.write(Event.done, { content: "" });
         stream.end();
         done(account);
-        console.log('easy chat close');
+        console.log("easy chat close");
         account.gpt4times += 1;
         this.accountPool.syncfile();
         if (account.gpt4times >= MaxGptTimes) {

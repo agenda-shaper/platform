@@ -4,10 +4,10 @@ import {
   ChatRequest,
   ChatResponse,
   ModelType,
-} from '../base';
-import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from 'axios';
-import { CreateAxiosProxy } from '../../utils/proxyAgent';
-import es from 'event-stream';
+} from "../base";
+import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from "axios";
+import { CreateAxiosProxy } from "../../chatbot_utils/proxyAgent";
+import es from "event-stream";
 import {
   ErrorData,
   Event,
@@ -15,7 +15,7 @@ import {
   MessageData,
   parseJSON,
   randomUserAgent,
-} from '../../utils';
+} from "../../chatbot_utils";
 //@ts-ignore
 
 interface RealReq {
@@ -34,15 +34,15 @@ export class PWeb extends Chat {
   constructor(options?: ChatOptions) {
     super(options);
     this.client = CreateAxiosProxy({
-      baseURL: 'https://p.v50.ltd/api/',
+      baseURL: "https://p.v50.ltd/api/",
       headers: {
-        Accept: 'application/json, text/plain, */*',
-        'Accept-Encoding': 'gzip, deflate, br',
-        Pragma: 'no-cache',
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        'Proxy-Connection': 'keep-alive',
-        'User-Agent': randomUserAgent(),
+        Accept: "application/json, text/plain, */*",
+        "Accept-Encoding": "gzip, deflate, br",
+        Pragma: "no-cache",
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache",
+        "Proxy-Connection": "keep-alive",
+        "User-Agent": randomUserAgent(),
       },
     } as CreateAxiosDefaults);
   }
@@ -70,16 +70,16 @@ export class PWeb extends Chat {
       user: null,
     };
     try {
-      const res = await this.client.post('/chat-process', data, {
-        responseType: 'stream',
+      const res = await this.client.post("/chat-process", data, {
+        responseType: "stream",
       } as AxiosRequestConfig);
       res.data.pipe(
         es.map((chunk: any, cb: any) => {
           stream.write(Event.message, { content: chunk.toString() });
-        }),
+        })
       );
-      res.data.on('close', () => {
-        stream.write(Event.done, { content: '' });
+      res.data.on("close", () => {
+        stream.write(Event.done, { content: "" });
         stream.end();
       });
     } catch (e: any) {

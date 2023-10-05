@@ -4,13 +4,13 @@ import {
   ChatRequest,
   ChatResponse,
   ModelType,
-} from '../base';
-import { Event, EventStream, getTokenSize, sleep } from '../../utils';
-import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import { CreateNewBrowser } from '../../utils/proxyAgent';
-import { Browser } from 'puppeteer';
-import { simplifyPageAll } from '../../utils/puppeteer';
+} from "../base";
+import { Event, EventStream, getTokenSize, sleep } from "../../chatbot_utils";
+import puppeteer from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
+import { CreateNewBrowser } from "../../chatbot_utils/proxyAgent";
+import { Browser } from "puppeteer";
+import { simplifyPageAll } from "../../chatbot_utils/puppeteer";
 
 puppeteer.use(StealthPlugin());
 
@@ -29,7 +29,7 @@ export class WWW extends Chat {
   }
 
   async newPage() {
-    if (!this.browser) throw new Error('browser not init');
+    if (!this.browser) throw new Error("browser not init");
     const page = await this.browser.newPage();
     await simplifyPageAll(page);
     return page;
@@ -47,20 +47,20 @@ export class WWW extends Chat {
   async askStream(req: WWWChatRequest, stream: EventStream): Promise<void> {
     if (!this.browser) {
       await this.init();
-      this.logger.info('init ok');
+      this.logger.info("init ok");
     }
     const page = await this.newPage();
     try {
       await page
         .goto(req.prompt, {
-          waitUntil: 'domcontentloaded',
+          waitUntil: "domcontentloaded",
           timeout: 5000,
         })
         .catch((err) => this.logger.error(`page load failed, `, err));
 
       // @ts-ignore
       let content = await page.$$eval(
-        'p, h1, h2, h3, h4, h5, h6, div, section, article, main',
+        "p, h1, h2, h3, h4, h5, h6, div, section, article, main",
         (elements) => {
           let textEntries = [];
           const textMap = new Map();
@@ -94,30 +94,30 @@ export class WWW extends Chat {
 
           // Sort by position (from top to bottom)
           textEntries = textEntries.sort(
-            (a, b) => a[1].position - b[1].position,
+            (a, b) => a[1].position - b[1].position
           );
 
           // Create the final text
-          const maxText = textEntries.map((entry) => entry[0]).join('\n');
+          const maxText = textEntries.map((entry) => entry[0]).join("\n");
 
           // Post-processing to remove extra whitespace and newlines
-          return maxText.replace(/\s+/g, ' ').trim();
-        },
+          return maxText.replace(/\s+/g, " ").trim();
+        }
       );
       const maxToken = +(req.max_tokens || process.env.WWW_MAX_TOKEN || 2000);
       const token = getTokenSize(content);
       if (token > maxToken) {
         content = content.slice(
           0,
-          Math.floor((content.length * maxToken) / token),
+          Math.floor((content.length * maxToken) / token)
         );
       }
       stream.write(Event.message, { content });
     } catch (e: any) {
-      this.logger.error('ask stream failed', e);
+      this.logger.error("ask stream failed", e);
       stream.write(Event.error, { error: e.message });
     } finally {
-      stream.write(Event.done, { content: '' });
+      stream.write(Event.done, { content: "" });
       stream.end();
       await page.close();
     }

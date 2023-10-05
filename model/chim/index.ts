@@ -4,10 +4,10 @@ import {
   ChatRequest,
   ChatResponse,
   ModelType,
-} from '../base';
-import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from 'axios';
-import { CreateAxiosProxy } from '../../utils/proxyAgent';
-import es from 'event-stream';
+} from "../base";
+import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from "axios";
+import { CreateAxiosProxy } from "../../chatbot_utils/proxyAgent";
+import es from "event-stream";
 import {
   ErrorData,
   Event,
@@ -15,7 +15,7 @@ import {
   MessageData,
   parseJSON,
   randomUserAgent,
-} from '../../utils';
+} from "../../chatbot_utils";
 
 interface Message {
   role: string;
@@ -36,13 +36,13 @@ export class Chim extends Chat {
     super(options);
     this.client = CreateAxiosProxy(
       {
-        baseURL: 'https://chimeragpt.adventblocks.cc',
+        baseURL: "https://chimeragpt.adventblocks.cc",
         headers: {
-          'User-Agent': randomUserAgent(),
+          "User-Agent": randomUserAgent(),
           Authorization: `Bearer ${process.env.CHIM_KEY}`,
         },
       } as CreateAxiosDefaults,
-      false,
+      false
     );
   }
 
@@ -67,13 +67,13 @@ export class Chim extends Chat {
       stream: true,
     };
     try {
-      const res = await this.client.post('/v1/chat/completions', data, {
-        responseType: 'stream',
+      const res = await this.client.post("/v1/chat/completions", data, {
+        responseType: "stream",
       } as AxiosRequestConfig);
       res.data.pipe(es.split(/\r?\n\r?\n/)).pipe(
         es.map(async (chunk: any, cb: any) => {
-          const dataStr = chunk.replace('data: ', '');
-          if (!dataStr || dataStr === '[DONE]') {
+          const dataStr = chunk.replace("data: ", "");
+          if (!dataStr || dataStr === "[DONE]") {
             return;
           }
           const data = parseJSON(dataStr, {} as any);
@@ -82,18 +82,18 @@ export class Chim extends Chat {
           }
           const [
             {
-              delta: { content = '' },
+              delta: { content = "" },
               finish_reason,
             },
           ] = data.choices;
-          if (finish_reason === 'stop') {
+          if (finish_reason === "stop") {
             return;
           }
           stream.write(Event.message, { content });
-        }),
+        })
       );
-      res.data.on('close', () => {
-        stream.write(Event.done, { content: '' });
+      res.data.on("close", () => {
+        stream.write(Event.done, { content: "" });
         stream.end();
       });
     } catch (e: any) {

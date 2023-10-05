@@ -4,11 +4,16 @@ import {
   ChatRequest,
   ChatResponse,
   ModelType,
-} from '../base';
-import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from 'axios';
-import { CreateAxiosProxy } from '../../utils/proxyAgent';
-import es from 'event-stream';
-import { ErrorData, Event, EventStream, MessageData } from '../../utils';
+} from "../base";
+import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from "axios";
+import { CreateAxiosProxy } from "../../chatbot_utils/proxyAgent";
+import es from "event-stream";
+import {
+  ErrorData,
+  Event,
+  EventStream,
+  MessageData,
+} from "../../chatbot_utils";
 
 interface AssistantMessage {
   role: string;
@@ -36,11 +41,11 @@ export class Skailar extends Chat {
   constructor(options?: ChatOptions) {
     super(options);
     this.client = CreateAxiosProxy({
-      baseURL: 'https://chat.skailar.net/api',
+      baseURL: "https://chat.skailar.net/api",
       headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        'Proxy-Connection': 'keep-alive',
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache",
+        "Proxy-Connection": "keep-alive",
       },
     } as CreateAxiosDefaults);
   }
@@ -57,28 +62,28 @@ export class Skailar extends Chat {
   public async askStream(req: ChatRequest, stream: EventStream) {
     const data: RealReq = {
       temperature: 1,
-      key: process.env.SKAILAR_KEY || '',
-      messages: [{ role: 'user', content: req.prompt }],
+      key: process.env.SKAILAR_KEY || "",
+      messages: [{ role: "user", content: req.prompt }],
       model: {
-        id: 'gpt-4',
-        name: 'GPT-4',
+        id: "gpt-4",
+        name: "GPT-4",
         maxLength: 24000,
         tokenLimit: 8000,
       },
-      prompt: '你是openai的gpt4模型，请回答我的问题',
+      prompt: "你是openai的gpt4模型，请回答我的问题",
     };
     try {
-      const res = await this.client.post('/chat', data, {
-        responseType: 'stream',
+      const res = await this.client.post("/chat", data, {
+        responseType: "stream",
       } as AxiosRequestConfig);
-      res.data.on('end', () => {
-        stream.write(Event.done, { content: '' });
+      res.data.on("end", () => {
+        stream.write(Event.done, { content: "" });
         stream.end();
       });
       res.data.pipe(
         es.map(async (chunk: any, cb: any) => {
           stream.write(Event.message, { content: chunk.toString() });
-        }),
+        })
       );
     } catch (e: any) {
       console.error(e.message);

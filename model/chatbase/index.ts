@@ -4,17 +4,17 @@ import {
   ChatRequest,
   ChatResponse,
   ModelType,
-} from '../base';
-import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from 'axios';
-import { CreateAxiosProxy } from '../../utils/proxyAgent';
-import es from 'event-stream';
+} from "../base";
+import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from "axios";
+import { CreateAxiosProxy } from "../../chatbot_utils/proxyAgent";
+import es from "event-stream";
 import {
   ErrorData,
   Event,
   EventStream,
   MessageData,
   randomStr,
-} from '../../utils';
+} from "../../chatbot_utils";
 
 export class ChatBase extends Chat {
   private client: AxiosInstance;
@@ -22,12 +22,12 @@ export class ChatBase extends Chat {
   constructor(options?: ChatOptions) {
     super(options);
     this.client = CreateAxiosProxy({
-      baseURL: 'https://www.chatbase.co/api',
+      baseURL: "https://www.chatbase.co/api",
       headers: {
-        'Content-Type': 'application/json',
-        accept: 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Proxy-Connection': 'keep-alive',
+        "Content-Type": "application/json",
+        accept: "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Proxy-Connection": "keep-alive",
       },
     } as CreateAxiosDefaults);
   }
@@ -44,13 +44,13 @@ export class ChatBase extends Chat {
   public async askStream(req: ChatRequest, stream: EventStream) {
     const data = {
       messages: req.messages,
-      captchaCode: 'hadsa',
-      chatId: 'chatbase--1--pdf-p680fxvnm',
+      captchaCode: "hadsa",
+      chatId: "chatbase--1--pdf-p680fxvnm",
       conversationId: `y4-${randomStr(10)}-chatbase--1--pdf-p680fxvnm`,
     };
     try {
-      const res = await this.client.post('/fe/chat', data, {
-        responseType: 'stream',
+      const res = await this.client.post("/fe/chat", data, {
+        responseType: "stream",
       } as AxiosRequestConfig);
       res.data.pipe(
         es.map(async (chunk: any, cb: any) => {
@@ -59,10 +59,10 @@ export class ChatBase extends Chat {
             return;
           }
           stream.write(Event.message, { content });
-        }),
+        })
       );
-      res.data.on('close', () => {
-        stream.write(Event.done, { content: '' });
+      res.data.on("close", () => {
+        stream.write(Event.done, { content: "" });
         stream.end();
       });
     } catch (e: any) {

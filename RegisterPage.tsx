@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import utils from "./utils"; // Import your utils module
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { NavigationProp } from "./navigationTypes";
 import {
   View,
   Text,
@@ -21,6 +22,9 @@ const RegisterPage = () => {
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(""); // Add state for error message
+
+  const navigation = useNavigation<NavigationProp>();
+
   type Check = [boolean, string];
 
   const handleRegister = async () => {
@@ -58,6 +62,9 @@ const RegisterPage = () => {
 
         // Store the token
         await AsyncStorage.setItem("token", data.token);
+
+        // Navigate to the MainScreen
+        navigation.navigate("Main");
       } else {
         setErrorMessage((await response.json()).message);
       }

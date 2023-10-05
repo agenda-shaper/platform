@@ -4,14 +4,14 @@ import {
   ChatRequest,
   ChatResponse,
   ModelType,
-} from '../base';
-import { Browser, EventEmitter, Page } from 'puppeteer';
+} from "../base";
+import { Browser, EventEmitter, Page } from "puppeteer";
 import {
   BrowserPool,
   BrowserUser,
   PrepareOptions,
   simplifyPage,
-} from '../../utils/puppeteer';
+} from "../../chatbot_utils/puppeteer";
 import {
   DoneData,
   ErrorData,
@@ -23,18 +23,18 @@ import {
   shuffleArray,
   sleep,
   TimeFormat,
-} from '../../utils';
-import { v4 } from 'uuid';
-import fs from 'fs';
-import moment from 'moment';
+} from "../../chatbot_utils";
+import { v4 } from "uuid";
+import fs from "fs";
+import moment from "moment";
 
 const MaxFailedTimes = 10;
 
 type UseLeft = Partial<Record<ModelType, number>>;
 
 const ModelMap: Partial<Record<ModelType, string>> = {
-  [ModelType.GPT3p5Turbo]: '#gpt35',
-  [ModelType.GPT4]: '#gpt4',
+  [ModelType.GPT3p5Turbo]: "#gpt35",
+  [ModelType.GPT4]: "#gpt4",
 };
 
 type Account = {
@@ -53,26 +53,26 @@ type Account = {
 class AccountPool {
   private readonly pool: Record<string, Account> = {};
   private using = new Set<string>();
-  private readonly account_file_path = './run/account_sincode.json';
+  private readonly account_file_path = "./run/account_sincode.json";
 
   constructor() {
     if (!process.env.SINCODE_EMAIL || !process.env.SINCODE_PASSWORD) {
-      console.log('sincode found 0 account');
+      console.log("sincode found 0 account");
       return;
     }
-    const sigList = process.env.SINCODE_EMAIL.split('|');
-    const mainList = process.env.SINCODE_PASSWORD.split('|');
+    const sigList = process.env.SINCODE_EMAIL.split("|");
+    const mainList = process.env.SINCODE_PASSWORD.split("|");
     if (fs.existsSync(this.account_file_path)) {
-      const accountStr = fs.readFileSync(this.account_file_path, 'utf-8');
+      const accountStr = fs.readFileSync(this.account_file_path, "utf-8");
       this.pool = parseJSON(accountStr, {} as Record<string, Account>);
     } else {
-      fs.mkdirSync('./run', { recursive: true });
+      fs.mkdirSync("./run", { recursive: true });
       this.syncfile();
     }
     for (const key in this.pool) {
       this.pool[key].failedCnt = 0;
       this.pool[key].model = undefined;
-      if (!('vip' in this.pool)) {
+      if (!("vip" in this.pool)) {
         this.pool[key].vip = true;
       }
     }
@@ -123,7 +123,7 @@ class AccountPool {
     for (const vv of shuffleArray(Object.values(this.pool))) {
       if (
         (!vv.invalid ||
-          moment().subtract(5, 'm').isAfter(moment(vv.last_use_time))) &&
+          moment().subtract(5, "m").isAfter(moment(vv.last_use_time))) &&
         !this.using.has(vv.id) &&
         vv.vip
       ) {
@@ -133,10 +133,10 @@ class AccountPool {
         return vv;
       }
     }
-    console.log('sincode pb run out!!!!!!');
+    console.log("sincode pb run out!!!!!!");
     return {
       id: v4(),
-      email: '',
+      email: "",
       failedCnt: 0,
     } as Account;
   }
@@ -158,7 +158,7 @@ export class Jasper extends Chat implements BrowserUser<Account> {
       this,
       false,
       10 * 1000,
-      false,
+      false
     );
   }
 
@@ -189,7 +189,7 @@ export class Jasper extends Chat implements BrowserUser<Account> {
   async init(
     id: string,
     browser: Browser,
-    options?: PrepareOptions,
+    options?: PrepareOptions
   ): Promise<[Page | undefined, Account]> {
     const account = this.accountPool.getByID(id);
     if (!account) {
@@ -230,8 +230,8 @@ export class Jasper extends Chat implements BrowserUser<Account> {
   }
 
   SLNewChat =
-    '#scrollbar > #scrollbar1 > .bubble-element > .clickable-element > .bubble-element:nth-child(2)';
-  SLInput = 'textarea';
+    "#scrollbar > #scrollbar1 > .bubble-element > .clickable-element > .bubble-element:nth-child(2)";
+  SLInput = "textarea";
   public static async goHome(page: Page) {
     await page.goto(`https://www.sincode.ai`);
   }
@@ -239,12 +239,12 @@ export class Jasper extends Chat implements BrowserUser<Account> {
   public async isVIP(page: Page) {
     await page.waitForSelector(this.SLInput);
     await page.click(this.SLInput);
-    await page.keyboard.type('say 1');
-    await page.keyboard.press('Enter');
+    await page.keyboard.type("say 1");
+    await page.keyboard.press("Enter");
     try {
       await page.waitForSelector(
-        'body > div.bubble-element.CustomElement.cnaMaEa0.bubble-r-container.relative',
-        { timeout: 5000 },
+        "body > div.bubble-element.CustomElement.cnaMaEa0.bubble-r-container.relative",
+        { timeout: 5000 }
       );
       return false;
     } catch (e) {
@@ -254,8 +254,8 @@ export class Jasper extends Chat implements BrowserUser<Account> {
 
   private async changeMode(page: Page, model: ModelType = ModelType.GPT4) {
     try {
-      await page.waitForSelector('#features');
-      await page.click('#features');
+      await page.waitForSelector("#features");
+      await page.click("#features");
 
       const selector = ModelMap[model];
       if (selector) {
@@ -275,43 +275,43 @@ export class Jasper extends Chat implements BrowserUser<Account> {
   public async askStream(req: PerplexityChatRequest, stream: EventStream) {
     const [page, account, done, destroy] = this.pagePool.get();
     if (!account || !page) {
-      stream.write(Event.error, { error: 'please retry later!' });
-      stream.write(Event.done, { content: '' });
+      stream.write(Event.error, { error: "please retry later!" });
+      stream.write(Event.done, { content: "" });
       stream.end();
       return;
     }
     const client = await page.target().createCDPSession();
     const tt = setTimeout(async () => {
-      this.logger.error('wait msg timeout, destroyed!');
-      client.removeAllListeners('Network.webSocketFrameReceived');
-      stream.write(Event.error, { error: 'please retry later!' });
-      stream.write(Event.done, { content: '' });
+      this.logger.error("wait msg timeout, destroyed!");
+      client.removeAllListeners("Network.webSocketFrameReceived");
+      stream.write(Event.error, { error: "please retry later!" });
+      stream.write(Event.done, { content: "" });
       stream.end();
       destroy(undefined, undefined, 10 * 60 * 1000);
     }, 10 * 1000);
     try {
-      let old = '';
+      let old = "";
       let et: EventEmitter;
-      let currMsgID = '';
-      await client.send('Network.enable');
+      let currMsgID = "";
+      await client.send("Network.enable");
       et = client.on(
-        'Network.webSocketFrameReceived',
+        "Network.webSocketFrameReceived",
         async ({ response, requestId }, ...rest2) => {
-          const dataStr = response?.payloadData || '';
+          const dataStr = response?.payloadData || "";
           if (!dataStr) {
             return;
           }
           try {
-            if (dataStr === 'pong') {
+            if (dataStr === "pong") {
               return;
             }
             tt.refresh();
-            if (dataStr.indexOf('xxUNKNOWNERRORxx') !== -1) {
-              client.removeAllListeners('Network.webSocketFrameReceived');
+            if (dataStr.indexOf("xxUNKNOWNERRORxx") !== -1) {
+              client.removeAllListeners("Network.webSocketFrameReceived");
               clearTimeout(tt);
               this.logger.error(`sincode return error, ${dataStr}`);
               await this.newChat(page);
-              stream.write(Event.error, { error: 'please retry later!' });
+              stream.write(Event.error, { error: "please retry later!" });
               stream.end();
               account.failedCnt += 1;
               account.last_use_time = moment().format(TimeFormat);
@@ -320,14 +320,14 @@ export class Jasper extends Chat implements BrowserUser<Account> {
               destroy(undefined, undefined, 10 * 60 * 1000);
               return;
             }
-            if (dataStr.indexOf('RESPONSE_START') !== -1) {
+            if (dataStr.indexOf("RESPONSE_START") !== -1) {
               currMsgID = requestId;
               return;
             }
-            if (dataStr.indexOf('DONE') !== -1) {
-              client.removeAllListeners('Network.webSocketFrameReceived');
+            if (dataStr.indexOf("DONE") !== -1) {
+              client.removeAllListeners("Network.webSocketFrameReceived");
               clearTimeout(tt);
-              stream.write(Event.done, { content: '' });
+              stream.write(Event.done, { content: "" });
               stream.end();
               account.failedCnt = 0;
               this.accountPool.syncfile();
@@ -342,9 +342,9 @@ export class Jasper extends Chat implements BrowserUser<Account> {
           } catch (e) {
             this.logger.error(`handle msg failed, dataStr:${dataStr}, err:`, e);
           }
-        },
+        }
       );
-      this.logger.info('sincode start send msg');
+      this.logger.info("sincode start send msg");
       if (req.model !== account.model) {
         const ok = await this.changeMode(page, req.model);
         if (ok) {
@@ -354,24 +354,24 @@ export class Jasper extends Chat implements BrowserUser<Account> {
 
       await page.waitForSelector(this.SLInput);
       await page.click(this.SLInput);
-      await client.send('Input.insertText', { text: req.prompt });
+      await client.send("Input.insertText", { text: req.prompt });
 
-      this.logger.info('sincode find input ok');
-      await page.keyboard.press('Enter');
-      this.logger.info('sincode send msg ok!');
+      this.logger.info("sincode find input ok");
+      await page.keyboard.press("Enter");
+      this.logger.info("sincode send msg ok!");
     } catch (e: any) {
-      client.removeAllListeners('Network.webSocketFrameReceived');
+      client.removeAllListeners("Network.webSocketFrameReceived");
       clearTimeout(tt);
       this.logger.error(
         `account: id=${account.id}, sincode ask stream failed:`,
-        e,
+        e
       );
       account.failedCnt += 1;
       account.model = undefined;
       this.accountPool.syncfile();
       destroy(undefined, undefined, 10 * 60 * 1000);
-      stream.write(Event.error, { error: 'some thing error, try again later' });
-      stream.write(Event.done, { content: '' });
+      stream.write(Event.error, { error: "some thing error, try again later" });
+      stream.write(Event.done, { content: "" });
       stream.end();
       return;
     }

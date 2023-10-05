@@ -5,7 +5,7 @@ import {
   ChatResponse,
   ModelType,
   Site,
-} from './base';
+} from "./base";
 import {
   ComError,
   DoneData,
@@ -14,9 +14,9 @@ import {
   EventStream,
   MessageData,
   ThroughEventStream,
-} from '../utils';
-import { Config, SiteCfg } from '../utils/config';
-import { OpenAI } from './openai';
+} from "../chatbot_utils";
+import { Config, SiteCfg } from "../chatbot_utils/config";
+import { OpenAI } from "./openai";
 
 interface AutoOptions extends ChatOptions {
   ModelMap: Map<Site, Chat>;
@@ -37,7 +37,7 @@ export class Auto extends Chat {
     if (!list) {
       throw new ComError(
         `not cfg ${model} in site_map}`,
-        ComError.Status.NotFound,
+        ComError.Status.NotFound
       );
     }
 
@@ -57,7 +57,7 @@ export class Auto extends Chat {
     if (!v) {
       throw new ComError(
         `not cfg ${model} in site_map}`,
-        ComError.Status.NotFound,
+        ComError.Status.NotFound
       );
     }
 
@@ -78,7 +78,7 @@ export class Auto extends Chat {
   async tryAskStream(
     req: ChatRequest,
     stream: EventStream,
-    tried: number = 0,
+    tried: number = 0
   ): Promise<void> {
     const es = new ThroughEventStream(
       (event, data) => {
@@ -99,7 +99,7 @@ export class Auto extends Chat {
       },
       () => {
         stream.end();
-      },
+      }
     );
     const chat = this.getRandomModel(req.model);
     await chat.preHandle(req);

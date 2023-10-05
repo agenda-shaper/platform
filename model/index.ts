@@ -1,36 +1,34 @@
-import { Chat, ChatOptions, ModelType, Site } from './base';
-import { You } from './you';
-import { Mcbbs } from './mcbbs';
-import { Phind } from './phind';
-import { Forefrontnew } from './forefront';
-import { Vita } from './vita';
-import { Skailar } from './skailar';
-import { FakeOpen } from './fakeopen';
-import { EasyChat } from './easychat';
-import { Better } from './better';
-import { PWeb } from './pweb';
-import { Bai } from './bai';
-import { Gra } from './gra';
-import { Magic } from './magic';
-import { Chim } from './chim';
-import { Ram } from './ram';
-import { Chur } from './chur';
-import { Xun } from './xun';
-import { VVM } from './vvm';
-import { Claude } from './claude';
-import { Cursor } from './cursor';
-import { Auto } from './auto';
-import { ChatBase } from './chatbase';
-import { AILS } from './ails';
-import { ChatDemo } from './chatdemo';
-import { SinCode } from './sincode';
-import { OpenAI } from './openai';
-import { OneAPI } from './oneapi';
-import { Jasper } from './jasper';
-import { AcyToo } from './acytoo';
-import { Google } from './google';
-import { WWW } from './www';
-import { DDG } from './ddg';
+import { Chat, ChatOptions, ModelType, Site } from "./base";
+import { Mcbbs } from "./mcbbs";
+import { Phind } from "./phind";
+import { Forefrontnew } from "./forefront";
+import { Vita } from "./vita";
+import { Skailar } from "./skailar";
+import { FakeOpen } from "./fakeopen";
+import { EasyChat } from "./easychat";
+import { Better } from "./better";
+import { PWeb } from "./pweb";
+import { Bai } from "./bai";
+import { Gra } from "./gra";
+import { Magic } from "./magic";
+import { Chim } from "./chim";
+import { Ram } from "./ram";
+import { Chur } from "./chur";
+import { Xun } from "./xun";
+import { VVM } from "./vvm";
+import { Claude } from "./claude";
+import { Cursor } from "./cursor";
+import { Auto } from "./auto";
+import { ChatBase } from "./chatbase";
+import { AILS } from "./ails";
+import { ChatDemo } from "./chatdemo";
+import { SinCode } from "./sincode";
+import { OpenAI } from "./openai";
+import { OneAPI } from "./oneapi";
+import { Jasper } from "./jasper";
+import { AcyToo } from "./acytoo";
+import { WWW } from "./www";
+import { DDG } from "./ddg";
 
 export class ChatModelFactory {
   private readonly modelMap: Map<Site, Chat>;
@@ -44,11 +42,10 @@ export class ChatModelFactory {
 
   init() {
     // register new model here
-    this.modelMap.set(Site.You, new You({ name: Site.You }));
     this.modelMap.set(Site.Phind, new Phind({ name: Site.Phind }));
     this.modelMap.set(
       Site.Forefront,
-      new Forefrontnew({ name: Site.Forefront, net: false }),
+      new Forefrontnew({ name: Site.Forefront, net: false })
     );
     this.modelMap.set(Site.Mcbbs, new Mcbbs({ name: Site.Mcbbs }));
     this.modelMap.set(Site.ChatDemo, new ChatDemo({ name: Site.ChatDemo }));
@@ -57,7 +54,7 @@ export class ChatModelFactory {
     this.modelMap.set(Site.FakeOpen, new FakeOpen({ name: Site.FakeOpen }));
     this.modelMap.set(
       Site.EasyChat,
-      new EasyChat({ name: Site.EasyChat, model: ModelType.GPT4 }),
+      new EasyChat({ name: Site.EasyChat, model: ModelType.GPT4 })
     );
     this.modelMap.set(Site.Better, new Better({ name: Site.Better }));
     this.modelMap.set(Site.PWeb, new PWeb({ name: Site.PWeb }));
@@ -74,7 +71,7 @@ export class ChatModelFactory {
     this.modelMap.set(Site.OneAPI, new OneAPI({ name: Site.OneAPI }));
     this.modelMap.set(
       Site.Auto,
-      new Auto({ name: Site.Auto, ModelMap: this.modelMap }),
+      new Auto({ name: Site.Auto, ModelMap: this.modelMap })
     );
     this.modelMap.set(Site.ChatBase, new ChatBase({ name: Site.ChatBase }));
     this.modelMap.set(Site.AiLs, new AILS({ name: Site.AiLs }));
@@ -82,7 +79,6 @@ export class ChatModelFactory {
     this.modelMap.set(Site.OpenAI, new OpenAI({ name: Site.OpenAI }));
     this.modelMap.set(Site.Jasper, new Jasper({ name: Site.Jasper }));
     this.modelMap.set(Site.AcyToo, new AcyToo({ name: Site.AcyToo }));
-    this.modelMap.set(Site.Google, new Google({ name: Site.Google }));
     this.modelMap.set(Site.WWW, new WWW({ name: Site.WWW }));
     this.modelMap.set(Site.DDG, new DDG({ name: Site.DDG }));
   }

@@ -1,60 +1,58 @@
-import {
-  ChatRequest,
-  // ChatResponse,
-  ModelType,
-  Site,
-  Message,
-} from "./model/base";
-import { ChatModelFactory } from "./model";
-import {
-  ComError,
-  // Event,
-  // EventStream,
-  // getTokenSize,
-  // OpenaiEventStream,
-  parseJSON,
-  // randomStr,
-  // ThroughEventStream,
-} from "./utils";
-// import { Config } from "./utils/config";
-// import { initLog } from "./utils/log";
+import EventSource from "react-native-event-source";
+interface Message {
+  role: string;
+  content: string;
+  createdAt: number;
+}
 
-const chatModel = new ChatModelFactory();
-
-// Define a function to send a sample message to the chatbot
-const sendMessageToChatbot = async () => {
-  // Replace 'YourPromptHere' with the message you want to send
-  const prompt = "are you gpt 4?";
-  const site = Site.VVM; // You can change the site if needed
-  const model = ModelType.GPT3p5Turbo; // You can change the model if needed
-
-  const chat = chatModel.get(site);
-
-  if (!chat) {
-    throw new ComError(`Not supported site: ${site}`, ComError.Status.NotFound);
-  }
-
-  let req: ChatRequest = {
-    prompt,
-    messages: parseJSON<Message[]>(prompt, [{ role: "user", content: prompt }]),
-    model,
+export async function sendMessageToAcyToo(messageContent: string) {
+  // Create a new message
+  const message = {
+    role: "user",
+    content: messageContent,
+    createdAt: Date.now(),
   };
 
-  if (typeof req.messages !== "object") {
-    req.messages = [{ role: "user", content: prompt }];
+  // Create a new request
+  const req = {
+    key: "", // Replace with your key
+    model: "GPT3p5Turbo", // Or any other model you want to use
+    messages: [message],
+    temperature: 1.0,
+    password: "", // Replace with your password
+  };
+
+  try {
+    // Send the request to the chatbot
+    const res = await fetch("https://chat.acytoo.com/api/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=UTF-8",
+        Accept: "*/*",
+        "Cache-Control": "no-cache",
+        "Proxy-Connection": "keep-alive",
+      },
+      body: JSON.stringify(req),
+    });
+
+    // Check for errors
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    // Create an EventSource
+    const eventSource = new EventSource(res.url);
+
+    // Listen for messages
+    eventSource.addEventListener("message", (event) => {
+      console.log("Received message:", event.data);
+    });
+
+    // Listen for errors
+    eventSource.addEventListener("error", (event) => {
+      console.error("Error:", event);
+    });
+  } catch (error) {
+    console.error("Error:", error);
   }
-
-  req = await chat.preHandle(req);
-
-  const data = await chat.ask(req);
-
-  if (data && data.error) {
-    console.error("Chatbot error:", data.error);
-  } else {
-    console.log("User message:", prompt);
-    console.log("Chatbot response:", data?.content || "");
-  }
-};
-
-// Call the function to send a sample message
-sendMessageToChatbot();
+}

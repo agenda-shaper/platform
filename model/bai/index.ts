@@ -4,7 +4,7 @@ import {
   ChatRequest,
   ChatResponse,
   ModelType,
-} from '../base';
+} from "../base";
 import {
   DoneData,
   ErrorData,
@@ -12,10 +12,10 @@ import {
   EventStream,
   MessageData,
   parseJSON,
-} from '../../utils';
-import { CreateAxiosProxy } from '../../utils/proxyAgent';
-import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from 'axios';
-import es from 'event-stream';
+} from "../../chatbot_utils";
+import { CreateAxiosProxy } from "../../chatbot_utils/proxyAgent";
+import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from "axios";
+import es from "event-stream";
 
 interface RealReq {
   prompt: string;
@@ -27,10 +27,10 @@ export class Bai extends Chat {
   constructor(options?: ChatOptions) {
     super(options);
     this.client = CreateAxiosProxy({
-      baseURL: 'https://chatbot.theb.ai/api/',
+      baseURL: "https://chatbot.theb.ai/api/",
       headers: {
-        Accept: 'application/json, text/plain, */*',
-        Origin: 'https://chatbot.theb.ai',
+        Accept: "application/json, text/plain, */*",
+        Origin: "https://chatbot.theb.ai",
       },
     } as CreateAxiosDefaults);
   }
@@ -49,16 +49,16 @@ export class Bai extends Chat {
       prompt: req.prompt,
     };
     try {
-      const res = await this.client.post('/chat-process', data, {
-        responseType: 'stream',
+      const res = await this.client.post("/chat-process", data, {
+        responseType: "stream",
       } as AxiosRequestConfig);
-      let old = '';
+      let old = "";
       res.data.pipe(es.split(/\r?\n/)).pipe(
         es.map(async (chunk: any, cb: any) => {
           try {
             const dataStr = chunk.toString();
             const data = parseJSON(dataStr, {} as any);
-            const { delta = '' } = data;
+            const { delta = "" } = data;
             if (!delta) {
               return;
             }
@@ -66,10 +66,10 @@ export class Bai extends Chat {
           } catch (e: any) {
             console.error(e.message);
           }
-        }),
+        })
       );
-      res.data.on('close', () => {
-        stream.write(Event.done, { content: '' });
+      res.data.on("close", () => {
+        stream.write(Event.done, { content: "" });
         stream.end();
       });
     } catch (e: any) {

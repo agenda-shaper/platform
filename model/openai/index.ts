@@ -1,8 +1,8 @@
-import { Chat, ChatOptions, ChatRequest, ModelType } from '../base';
-import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from 'axios';
-import { CreateAxiosProxy } from '../../utils/proxyAgent';
-import es from 'event-stream';
-import { Event, EventStream, parseJSON } from '../../utils';
+import { Chat, ChatOptions, ChatRequest, ModelType } from "../base";
+import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from "axios";
+import { CreateAxiosProxy } from "../../chatbot_utils/proxyAgent";
+import es from "event-stream";
+import { Event, EventStream, parseJSON } from "../../chatbot_utils";
 
 interface Message {
   role: string;
@@ -29,17 +29,17 @@ export class OpenAI extends Chat {
     super(options);
     this.client = CreateAxiosProxy(
       {
-        baseURL: options?.base_url || 'https://api.openai.com/',
+        baseURL: options?.base_url || "https://api.openai.com/",
         headers: {
-          'Content-Type': 'application/json',
-          accept: 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Proxy-Connection': 'keep-alive',
-          Authorization: `Bearer ${options?.api_key || ''}`,
+          "Content-Type": "application/json",
+          accept: "text/event-stream",
+          "Cache-Control": "no-cache",
+          "Proxy-Connection": "keep-alive",
+          Authorization: `Bearer ${options?.api_key || ""}`,
         },
       } as CreateAxiosDefaults,
       false,
-      !!options?.proxy,
+      !!options?.proxy
     );
   }
 
@@ -55,38 +55,38 @@ export class OpenAI extends Chat {
       stream: true,
     };
     try {
-      const res = await this.client.post('/v1/chat/completions', data, {
-        responseType: 'stream',
+      const res = await this.client.post("/v1/chat/completions", data, {
+        responseType: "stream",
       } as AxiosRequestConfig);
       res.data.pipe(es.split(/\r?\n\r?\n/)).pipe(
         es.map(async (chunk: any, cb: any) => {
-          const dataStr = chunk.replace('data: ', '');
+          const dataStr = chunk.replace("data: ", "");
           if (!dataStr) {
             return;
           }
-          if (dataStr === '[DONE]') {
+          if (dataStr === "[DONE]") {
             return;
           }
           const data = parseJSON(dataStr, {} as any);
           if (!data?.choices) {
-            stream.write(Event.error, { error: 'not found data.choices' });
+            stream.write(Event.error, { error: "not found data.choices" });
             stream.end();
             return;
           }
           const [
             {
-              delta: { content = '' },
+              delta: { content = "" },
               finish_reason,
             },
           ] = data.choices;
-          if (finish_reason === 'stop') {
+          if (finish_reason === "stop") {
             return;
           }
           stream.write(Event.message, { content });
-        }),
+        })
       );
-      res.data.on('close', () => {
-        stream.write(Event.done, { content: '' });
+      res.data.on("close", () => {
+        stream.write(Event.done, { content: "" });
         stream.end();
       });
     } catch (e: any) {

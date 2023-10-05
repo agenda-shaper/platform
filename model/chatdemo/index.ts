@@ -1,22 +1,22 @@
-import { Chat, ChatOptions, ChatRequest, ModelType } from '../base';
-import { Browser, Page, Protocol } from 'puppeteer';
-import { BrowserPool, BrowserUser } from '../../utils/puppeteer';
-import * as fs from 'fs';
+import { Chat, ChatOptions, ChatRequest, ModelType } from "../base";
+import { Browser, Page, Protocol } from "puppeteer";
+import { BrowserPool, BrowserUser } from "../../chatbot_utils/puppeteer";
+import * as fs from "fs";
 import {
   Event,
   EventStream,
   parseJSON,
   randomUserAgent,
   sleep,
-} from '../../utils';
-import { v4 } from 'uuid';
-import moment from 'moment';
-import { AxiosInstance, AxiosRequestConfig } from 'axios';
-import es from 'event-stream';
-import { CreateAxiosProxy } from '../../utils/proxyAgent';
-import { CreateAxiosDefaults } from 'axios/index';
+} from "../../chatbot_utils";
+import { v4 } from "uuid";
+import moment from "moment";
+import { AxiosInstance, AxiosRequestConfig } from "axios";
+import es from "event-stream";
+import { CreateAxiosProxy } from "../../chatbot_utils/proxyAgent";
+import { CreateAxiosDefaults } from "axios/index";
 
-const TimeFormat = 'YYYY-MM-DD HH:mm:ss';
+const TimeFormat = "YYYY-MM-DD HH:mm:ss";
 
 type Account = {
   id: string;
@@ -38,15 +38,15 @@ interface RealReq {
 
 class AccountPool {
   private pool: Account[] = [];
-  private readonly account_file_path = './run/account_demochat.json';
+  private readonly account_file_path = "./run/account_demochat.json";
   private using = new Set<string>();
 
   constructor() {
     if (fs.existsSync(this.account_file_path)) {
-      const accountStr = fs.readFileSync(this.account_file_path, 'utf-8');
+      const accountStr = fs.readFileSync(this.account_file_path, "utf-8");
       this.pool = parseJSON(accountStr, [] as Account[]);
     } else {
-      fs.mkdirSync('./run', { recursive: true });
+      fs.mkdirSync("./run", { recursive: true });
       this.syncfile();
     }
   }
@@ -74,7 +74,7 @@ class AccountPool {
       if (
         (item.useTimes < 10 ||
           moment(item.last_use_time).isBefore(
-            moment().subtract(1, 'd').subtract(2, 'h'),
+            moment().subtract(1, "d").subtract(2, "h")
           )) &&
         !this.using.has(item.id)
       ) {
@@ -90,7 +90,7 @@ class AccountPool {
       last_use_time: now.format(TimeFormat),
       cookie: [],
       useTimes: 0,
-      token: '',
+      token: "",
     };
     this.pool.push(newAccount);
     this.syncfile();
@@ -120,17 +120,17 @@ export class ChatDemo extends Chat implements BrowserUser<Account> {
     this.pagePool = new BrowserPool<Account>(maxSize, this, false);
     this.client = CreateAxiosProxy(
       {
-        baseURL: 'https://chat.chatgptdemo.net',
+        baseURL: "https://chat.chatgptdemo.net",
         headers: {
-          'Content-Type': 'application/json',
-          accept: 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Proxy-Connection': 'keep-alive',
-          Referer: 'https://chat.chatgptdemo.net/',
-          Origin: 'https://chat.chatgptdemo.net',
+          "Content-Type": "application/json",
+          accept: "text/event-stream",
+          "Cache-Control": "no-cache",
+          "Proxy-Connection": "keep-alive",
+          Referer: "https://chat.chatgptdemo.net/",
+          Origin: "https://chat.chatgptdemo.net",
         },
       } as CreateAxiosDefaults,
-      true,
+      true
     );
   }
 
@@ -156,29 +156,29 @@ export class ChatDemo extends Chat implements BrowserUser<Account> {
 
   async init(
     id: string,
-    browser: Browser,
+    browser: Browser
   ): Promise<[Page | undefined, Account]> {
     const account = this.accountPool.getByID(id);
     try {
       if (!account) {
-        throw new Error('account undefined, something error');
+        throw new Error("account undefined, something error");
       }
       const [page] = await browser.pages();
       await page.setUserAgent(this.useragent);
 
-      await page.goto('https://chat.chatgptdemo.net/');
+      await page.goto("https://chat.chatgptdemo.net/");
       await sleep(2000);
-      account.cookie = await page.cookies('https://chat.chatgptdemo.net');
+      account.cookie = await page.cookies("https://chat.chatgptdemo.net");
       if (account.cookie.length === 0) {
-        throw new Error('demochat got cookie failed');
+        throw new Error("demochat got cookie failed");
       }
       await this.closePOP(page);
       account.token = await this.getToken(page);
       this.accountPool.syncfile();
-      this.logger.info('register demochat successfully');
+      this.logger.info("register demochat successfully");
       return [page, account];
     } catch (e: any) {
-      this.logger.warn('something error happened,err:', e.message);
+      this.logger.warn("something error happened,err:", e.message);
       return [] as any;
     }
   }
@@ -188,46 +188,46 @@ export class ChatDemo extends Chat implements BrowserUser<Account> {
       () =>
         // @ts-ignore
         (document.querySelector(
-          '#ADS-block-detect > div.ads-block-popup',
+          "#ADS-block-detect > div.ads-block-popup"
           // @ts-ignore
-        ).style.display = 'none'),
+        ).style.display = "none")
     );
     // @ts-ignore
     await page.evaluate(
       () =>
         // @ts-ignore
         (document.querySelector(
-          '#ADS-block-detect > div.overlay',
+          "#ADS-block-detect > div.overlay"
           // @ts-ignore
-        ).style.display = 'none'),
+        ).style.display = "none")
     );
   }
 
   public async getToken(page: Page) {
     // @ts-ignore
-    const token: string = await page.evaluate(() => $('#TTT').text());
+    const token: string = await page.evaluate(() => $("#TTT").text());
     return token;
   }
 
   public async getChatID(page: Page) {
     const chatid: string = await page.evaluate(() =>
       // @ts-ignore
-      $('.chatbox-item.focused').attr('id'),
+      $(".chatbox-item.focused").attr("id")
     );
     return chatid;
   }
 
   public async newChat(page: Page) {
     await page.waitForSelector(
-      '.app > #main-menu > .main > .button-container > .button',
+      ".app > #main-menu > .main > .button-container > .button"
     );
-    await page.click('.app > #main-menu > .main > .button-container > .button');
+    await page.click(".app > #main-menu > .main > .button-container > .button");
   }
 
   public async askStream(req: ChatRequest, stream: EventStream) {
     const [page, account, done, destroy] = this.pagePool.get();
     if (!account || !page || !account.cookie || account.cookie.length === 0) {
-      stream.write(Event.error, { error: 'please wait init.....about 1 min' });
+      stream.write(Event.error, { error: "please wait init.....about 1 min" });
       stream.end();
       return;
     }
@@ -240,46 +240,46 @@ export class ChatDemo extends Chat implements BrowserUser<Account> {
     try {
       account.useTimes += 1;
       this.accountPool.syncfile();
-      const res = await this.client.post('/chat_api_stream', data, {
-        responseType: 'stream',
+      const res = await this.client.post("/chat_api_stream", data, {
+        responseType: "stream",
         headers: {
           Cookie: account.cookie
             .map((item) => `${item.name}=${item.value}`)
-            .join('; '),
+            .join("; "),
         },
       } as AxiosRequestConfig);
       res.data.pipe(es.split(/\r?\n\r?\n/)).pipe(
         es.map(async (chunk: any, cb: any) => {
-          const dataStr = chunk.replace('data: ', '');
+          const dataStr = chunk.replace("data: ", "");
           if (!dataStr) {
             return;
           }
           const data = parseJSON(dataStr, {} as any);
           if (!data?.choices) {
-            stream.write(Event.error, { error: 'not found data.choices' });
+            stream.write(Event.error, { error: "not found data.choices" });
             stream.end();
             return;
           }
           const [
             {
-              delta: { content = '' },
+              delta: { content = "" },
               finish_reason,
             },
           ] = data.choices;
-          if (finish_reason === 'stop') {
+          if (finish_reason === "stop") {
             return;
           }
           stream.write(Event.message, { content });
-        }),
+        })
       );
-      res.data.on('close', () => {
-        stream.write(Event.done, { content: '' });
+      res.data.on("close", () => {
+        stream.write(Event.done, { content: "" });
         stream.end();
         this.newChat(page);
         done(account);
       });
     } catch (e: any) {
-      this.logger.error('demochat ask stream failed, err', e.message);
+      this.logger.error("demochat ask stream failed, err", e.message);
       stream.write(Event.error, { error: e.message });
       stream.end();
       await this.newChat(page);

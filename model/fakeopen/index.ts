@@ -4,10 +4,10 @@ import {
   ChatRequest,
   ChatResponse,
   ModelType,
-} from '../base';
-import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from 'axios';
-import { CreateAxiosProxy } from '../../utils/proxyAgent';
-import es from 'event-stream';
+} from "../base";
+import { AxiosInstance, AxiosRequestConfig, CreateAxiosDefaults } from "axios";
+import { CreateAxiosProxy } from "../../chatbot_utils/proxyAgent";
+import es from "event-stream";
 import {
   ErrorData,
   Event,
@@ -16,10 +16,10 @@ import {
   parseJSON,
   shuffleArray,
   sleep,
-} from '../../utils';
-import fs from 'fs';
-import { v4 } from 'uuid';
-import moment from 'moment/moment';
+} from "../../chatbot_utils";
+import fs from "fs";
+import { v4 } from "uuid";
+import moment from "moment/moment";
 
 interface Message {
   role: string;
@@ -84,30 +84,30 @@ type Account = {
 class AccountPool {
   private pool: Record<string, Account> = {};
   private using = new Set<string>();
-  private readonly account_file_path = './run/account_fakeopen.json';
+  private readonly account_file_path = "./run/account_fakeopen.json";
   private client: AxiosInstance;
 
   constructor() {
     this.client = CreateAxiosProxy({
-      baseURL: 'https://ai.fakeopen.com',
+      baseURL: "https://ai.fakeopen.com",
       headers: {
-        accept: '*/*',
-        'accept-language': 'zh-CN,zh;q=0.9',
-        'cache-control': 'no-cache',
-        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        pragma: 'no-cache',
-        'sec-ch-ua':
+        accept: "*/*",
+        "accept-language": "zh-CN,zh;q=0.9",
+        "cache-control": "no-cache",
+        "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+        pragma: "no-cache",
+        "sec-ch-ua":
           '"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"macOS"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-        'x-requested-with': 'XMLHttpRequest',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"macOS"',
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "x-requested-with": "XMLHttpRequest",
         cookie:
-          'sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22188a317c40520a-0c3c4294c10036-1b525634-1296000-188a317c406435%22%2C%22first_id%22%3A%22%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTg4YTMxN2M0MDUyMGEtMGMzYzQyOTRjMTAwMzYtMWI1MjU2MzQtMTI5NjAwMC0xODhhMzE3YzQwNjQzNSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%22%2C%22value%22%3A%22%22%7D%2C%22%24device_id%22%3A%22188a317c40520a-0c3c4294c10036-1b525634-1296000-188a317c406435%22%7D',
-        Referer: 'https://ai.fakeopen.com/auth1',
-        'Referrer-Policy': 'strict-origin-when-cross-origin',
+          "sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22188a317c40520a-0c3c4294c10036-1b525634-1296000-188a317c406435%22%2C%22first_id%22%3A%22%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTg4YTMxN2M0MDUyMGEtMGMzYzQyOTRjMTAwMzYtMWI1MjU2MzQtMTI5NjAwMC0xODhhMzE3YzQwNjQzNSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%22%2C%22value%22%3A%22%22%7D%2C%22%24device_id%22%3A%22188a317c40520a-0c3c4294c10036-1b525634-1296000-188a317c406435%22%7D",
+        Referer: "https://ai.fakeopen.com/auth1",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
       },
     } as CreateAxiosDefaults);
     this.initialize();
@@ -115,23 +115,23 @@ class AccountPool {
 
   async initialize() {
     if (!process.env.FAKE_OPEN_EMAIL || !process.env.FAKE_OPEN_PASSWORD) {
-      console.log('fakeopen found 0 account');
+      console.log("fakeopen found 0 account");
       return;
     }
-    const mailList = process.env.FAKE_OPEN_EMAIL.split('|');
-    const pwdList = process.env.FAKE_OPEN_PASSWORD.split('|');
+    const mailList = process.env.FAKE_OPEN_EMAIL.split("|");
+    const pwdList = process.env.FAKE_OPEN_PASSWORD.split("|");
     if (fs.existsSync(this.account_file_path)) {
-      const accountStr = fs.readFileSync(this.account_file_path, 'utf-8');
+      const accountStr = fs.readFileSync(this.account_file_path, "utf-8");
       this.pool = parseJSON(accountStr, {} as Record<string, Account>);
     } else {
-      fs.mkdirSync('./run', { recursive: true });
+      fs.mkdirSync("./run", { recursive: true });
       this.syncfile();
     }
     for (const key in this.pool) {
       this.pool[key].failedCnt = 0;
       this.pool[key].model = undefined;
 
-      if (!('plus' in this.pool)) {
+      if (!("plus" in this.pool)) {
         this.pool[key].plus = true;
       }
     }
@@ -144,42 +144,42 @@ class AccountPool {
       try {
         // 登录获取access_token
         const loginResp = await this.client.post(
-          '/auth/login',
+          "/auth/login",
           { username: mail, password: pwd },
           {
-            responseType: 'json',
-          } as AxiosRequestConfig,
+            responseType: "json",
+          } as AxiosRequestConfig
         );
         const { access_token } = loginResp.data as LoginRes;
         // 获取可用模型
         const validModelsResp = await this.client.get(
-          '/api/models?history_and_training_disabled=false',
+          "/api/models?history_and_training_disabled=false",
           {
-            responseType: 'json',
+            responseType: "json",
             // 替换headers中的Authorization
             headers: {
               Authorization: `Bearer ${access_token}`,
             },
-          } as AxiosRequestConfig,
+          } as AxiosRequestConfig
         );
         // 判断有无GPT-4权限,即plus权限
         const { categories } = validModelsResp.data as ValidModelsResp;
         const plus =
-          categories.find((item) => item.category === 'gpt_4')
-            ?.subscription_level === 'plus';
+          categories.find((item) => item.category === "gpt_4")
+            ?.subscription_level === "plus";
 
         const registerResp = await this.client.post(
-          '/token/register',
+          "/token/register",
           {
             unique_name: mail,
             access_token: access_token,
             expires_in: 0,
-            site_limit: '',
+            site_limit: "",
             show_conversations: true,
           },
           {
-            responseType: 'json',
-          } as AxiosRequestConfig,
+            responseType: "json",
+          } as AxiosRequestConfig
         );
         const { token_key } = registerResp.data as { token_key: string };
         this.pool[mail] = {
@@ -199,8 +199,8 @@ class AccountPool {
           id: v4(),
           email: mail,
           password: pwd,
-          access_token: '',
-          token_key: '',
+          access_token: "",
+          token_key: "",
           failedCnt: 0,
           invalid: true,
           plus: false,
@@ -239,7 +239,7 @@ class AccountPool {
     for (const vv of shuffleArray(Object.values(this.pool))) {
       if (
         (!vv.invalid ||
-          moment().subtract(5, 'm').isAfter(moment(vv.last_use_time))) &&
+          moment().subtract(5, "m").isAfter(moment(vv.last_use_time))) &&
         !this.using.has(vv.id) &&
         ((isPlus && vv.plus === isPlus) || !isPlus)
       ) {
@@ -249,10 +249,10 @@ class AccountPool {
         return vv;
       }
     }
-    console.log('fakeopen accessToken run out!!!!!!');
+    console.log("fakeopen accessToken run out!!!!!!");
     return {
       id: v4(),
-      email: '',
+      email: "",
       failedCnt: 0,
     } as Account;
   }
@@ -266,19 +266,19 @@ export class FakeOpen extends Chat {
     super(options);
     this.client = CreateAxiosProxy(
       {
-        baseURL: 'https://ai.fakeopen.com/v1/',
+        baseURL: "https://ai.fakeopen.com/v1/",
         headers: {
-          'Content-Type': 'application/json',
-          accept: 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Proxy-Connection': 'keep-alive',
+          "Content-Type": "application/json",
+          accept: "text/event-stream",
+          "Cache-Control": "no-cache",
+          "Proxy-Connection": "keep-alive",
           Authorization: `Bearer ${
             process.env.FAKE_OPEN_KEY ||
-            'pk-this-is-a-real-free-api-key-pk-for-everyone'
+            "pk-this-is-a-real-free-api-key-pk-for-everyone"
           }`,
         },
       } as CreateAxiosDefaults,
-      false,
+      false
     );
     this.accountPool = new AccountPool();
   }
@@ -298,15 +298,15 @@ export class FakeOpen extends Chat {
 
   public async askStream(req: ChatRequest, stream: EventStream) {
     const data: RealReq = {
-      messages: [{ role: 'user', content: req.prompt }],
+      messages: [{ role: "user", content: req.prompt }],
       temperature: 1.0,
       model: req.model,
       stream: true,
     };
     const account = this.accountPool.get(req.model === ModelType.GPT4);
     try {
-      const res = await this.client.post('/chat/completions', data, {
-        responseType: 'stream',
+      const res = await this.client.post("/chat/completions", data, {
+        responseType: "stream",
         // 替换headers中的Authorization
         headers: {
           Authorization: `Bearer ${account.token_key}`,
@@ -314,34 +314,34 @@ export class FakeOpen extends Chat {
       } as AxiosRequestConfig);
       res.data.pipe(es.split(/\r?\n\r?\n/)).pipe(
         es.map(async (chunk: any, cb: any) => {
-          const dataStr = chunk.replace('data: ', '');
+          const dataStr = chunk.replace("data: ", "");
           if (!dataStr) {
             return;
           }
-          if (dataStr === '[DONE]') {
-            stream.write(Event.done, { content: '' });
+          if (dataStr === "[DONE]") {
+            stream.write(Event.done, { content: "" });
             stream.end();
             this.accountPool.release(account.id);
             return;
           }
           const data = parseJSON(dataStr, {} as any);
           if (!data?.choices) {
-            stream.write(Event.error, { error: 'not found data.choices' });
+            stream.write(Event.error, { error: "not found data.choices" });
             stream.end();
             this.accountPool.release(account.id);
             return;
           }
           const [
             {
-              delta: { content = '' },
+              delta: { content = "" },
               finish_reason,
             },
           ] = data.choices;
-          if (finish_reason === 'stop') {
+          if (finish_reason === "stop") {
             return;
           }
           stream.write(Event.message, { content });
-        }),
+        })
       );
     } catch (e: any) {
       console.error(e.message);
