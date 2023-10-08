@@ -6,7 +6,7 @@ import LikePressedIcon from "./assets/like-pressed.svg";
 import DislikePressedIcon from "./assets/dislike-pressed.svg";
 import LikeUnpressedIcon from "./assets/like-unpressed.svg";
 import DislikeUnpressedIcon from "./assets/dislike-unpressed.svg";
-// Define a TypeScript interface for the props
+// Define a TypeScript interface for the prop
 export interface CellProps {
   id: number;
   title: string;
@@ -66,13 +66,21 @@ const Cell: React.FC<CellProps> = ({ title, description, imageUrl, id }) => {
             style={[styles.buttonContainer, liked && styles.likedButton]}
             onPress={handleLikePress}
           >
-            <SvgUri width="50" height="50" uri={LikeUnpressedIcon} />
+            {liked ? (
+              <LikePressedIcon width={30} height={30} />
+            ) : (
+              <LikeUnpressedIcon width={30} height={30} />
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.buttonContainer, disliked && styles.dislikedButton]}
             onPress={handleDislikePress}
           >
-            <SvgUri width="50" height="50" uri={DislikeUnpressedIcon} />
+            {disliked ? (
+              <DislikePressedIcon width={30} height={30} />
+            ) : (
+              <DislikeUnpressedIcon width={30} height={30} />
+            )}
           </TouchableOpacity>
         </View>
       </View>
