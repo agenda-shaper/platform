@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import utils from "./utils"; // Import your utility module
-
+import { SvgUri } from "react-native-svg"; // Import SvgUri
+import LikePressedIcon from "./assets/like-pressed.svg";
+import DislikePressedIcon from "./assets/dislike-pressed.svg";
+import LikeUnpressedIcon from "./assets/like-unpressed.svg";
+import DislikeUnpressedIcon from "./assets/dislike-unpressed.svg";
 // Define a TypeScript interface for the props
 export interface CellProps {
   id: number;
@@ -49,26 +53,29 @@ const Cell: React.FC<CellProps> = ({ title, description, imageUrl, id }) => {
       await react("undislike");
     }
   };
-
   return (
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.description}>{description}</Text>
+      </View>
+      <View style={styles.imageAndButtonsContainer}>
+        <Image source={{ uri: imageUrl }} style={styles.image} />
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity onPress={handleLikePress}>
-            <Text style={[styles.button, liked && styles.likedButton]}>
-              Like
-            </Text>
+          <TouchableOpacity
+            style={[styles.buttonContainer, liked && styles.likedButton]}
+            onPress={handleLikePress}
+          >
+            <SvgUri width="50" height="50" uri={LikeUnpressedIcon} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleDislikePress}>
-            <Text style={[styles.button, disliked && styles.dislikedButton]}>
-              Dislike
-            </Text>
+          <TouchableOpacity
+            style={[styles.buttonContainer, disliked && styles.dislikedButton]}
+            onPress={handleDislikePress}
+          >
+            <SvgUri width="50" height="50" uri={DislikeUnpressedIcon} />
           </TouchableOpacity>
         </View>
       </View>
-      <Image source={{ uri: imageUrl }} style={styles.image} />
     </View>
   );
 };
@@ -101,22 +108,36 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 16,
+    justifyContent: "space-between", // Change this to 'space-between' to distribute the buttons evenly
+    marginTop: 8,
+    width: "85%", // Reduce this to make the buttons smaller
+  },
+  buttonContainer: {
+    flex: 1, // Add this to make the TouchableOpacity elements take up full space
+    alignItems: "center", // Center the text horizontally
+    justifyContent: "center", // Center the text vertically
+    aspectRatio: 1, // Add this to make the buttons square
+    margin: 3,
   },
   button: {
-    padding: 8,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
-    borderRadius: 8,
+    textAlign: "center", // Center the text inside the button
   },
   likedButton: {
+    borderRadius: 15,
     backgroundColor: "green",
     color: "white",
   },
   dislikedButton: {
+    borderRadius: 15,
     backgroundColor: "red",
     color: "white",
+  },
+  imageAndButtonsContainer: {
+    flex: 1,
+    justifyContent: "space-between",
+    alignItems: "center", // Add this to align the image and buttons
   },
 });
 
