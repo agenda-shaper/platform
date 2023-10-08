@@ -5,22 +5,20 @@ import utils from "./utils"; // Import your utility module
 
 const MainScreen = () => {
   const [data, setData] = useState<CellProps[]>([]);
+  // Fetch data from your API here
+  const fetchData = async () => {
+    try {
+      const response = await utils.get("/cells/fetch"); // Replace with your actual API endpoint
+      const result = await response.json();
+      console.log(result);
 
+      const { cells } = result;
+      setData(cells);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   useEffect(() => {
-    // Fetch data from your API here
-    const fetchData = async () => {
-      try {
-        const response = await utils.get("/cells/fetch"); // Replace with your actual API endpoint
-        const result = await response.json();
-        console.log(result);
-
-        const { cells } = result;
-        setData(cells);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
     fetchData();
   }, []);
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Markdown from "@valasolutions/react-native-markdown";
 import utils from "./utils"; // Import your utils module
@@ -12,7 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { sendMessageToAI } from "./chatbot"; // Import the chatbot function
+import { sendMessage } from "./chatbot"; // Import the chatbot function
 
 interface Message {
   role: string;
@@ -21,12 +21,24 @@ interface Message {
 
 const ChatScreen = () => {
   const insets = useSafeAreaInsets();
+  const [chatId, setChatId] = useState(null);
 
   const [messages, setMessages] = useState<{ role: string; content: string }[]>(
     []
   );
   const [inputMessage, setInputMessage] = useState<string>("");
-
+  const newChat = async () => {
+    // Clear the local state
+    setMessages([]);
+    const response = await utils.get("/chat/new");
+    if (response.ok) {
+      console.log("Started new chat");
+      const data = await response.json();
+      setChatId(data.chat_id); // Store the chat_id in state
+    } else {
+      console.log((await response.json()).message);
+    }
+  };
   const handleMessageSend = async () => {
     if (inputMessage.trim() === "") return; // Don't send empty messages
     setInputMessage("");
@@ -43,17 +55,21 @@ const ChatScreen = () => {
       },
     ];
     setMessages(newMessages);
-    const aiRespondedMessages = await sendMessageToAI(newMessages);
+    const aiRespondedMessages = await sendMessage(newMessages);
     if (aiRespondedMessages) {
       setMessages(aiRespondedMessages);
       const lastTwoMessages = aiRespondedMessages.slice(-2);
-      const response = await utils.post("/chat/send", {
-        messageFields: lastTwoMessages,
-      });
-      if (response.ok) {
-        console.log("Saving successful");
-      } else {
-        console.log((await response.json()).message);
+      // Send the last two messages one by one, including the chat_id
+      for (const message of lastTwoMessages) {
+        const response = await utils.post("/chat/send", {
+          chat_id: chatId, // Include the chat_id
+          message: message,
+        });
+        if (response.ok) {
+          console.log("Saving successful");
+        } else {
+          console.log((await response.json()).message);
+        }
       }
     } else {
       // err
@@ -62,6 +78,9 @@ const ChatScreen = () => {
       setMessages([...newMessages]);
     }
   };
+  useEffect(() => {
+    newChat();
+  }, []); // Empty dependency array ensures this runs only on mount
 
   return (
     <KeyboardAvoidingView

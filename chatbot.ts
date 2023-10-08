@@ -5,7 +5,7 @@ interface Message {
   content: string;
 }
 
-export async function sendMessageToAI(messages: Message[]) {
+export async function sendMessage(messages: Message[]) {
   // Create a new request with the entire conversation history
   const req = {
     key: "", // Replace with your key
