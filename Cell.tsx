@@ -71,14 +71,14 @@ const Cell: React.FC<CellProps> = ({ title, description, imageUrl, id }) => {
           >
             {liked ? (
               <SvgUri
-                width="35"
-                height="35"
+                width="30"
+                height="30"
                 uri={`${utils.API_BASE_URL}/assets/like-pressed.svg`}
               />
             ) : (
               <SvgUri
-                width="35"
-                height="35"
+                width="30"
+                height="30"
                 uri={`${utils.API_BASE_URL}/assets/like-unpressed.svg`}
               />
             )}
@@ -89,14 +89,14 @@ const Cell: React.FC<CellProps> = ({ title, description, imageUrl, id }) => {
           >
             {disliked ? (
               <SvgUri
-                width="35"
-                height="35"
+                width="30"
+                height="30"
                 uri={`${utils.API_BASE_URL}/assets/dislike-pressed.svg`}
               />
             ) : (
               <SvgUri
-                width="35"
-                height="35"
+                width="30"
+                height="30"
                 uri={`${utils.API_BASE_URL}/assets/dislike-unpressed.svg`}
               />
             )}
@@ -124,16 +124,22 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
+    paddingRight: 20,
+    paddingLeft: 10,
     fontWeight: "bold",
+    textAlign: "left", // This will center the text
+
     marginBottom: 8,
   },
   description: {
-    paddingRight: 10,
+    paddingLeft: 10,
+    paddingRight: 20,
+    textAlign: "left", // This will center the text
     fontSize: 16,
     color: "#888",
   },
   image: {
-    flex: 1.0, // adjust this value to change the size of the image
+    flex: 0.8, // adjust this value to change the size of the image
     aspectRatio: 1,
     borderRadius: 8,
     marginBottom: 8,
@@ -143,17 +149,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between", // Change this to 'space-between' to distribute the buttons evenly
     marginTop: 8,
     marginBottom: 0,
+    //flex: 0.8,
     width: "90%", // Reduce this to make the buttons smaller
   },
   buttonContainer: {
-    flex: 1, // Add this to make the TouchableOpacity elements take up full space
+    flex: 2, // Add this to make the TouchableOpacity elements take up full space
     alignItems: "center", // Center the text horizontally
     justifyContent: "center", // Center the text vertically
     aspectRatio: 1, // Add this to make the buttons square
     margin: 3,
   },
   imageAndButtonsContainer: {
-    flex: 1,
+    flex: 0.8,
     justifyContent: "space-between",
     alignItems: "center", // Add this to align the image and buttons
   },
