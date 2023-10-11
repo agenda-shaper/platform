@@ -2,10 +2,7 @@ import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import utils from "./utils"; // Import your utility module
 import { SvgUri } from "react-native-svg"; // Import SvgUri
-import LikePressedIcon from "./assets/like-pressed.svg";
-import DislikePressedIcon from "./assets/dislike-pressed.svg";
-import LikeUnpressedIcon from "./assets/like-unpressed.svg";
-import DislikeUnpressedIcon from "./assets/dislike-unpressed.svg";
+
 // Define a TypeScript interface for the prop
 export interface CellProps {
   id: number;
@@ -37,9 +34,12 @@ const Cell: React.FC<CellProps> = ({ title, description, imageUrl, id }) => {
   const handleLikePress = async () => {
     if (!liked) {
       console.log("Liked:", title);
+      setLiked(true);
+      setDisliked(false);
       await react("like");
     } else {
       console.log("Unliked:", title);
+      setLiked(false);
       await react("unlike");
     }
   };
@@ -47,9 +47,12 @@ const Cell: React.FC<CellProps> = ({ title, description, imageUrl, id }) => {
   const handleDislikePress = async () => {
     if (!disliked) {
       console.log("Disliked:", title);
+      setDisliked(true);
+      setLiked(false);
       await react("dislike");
     } else {
       console.log("Undisliked:", title);
+      setDisliked(false);
       await react("undislike");
     }
   };
@@ -63,23 +66,39 @@ const Cell: React.FC<CellProps> = ({ title, description, imageUrl, id }) => {
         <Image source={{ uri: imageUrl }} style={styles.image} />
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
-            style={[styles.buttonContainer, liked && styles.likedButton]}
+            style={[styles.buttonContainer]}
             onPress={handleLikePress}
           >
             {liked ? (
-              <LikePressedIcon width={30} height={30} />
+              <SvgUri
+                width="35"
+                height="35"
+                uri={`${utils.API_BASE_URL}/assets/like-pressed.svg`}
+              />
             ) : (
-              <LikeUnpressedIcon width={30} height={30} />
+              <SvgUri
+                width="35"
+                height="35"
+                uri={`${utils.API_BASE_URL}/assets/like-unpressed.svg`}
+              />
             )}
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.buttonContainer, disliked && styles.dislikedButton]}
+            style={[styles.buttonContainer]}
             onPress={handleDislikePress}
           >
             {disliked ? (
-              <DislikePressedIcon width={30} height={30} />
+              <SvgUri
+                width="35"
+                height="35"
+                uri={`${utils.API_BASE_URL}/assets/dislike-pressed.svg`}
+              />
             ) : (
-              <DislikeUnpressedIcon width={30} height={30} />
+              <SvgUri
+                width="35"
+                height="35"
+                uri={`${utils.API_BASE_URL}/assets/dislike-unpressed.svg`}
+              />
             )}
           </TouchableOpacity>
         </View>
@@ -94,9 +113,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 16,
+    paddingVertical: 16, // adjust this value to change the top and bottom spacing
+    paddingHorizontal: 18, // adjust this value to change the left and right spacing
     borderBottomWidth: 1,
     borderColor: "#ccc",
-    height: 200,
+    height: 220,
   },
   content: {
     flex: 2,
@@ -104,21 +125,25 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "bold",
+    marginBottom: 8,
   },
   description: {
+    paddingRight: 10,
     fontSize: 16,
     color: "#888",
   },
   image: {
-    flex: 1,
+    flex: 1.0, // adjust this value to change the size of the image
     aspectRatio: 1,
     borderRadius: 8,
+    marginBottom: 8,
   },
   buttonsContainer: {
     flexDirection: "row",
     justifyContent: "space-between", // Change this to 'space-between' to distribute the buttons evenly
     marginTop: 8,
-    width: "85%", // Reduce this to make the buttons smaller
+    marginBottom: 0,
+    width: "90%", // Reduce this to make the buttons smaller
   },
   buttonContainer: {
     flex: 1, // Add this to make the TouchableOpacity elements take up full space
@@ -126,21 +151,6 @@ const styles = StyleSheet.create({
     justifyContent: "center", // Center the text vertically
     aspectRatio: 1, // Add this to make the buttons square
     margin: 3,
-  },
-  button: {
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center", // Center the text inside the button
-  },
-  likedButton: {
-    borderRadius: 15,
-    backgroundColor: "green",
-    color: "white",
-  },
-  dislikedButton: {
-    borderRadius: 15,
-    backgroundColor: "red",
-    color: "white",
   },
   imageAndButtonsContainer: {
     flex: 1,

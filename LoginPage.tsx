@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import utils from "./utils"; // Import your utils module
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
-import { NavigationProp } from "./navigationTypes";
+import { AuthNavigationProp } from "./navigationTypes";
 
 import {
   View,
@@ -16,13 +16,21 @@ import {
   Keyboard,
   TouchableOpacity,
 } from "react-native";
+import { AuthContext } from "./auth-context"; // Import your AuthContext
 
 const LoginPage = () => {
+  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setError] = useState("");
 
-  const navigation = useNavigation<NavigationProp>();
+  const navigation = useNavigation<AuthNavigationProp>();
+
+  const navigateToRegister = () => {
+    // Use the navigation object to navigate to the RegisterPage
+    navigation.replace("Register");
+  };
 
   const handleLogin = async () => {
     try {
@@ -49,10 +57,7 @@ const LoginPage = () => {
         console.log("Login successful", data);
         await AsyncStorage.setItem("token", data.token);
 
-        // Navigate to the MainScreen
-        navigation.navigate("Main");
-
-        // You can navigate to the user's dashboard or perform any other action here
+        setIsLoggedIn(true);
       } else {
         // Login failed, display an error message
         const errorData = await response.json();
@@ -91,8 +96,10 @@ const LoginPage = () => {
             <Text style={styles.errorMessage}>{errorMessage}</Text>
           ) : null}
           <Text style={styles.registerText}>
-            <Text>Don't have an account? </Text>
-            <Text style={{ color: "blue" }}>Register</Text>
+            Don't have an account?{" "}
+            <Text style={{ color: "blue" }} onPress={navigateToRegister}>
+              Register
+            </Text>
           </Text>
         </View>
       </KeyboardAvoidingView>

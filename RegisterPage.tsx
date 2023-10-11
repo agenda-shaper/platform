@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import utils from "./utils"; // Import your utils module
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
-import { NavigationProp } from "./navigationTypes";
+import { AuthNavigationProp } from "./navigationTypes";
 import {
   View,
   Text,
@@ -15,17 +15,22 @@ import {
   Keyboard,
   TouchableOpacity,
 } from "react-native";
-
+import { AuthContext } from "./auth-context"; // Import your AuthContext
 const RegisterPage = () => {
+  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(""); // Add state for error message
 
-  const navigation = useNavigation<NavigationProp>();
+  const navigation = useNavigation<AuthNavigationProp>();
 
   type Check = [boolean, string];
+  const navigateToLogin = () => {
+    // Use the navigation object to navigate to the RegisterPage
+    navigation.replace("Login");
+  };
 
   const handleRegister = async () => {
     setErrorMessage("");
@@ -63,8 +68,7 @@ const RegisterPage = () => {
         // Store the token
         await AsyncStorage.setItem("token", data.token);
 
-        // Navigate to the MainScreen
-        navigation.navigate("Main");
+        setIsLoggedIn(true);
       } else {
         setErrorMessage((await response.json()).message);
       }
@@ -120,7 +124,9 @@ const RegisterPage = () => {
           ) : null}
           <Text style={styles.loginText}>
             Already have an account?{" "}
-            <Text style={{ color: "blue" }}>Log In</Text>
+            <Text style={{ color: "blue" }} onPress={navigateToLogin}>
+              Log In
+            </Text>
           </Text>
         </View>
       </KeyboardAvoidingView>

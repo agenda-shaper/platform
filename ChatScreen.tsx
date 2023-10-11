@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import KeyboardDismissView from "react-native-keyboard-dismiss-view";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Markdown from "@valasolutions/react-native-markdown";
+import { SvgUri } from "react-native-svg"; // Import SvgUri
 import utils from "./utils"; // Import your utils module
 import {
   View,
@@ -9,8 +13,12 @@ import {
   Button,
   FlatList,
   StyleSheet,
+  TouchableWithoutFeedback,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
+  TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { sendMessage } from "./chatbot"; // Import the chatbot function
 
@@ -20,6 +28,8 @@ interface Message {
 }
 
 const ChatScreen = () => {
+  const [isScrolling, setIsScrolling] = useState(false);
+
   const insets = useSafeAreaInsets();
   const [chatId, setChatId] = useState(null);
 
@@ -86,31 +96,98 @@ const ChatScreen = () => {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
-      //keyboardVerticalOffset={64}
       keyboardVerticalOffset={insets.top + 45} // Adjust this value as needed
     >
-      <FlatList
-        data={messages}
-        renderItem={({ item }) => (
-          <View
-            style={item.role === "user" ? styles.userMessage : styles.aiMessage}
-          >
-            <Markdown>{item.content}</Markdown>
-          </View>
-        )}
-        keyExtractor={(item, index) => index.toString()}
-      />
+      <KeyboardDismissView style={{ flex: 1 }}>
+        <FlatList
+          data={messages}
+          renderItem={({ item }) => (
+            <View
+              style={
+                item.role === "user" ? styles.userMessage : styles.aiMessage
+              }
+            >
+              <Markdown style={customMarkdownStyles}>{item.content}</Markdown>
+            </View>
+          )}
+          keyExtractor={(item, index) => index.toString()}
+        />
+      </KeyboardDismissView>
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Type a message..."
+          placeholder="Message"
           value={inputMessage}
           onChangeText={(text) => setInputMessage(text)}
+          multiline // This makes the TextInput multiline
         />
-        <Button title="Send" onPress={handleMessageSend} />
+        <TouchableOpacity onPress={handleMessageSend}>
+          <SvgUri
+            width="28"
+            height="28"
+            uri={`${utils.API_BASE_URL}/assets/chat-send.svg`}
+          />
+        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
+};
+const customMarkdownStyles = {
+  // Text
+  text: {
+    fontSize: 18,
+  },
+
+  // Headings
+  heading1: {
+    flexDirection: "row",
+    fontSize: 32,
+  },
+  heading2: {
+    flexDirection: "row",
+    fontSize: 26,
+  },
+  heading3: {
+    flexDirection: "row",
+    fontSize: 22,
+  },
+  heading4: {
+    flexDirection: "row",
+    fontSize: 20,
+  },
+  heading5: {
+    flexDirection: "row",
+    fontSize: 18,
+  },
+  heading6: {
+    flexDirection: "row",
+    fontSize: 16,
+  },
+
+  // Lists
+  bullet_list_icon: {
+    marginLeft: 10,
+    marginRight: 10,
+    fontSize: 18,
+  },
+
+  // Code
+  code_inline: {
+    borderWidth: 1,
+    borderColor: "#CCCCCC",
+    backgroundColor: "#f5f5f5",
+    padding: 10,
+    borderRadius: 4,
+    fontSize: 18, // adjust this value as needed
+    ...Platform.select({
+      ["ios"]: {
+        fontFamily: "Courier",
+      },
+      ["android"]: {
+        fontFamily: "monospace",
+      },
+    }),
+  },
 };
 
 const styles = StyleSheet.create({
@@ -119,15 +196,17 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   userMessage: {
+    fontSize: 18, // adjust this value as needed
     alignSelf: "flex-end",
     backgroundColor: "#e3f2fd",
     padding: 8,
-    marginVertical: 4,
+    marginVertical: 8,
     marginRight: 8,
     marginLeft: 64, // Adjust this to control message width
     borderRadius: 8,
   },
   aiMessage: {
+    fontSize: 18, // adjust this value as needed
     alignSelf: "flex-start",
     backgroundColor: "#fde3fd",
     padding: 8,
@@ -140,15 +219,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 12,
   },
   input: {
+    fontSize: 18, // adjust this value as needed
     flex: 1,
     marginRight: 8,
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 16,
     padding: 8,
+    maxHeight: 100, // Set your desired max height here
   },
 });
 
