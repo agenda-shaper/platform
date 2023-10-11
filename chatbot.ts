@@ -12,7 +12,7 @@ export async function sendMessage(messages: Message[]) {
     messages: messages,
     model: { id: "gpt-3.5-turbo", name: "GPT-3.5" },
     prompt:
-      "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+      "You are an AI Chatbot powered by GPT 4. Follow the user's instructions carefully. Respond using markdown.",
     temperature: 0.7,
   };
 
