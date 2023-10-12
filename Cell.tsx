@@ -9,9 +9,16 @@ export interface CellProps {
   title: string;
   description: string;
   imageUrl: string;
+  full_explanation: string;
 }
 
-const Cell: React.FC<CellProps> = ({ title, description, imageUrl, id }) => {
+const Cell: React.FC<CellProps> = ({
+  title,
+  description,
+  imageUrl,
+  id,
+  full_explanation,
+}) => {
   const [liked, setLiked] = useState<boolean>(false);
   const [disliked, setDisliked] = useState<boolean>(false);
   const react = async (reactionType: string) => {

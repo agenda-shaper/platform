@@ -32,6 +32,7 @@ const MainScreen = () => {
             title={item.title}
             description={item.description}
             imageUrl={item.imageUrl}
+            full_explanation={item.full_explanation}
           />
         )}
         keyExtractor={(item) => item.id.toString()} // Use the "id" as the key
