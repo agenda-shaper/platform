@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import utils from "./utils"; // Import your utility module
 import { SvgUri } from "react-native-svg"; // Import SvgUri
+import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { MainStackNavigationProp } from "./navigationTypes";
 
 // Define a TypeScript interface for the prop
 export interface CellProps {
@@ -19,6 +21,8 @@ const Cell: React.FC<CellProps> = ({
   id,
   full_explanation,
 }) => {
+  const navigation = useNavigation<MainStackNavigationProp>();
+
   const [liked, setLiked] = useState<boolean>(false);
   const [disliked, setDisliked] = useState<boolean>(false);
   const react = async (reactionType: string) => {
@@ -30,9 +34,9 @@ const Cell: React.FC<CellProps> = ({
       }); // Replace with your actual API endpoint
       const data = await response.json();
       console.log(data);
-      const { isLiked, isDisliked } = data;
-      setLiked(isLiked);
-      setDisliked(isDisliked);
+      // const { isLiked, isDisliked } = data;
+      // setLiked(isLiked);
+      // setDisliked(isDisliked);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -63,54 +67,75 @@ const Cell: React.FC<CellProps> = ({
       await react("undislike");
     }
   };
+  // Inside your Cell component
+  const handlePress = () => {
+    navigation.navigate("InnerCell", {
+      title,
+      description,
+      imageUrl,
+      id,
+      full_explanation,
+    });
+  };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.description}>{description}</Text>
-      </View>
-      <View style={styles.imageAndButtonsContainer}>
-        <Image source={{ uri: imageUrl }} style={styles.image} />
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity
-            style={[styles.buttonContainer]}
-            onPress={handleLikePress}
+    <TouchableOpacity activeOpacity={1} onPress={handlePress}>
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <Text style={styles.title} numberOfLines={3} ellipsizeMode="tail">
+            {title}
+          </Text>
+          <Text
+            style={styles.description}
+            numberOfLines={5}
+            ellipsizeMode="tail"
           >
-            {liked ? (
-              <SvgUri
-                width="30"
-                height="30"
-                uri={`${utils.API_BASE_URL}/assets/like-pressed.svg`}
-              />
-            ) : (
-              <SvgUri
-                width="30"
-                height="30"
-                uri={`${utils.API_BASE_URL}/assets/like-unpressed.svg`}
-              />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.buttonContainer]}
-            onPress={handleDislikePress}
-          >
-            {disliked ? (
-              <SvgUri
-                width="30"
-                height="30"
-                uri={`${utils.API_BASE_URL}/assets/dislike-pressed.svg`}
-              />
-            ) : (
-              <SvgUri
-                width="30"
-                height="30"
-                uri={`${utils.API_BASE_URL}/assets/dislike-unpressed.svg`}
-              />
-            )}
-          </TouchableOpacity>
+            {description}
+          </Text>
+        </View>
+        <View style={styles.imageAndButtonsContainer}>
+          <Image source={{ uri: imageUrl }} style={styles.image} />
+          <View style={styles.buttonsContainer}>
+            <TouchableOpacity
+              style={[styles.buttonContainer]}
+              onPress={handleLikePress}
+            >
+              {liked ? (
+                <SvgUri
+                  width="30"
+                  height="30"
+                  uri={`${utils.API_BASE_URL}/assets/like-pressed.svg`}
+                />
+              ) : (
+                <SvgUri
+                  width="30"
+                  height="30"
+                  uri={`${utils.API_BASE_URL}/assets/like-unpressed.svg`}
+                />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.buttonContainer]}
+              onPress={handleDislikePress}
+            >
+              {disliked ? (
+                <SvgUri
+                  width="30"
+                  height="30"
+                  uri={`${utils.API_BASE_URL}/assets/dislike-pressed.svg`}
+                />
+              ) : (
+                <SvgUri
+                  width="30"
+                  height="30"
+                  uri={`${utils.API_BASE_URL}/assets/dislike-unpressed.svg`}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -124,7 +149,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18, // adjust this value to change the left and right spacing
     borderBottomWidth: 1,
     borderColor: "#ccc",
-    height: 220,
+    minHeight: 200,
+    maxHeight: 250,
   },
   content: {
     flex: 2,
@@ -146,10 +172,11 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   image: {
-    flex: 0.8, // adjust this value to change the size of the image
+    //flex: 0.8, // adjust this value to change the size of the image
     aspectRatio: 1,
     borderRadius: 8,
     marginBottom: 8,
+    height: 100,
   },
   buttonsContainer: {
     flexDirection: "row",

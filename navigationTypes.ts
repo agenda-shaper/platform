@@ -1,5 +1,8 @@
+// navigationTypes.ts
+
 import { StackNavigationProp } from "@react-navigation/stack";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import { CellProps } from "./Cell"; // Import your Cell component
 
 // Define a type for your authentication stack navigation structure
 export type AuthStackParamList = {
@@ -17,6 +20,13 @@ export type MainTabParamList = {
   Chat: undefined;
   // Add more tab screens here for your navigation
 };
-
 // Define a type for the navigation prop within the main tab navigator
 export type MainTabNavigationProp = BottomTabNavigationProp<MainTabParamList>;
+
+export type MainStackParamList = {
+  Main: undefined;
+  Screen: { InnerCell: undefined };
+  InnerCell: CellProps;
+};
+
+export type MainStackNavigationProp = StackNavigationProp<MainStackParamList>;
