@@ -4,6 +4,7 @@ import utils from "./utils"; // Import your utility module
 import { SvgUri } from "react-native-svg"; // Import SvgUri
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 import { MainStackNavigationProp } from "./navigationTypes";
+import { useRef } from "react";
 
 // Define a TypeScript interface for the prop
 export interface CellProps {
@@ -77,7 +78,6 @@ const Cell: React.FC<CellProps> = ({
       full_explanation,
     });
   };
-
   return (
     <TouchableOpacity activeOpacity={1} onPress={handlePress}>
       <View style={styles.container}>
@@ -87,7 +87,7 @@ const Cell: React.FC<CellProps> = ({
           </Text>
           <Text
             style={styles.description}
-            numberOfLines={5}
+            numberOfLines={7}
             ellipsizeMode="tail"
           >
             {description}
@@ -149,8 +149,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18, // adjust this value to change the left and right spacing
     borderBottomWidth: 1,
     borderColor: "#ccc",
-    minHeight: 200,
-    maxHeight: 250,
+    minHeight: 260,
+    maxHeight: 280,
   },
   content: {
     flex: 2,
