@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import utils from "./utils"; // Import your utility module
+import utils, { InteractionManager } from "./utils"; // Import your utility module
+
 import { SvgUri } from "react-native-svg"; // Import SvgUri
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 import { MainStackNavigationProp } from "./navigationTypes";
-import { useRef } from "react";
+
+const interactionManager = InteractionManager.getInstance();
 
 // Define a TypeScript interface for the prop
 export interface CellProps {
-  id: number;
+  id: string;
   title: string;
   description: string;
   imageUrl: string;
@@ -77,6 +79,7 @@ const Cell: React.FC<CellProps> = ({
       id,
       full_explanation,
     });
+    interactionManager.add({ id, type: "post_click" });
   };
   return (
     <TouchableOpacity activeOpacity={1} onPress={handlePress}>

@@ -5,7 +5,7 @@ import KeyboardDismissView from "react-native-keyboard-dismiss-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Markdown from "@valasolutions/react-native-markdown";
 import { SvgUri } from "react-native-svg"; // Import SvgUri
-import utils from "./utils"; // Import your utils module
+import utils, { InteractionManager } from "./utils"; // Import your utility module
 import {
   View,
   Text,
@@ -21,6 +21,8 @@ import {
   ScrollView,
 } from "react-native";
 import { sendMessage } from "./chatbot"; // Import the chatbot function
+
+const interactionManager = InteractionManager.getInstance();
 
 interface Message {
   role: string;
