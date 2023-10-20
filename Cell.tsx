@@ -17,130 +17,123 @@ export interface CellProps {
   full_explanation: string;
 }
 
-const Cell: React.FC<CellProps> = ({
-  title,
-  description,
-  imageUrl,
-  id,
-  full_explanation,
-}) => {
-  const navigation = useNavigation<MainStackNavigationProp>();
+const Cell: React.FC<CellProps> = React.memo(
+  ({ title, description, imageUrl, id, full_explanation }) => {
+    const navigation = useNavigation<MainStackNavigationProp>();
+    const [liked, setLiked] = useState<boolean>(false);
+    const [saved, setSaved] = useState<boolean>(false);
 
-  const [liked, setLiked] = useState<boolean>(false);
-  const [disliked, setDisliked] = useState<boolean>(false);
-  const react = async (reactionType: string) => {
-    try {
-      console.log(id, reactionType);
-      const response = await utils.post("/cells/react", {
-        post_id: id,
-        reactionType: reactionType,
-      }); // Replace with your actual API endpoint
-      const data = await response.json();
-      console.log(data);
-      // const { isLiked, isDisliked } = data;
-      // setLiked(isLiked);
-      // setDisliked(isDisliked);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+    const handleLikePress = async () => {
+      if (!liked) {
+        interactionManager.add({
+          id,
+          type: "like",
+          data: { reaction: "like" },
+        });
+        console.log("Liked:", title);
+        setLiked(true);
+      } else {
+        interactionManager.add({
+          id,
+          type: "like",
+          data: { reaction: "unlike" },
+        });
+        console.log("Unliked:", title);
+        setLiked(false);
+      }
+    };
 
-  const handleLikePress = async () => {
-    if (!liked) {
-      console.log("Liked:", title);
-      setLiked(true);
-      setDisliked(false);
-      await react("like");
-    } else {
-      console.log("Unliked:", title);
-      setLiked(false);
-      await react("unlike");
-    }
-  };
-
-  const handleDislikePress = async () => {
-    if (!disliked) {
-      console.log("Disliked:", title);
-      setDisliked(true);
-      setLiked(false);
-      await react("dislike");
-    } else {
-      console.log("Undisliked:", title);
-      setDisliked(false);
-      await react("undislike");
-    }
-  };
-  // Inside your Cell component
-  const handlePress = () => {
-    navigation.navigate("InnerCell", {
-      title,
-      description,
-      imageUrl,
-      id,
-      full_explanation,
-    });
-    interactionManager.add({ id, type: "post_click" });
-  };
-  return (
-    <TouchableOpacity activeOpacity={1} onPress={handlePress}>
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.title} numberOfLines={3} ellipsizeMode="tail">
-            {title}
-          </Text>
-          <Text
-            style={styles.description}
-            numberOfLines={7}
-            ellipsizeMode="tail"
-          >
-            {description}
-          </Text>
-        </View>
-        <View style={styles.imageAndButtonsContainer}>
-          <Image source={{ uri: imageUrl }} style={styles.image} />
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity
-              style={[styles.buttonContainer]}
-              onPress={handleLikePress}
+    const handleSavePress = async () => {
+      if (!saved) {
+        interactionManager.add({
+          id,
+          type: "save",
+          data: { reaction: "save" },
+        });
+        console.log("Saved:", title);
+        setSaved(true);
+      } else {
+        interactionManager.add({
+          id,
+          type: "save",
+          data: { reaction: "unsave" },
+        });
+        console.log("Unsaved:", title);
+        setSaved(false);
+      }
+    };
+    // Inside your Cell component
+    const handlePress = () => {
+      navigation.navigate("InnerCell", {
+        title,
+        description,
+        imageUrl,
+        id,
+        full_explanation,
+      });
+      interactionManager.add({ id, type: "post_click" });
+    };
+    return (
+      <TouchableOpacity activeOpacity={1} onPress={handlePress}>
+        <View style={styles.container}>
+          <View style={styles.content}>
+            <Text style={styles.title} numberOfLines={3} ellipsizeMode="tail">
+              {title}
+            </Text>
+            <Text
+              style={styles.description}
+              numberOfLines={7}
+              ellipsizeMode="tail"
             >
-              {liked ? (
-                <SvgUri
-                  width="30"
-                  height="30"
-                  uri={`${utils.API_BASE_URL}/assets/like-pressed.svg`}
-                />
-              ) : (
-                <SvgUri
-                  width="30"
-                  height="30"
-                  uri={`${utils.API_BASE_URL}/assets/like-unpressed.svg`}
-                />
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.buttonContainer]}
-              onPress={handleDislikePress}
-            >
-              {disliked ? (
-                <SvgUri
-                  width="30"
-                  height="30"
-                  uri={`${utils.API_BASE_URL}/assets/dislike-pressed.svg`}
-                />
-              ) : (
-                <SvgUri
-                  width="30"
-                  height="30"
-                  uri={`${utils.API_BASE_URL}/assets/dislike-unpressed.svg`}
-                />
-              )}
-            </TouchableOpacity>
+              {description}
+            </Text>
+          </View>
+          <View style={styles.imageAndButtonsContainer}>
+            <Image source={{ uri: imageUrl }} style={styles.image} />
+            <View style={styles.buttonsContainer}>
+              <TouchableOpacity
+                style={[styles.buttonContainer]}
+                onPress={handleLikePress}
+              >
+                {liked ? (
+                  <SvgUri
+                    width="30"
+                    height="30"
+                    uri={`${utils.API_BASE_URL}/assets/like-pressed.svg`}
+                  />
+                ) : (
+                  <SvgUri
+                    width="30"
+                    height="30"
+                    uri={`${utils.API_BASE_URL}/assets/like-unpressed.svg`}
+                  />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.buttonContainer]}
+                onPress={handleSavePress}
+              >
+                {saved ? (
+                  <SvgUri
+                    width="30"
+                    height="30"
+                    uri={`${utils.API_BASE_URL}/assets/dislike-pressed.svg`}
+                  />
+                ) : (
+                  <SvgUri
+                    width="30"
+                    height="30"
+                    uri={`${utils.API_BASE_URL}/assets/dislike-unpressed.svg`}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
+      </TouchableOpacity>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   container: {

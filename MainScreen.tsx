@@ -10,6 +10,7 @@ import Cell, { CellProps } from "./Cell"; // Import your Cell component
 import utils, { InteractionManager } from "./utils"; // Import your utility module
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 import { MainStackNavigationProp } from "./navigationTypes";
+import { SwipeListView } from "react-native-swipe-list-view";
 
 const interactionManager = InteractionManager.getInstance();
 
@@ -139,22 +140,34 @@ const MainScreen = () => {
         }
       }}
     >
-      <FlatList
+      <SwipeListView
         data={data}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <Cell
-            id={item.id} // Pass the "id" as a prop
+            id={item.id}
             title={item.title}
             description={item.description}
             imageUrl={item.imageUrl}
             full_explanation={item.full_explanation}
           />
         )}
-        keyExtractor={(item) => item.id.toString()} // Use the "id" as the key
-        contentContainerStyle={styles.list}
+        renderHiddenItem={({ item }, rowMap) => (
+          <View style={styles.rowBack}></View>
+        )}
+        leftOpenValue={75}
+        onRowDidOpen={(rowKey, rowMap) => {
+          setTimeout(() => {
+            setData((prevData) =>
+              prevData.filter((item) => item.id !== rowKey)
+            );
+            rowMap[rowKey].closeRow();
+          }, 2000);
+        }}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={{
-          itemVisiblePercentThreshold: 20, // Adjust as needed
+          itemVisiblePercentThreshold: 20,
         }}
       />
     </View>
@@ -167,6 +180,19 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingVertical: 16,
+  },
+  rowBack: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    padding: 16,
+    backgroundColor: "#ccc",
+  },
+  backTextWhite: {
+    color: "#FFF",
+    fontWeight: "bold",
+    textAlign: "right",
+    paddingHorizontal: 15,
   },
 });
 

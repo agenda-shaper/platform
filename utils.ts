@@ -77,7 +77,12 @@ const utils = {
 
 export interface Interaction {
   id: string;
-  type: "post_click" | "post_visibility" | "innercell_visibility";
+  type:
+    | "post_click"
+    | "post_visibility"
+    | "innercell_visibility"
+    | "like"
+    | "save";
   data?: object;
 }
 
@@ -95,7 +100,14 @@ export class InteractionManager {
 
   // Method to add an interaction
   public add(interaction: Interaction): void {
-    //const interaction = { postId, type, data };
+    // for spam stuff
+    if (interaction.type == "save") {
+      // filter if theres any interactions with the same type and id
+      // if yes remove them both because they neutralise
+    } else if ((interaction.type = "like")) {
+      // same here
+    }
+
     this.interactions.push(interaction);
   }
 
