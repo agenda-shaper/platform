@@ -47,7 +47,6 @@ const InnerCell: React.FC<Props> = ({ route }) => {
     <ScrollView contentContainerStyle={styles.container}>
       <Image source={{ uri: imageUrl }} style={styles.image} />
       <Text style={styles.title}>{title}</Text>
-      <Text style={styles.description}>{description}</Text>
       <Text style={styles.fullExplanation}>{full_explanation}</Text>
     </ScrollView>
   );
@@ -72,14 +71,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 8,
   },
-  description: {
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 8,
-  },
   fullExplanation: {
-    fontSize: 14,
-    textAlign: "center",
+    fontSize: 15,
+    textAlign: "left",
   },
 });
 
