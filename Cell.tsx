@@ -116,13 +116,13 @@ const Cell: React.FC<CellProps> = React.memo(
                   <SvgUri
                     width="30"
                     height="30"
-                    uri={`${utils.API_BASE_URL}/assets/dislike-pressed.svg`}
+                    uri={`${utils.API_BASE_URL}/assets/save-pressed.png`}
                   />
                 ) : (
                   <SvgUri
                     width="30"
                     height="30"
-                    uri={`${utils.API_BASE_URL}/assets/dislike-unpressed.svg`}
+                    uri={`${utils.API_BASE_URL}/assets/save-unpressed.png`}
                   />
                 )}
               </TouchableOpacity>
