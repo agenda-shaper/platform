@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
+  Text,
   FlatList,
   StyleSheet,
   Dimensions,
@@ -24,6 +25,20 @@ const MainScreen = () => {
   const [wasIdle, setWasIdle] = useState(false); // Add this state
   const timers = useRef<{ [id: string]: number }>({});
   const [visiblePosts, setVisiblePosts] = useState<ViewToken[]>([]);
+  const [listData, setListData] = React.useState(data); // Add this line
+
+  const onSwipeValueChange = (swipeData: any) => {
+    const { key, value } = swipeData;
+    console.log(swipeData);
+    if (value < -200) {
+      console.log("deleting", key);
+      // // If the user has swiped the list item to left beyond 200
+      // const newData = [...listData]; // clone the list data
+      // const prevIndex = listData.findIndex(item => item.id.toString() === key);
+      // newData.splice(prevIndex, 1); // remove the item from the data array
+      // setListData(newData); // update the state
+    }
+  };
 
   const onViewableItemsChanged = useCallback(
     (info: { viewableItems: ViewToken[]; changed: ViewToken[] }) => {
@@ -130,6 +145,22 @@ const MainScreen = () => {
       }
     };
   }, []);
+  const renderItem = ({ item }: { item: CellProps }) => (
+    <Cell
+      id={item.id}
+      title={item.title}
+      description={item.description}
+      imageUrl={item.imageUrl}
+      full_explanation={item.full_explanation}
+    />
+  );
+
+  const renderHiddenItem = () => (
+    <View style={[styles.rowBack]}>
+      <Text>Ask AI</Text>
+      <Text>See Less</Text>
+    </View>
+  );
 
   return (
     <View
@@ -140,35 +171,19 @@ const MainScreen = () => {
         }
       }}
     >
-      <SwipeListView
+      <FlatList
         data={data}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <Cell
-            id={item.id}
-            title={item.title}
-            description={item.description}
-            imageUrl={item.imageUrl}
-            full_explanation={item.full_explanation}
-          />
-        )}
-        renderHiddenItem={({ item }, rowMap) => (
-          <View style={styles.rowBack}></View>
-        )}
-        leftOpenValue={75}
-        onRowDidOpen={(rowKey, rowMap) => {
-          setTimeout(() => {
-            setData((prevData) =>
-              prevData.filter((item) => item.id !== rowKey)
-            );
-            rowMap[rowKey].closeRow();
-          }, 2000);
-        }}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{
-          itemVisiblePercentThreshold: 20,
-        }}
+        renderItem={renderItem}
+        //renderHiddenItem={renderHiddenItem}
+        initialNumToRender={10} // Render only the first 10 items initially
+        //onRowDidOpen={onSwipeValueChange} // Add this line
+
+        // onViewableItemsChanged={onViewableItemsChanged}
+        // viewabilityConfig={{
+        //   itemVisiblePercentThreshold: 20,
+        // }}
       />
     </View>
   );
@@ -182,17 +197,12 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   rowBack: {
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-end",
-    padding: 16,
-    backgroundColor: "#ccc",
-  },
-  backTextWhite: {
-    color: "#FFF",
-    fontWeight: "bold",
-    textAlign: "right",
-    paddingHorizontal: 15,
+    backgroundColor: "#DDD",
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 12,
   },
 });
 

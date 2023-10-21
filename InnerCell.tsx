@@ -1,5 +1,13 @@
 import React, { useEffect, useRef } from "react";
-import { ScrollView, View, Text, Image, StyleSheet } from "react-native";
+import {
+  ScrollView,
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+} from "react-native";
 import { RouteProp, useNavigation } from "@react-navigation/native";
 import { MainStackParamList } from "./navigationTypes";
 import { InteractionManager } from "./utils";
@@ -42,38 +50,75 @@ const InnerCell: React.FC<Props> = ({ route }) => {
       unsubscribeBlur();
     };
   }, []);
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Image source={{ uri: imageUrl }} style={styles.image} />
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.fullExplanation}>{full_explanation}</Text>
-    </ScrollView>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.fullExplanation}>{full_explanation}</Text>
+      </ScrollView>
+      <View style={styles.buttonsContainer}>
+        <TouchableOpacity
+          style={[styles.buttonsContainer]}
+          //onPress={handleLikePress}
+        >
+          {/* {liked ? (
+            <SvgUri
+              ...
+            />
+          ) : (
+            <SvgUri
+             ...
+            />
+          )} */}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.buttonsContainer]}
+          //onPress={handleSavePress}
+        >
+          {/* {saved ? (
+            <SvgUri
+              ...
+            />
+          ) : (
+            <SvgUri
+             ...
+            />
+          )} */}
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     padding: 16,
-    alignItems: "center",
-    justifyContent: "center",
   },
-  image: {
-    width: "100%",
-    height: undefined,
-    aspectRatio: 1,
-    resizeMode: "cover",
-    marginBottom: 16,
-  },
+
   title: {
     fontSize: 18,
     fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 16,
+    alignSelf: "center",
   },
   fullExplanation: {
-    fontSize: 15,
-    textAlign: "left",
+    fontSize: 16,
+    marginHorizontal: 8,
+    //color: "#888",
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 10,
   },
 });
 

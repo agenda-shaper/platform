@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import utils, { InteractionManager } from "./utils"; // Import your utility module
-
 import { SvgUri } from "react-native-svg"; // Import SvgUri
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 import { MainStackNavigationProp } from "./navigationTypes";
@@ -147,6 +146,7 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     minHeight: 260,
     maxHeight: 280,
+    backgroundColor: "white",
   },
   content: {
     flex: 2,
