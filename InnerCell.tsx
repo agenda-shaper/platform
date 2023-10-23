@@ -7,6 +7,7 @@ import {
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
+  Linking,
 } from "react-native";
 import { RouteProp, useNavigation } from "@react-navigation/native";
 import { MainStackParamList } from "./navigationTypes";
@@ -21,7 +22,16 @@ type Props = {
 };
 
 const InnerCell: React.FC<Props> = ({ route }) => {
-  const { title, description, imageUrl, id, full_explanation } = route.params;
+  const {
+    title,
+    description,
+    imageUrl,
+    id,
+    full_explanation,
+    links,
+    created_at,
+  } = route.params;
+  console.log(links);
   const navigation = useNavigation();
   const interactionManager = InteractionManager.getInstance();
   const startTimeRef = useRef<number | null>(null);
@@ -61,6 +71,16 @@ const InnerCell: React.FC<Props> = ({ route }) => {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.fullExplanation}>{full_explanation}</Text>
+        {links &&
+          links.map((link: string, index: any) => (
+            <Text
+              key={index}
+              style={styles.link}
+              onPress={() => Linking.openURL(link)}
+            >
+              {link}
+            </Text>
+          ))}
       </ScrollView>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
@@ -103,6 +123,12 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
   },
+  link: {
+    color: "blue",
+    textDecorationLine: "underline",
+    marginTop: 18,
+    marginHorizontal: 6,
+  },
 
   title: {
     fontSize: 18,
@@ -112,7 +138,7 @@ const styles = StyleSheet.create({
   },
   fullExplanation: {
     fontSize: 16,
-    marginHorizontal: 8,
+    marginHorizontal: 6,
     //color: "#888",
   },
   buttonsContainer: {

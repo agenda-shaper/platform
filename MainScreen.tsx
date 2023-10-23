@@ -152,6 +152,8 @@ const MainScreen = () => {
       description={item.description}
       imageUrl={item.imageUrl}
       full_explanation={item.full_explanation}
+      links={item.links}
+      created_at={item.created_at}
     />
   );
 

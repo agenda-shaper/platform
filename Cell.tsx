@@ -4,6 +4,7 @@ import utils, { InteractionManager } from "./utils"; // Import your utility modu
 import { SvgUri } from "react-native-svg"; // Import SvgUri
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 import { MainStackNavigationProp } from "./navigationTypes";
+import moment from "moment";
 
 const interactionManager = InteractionManager.getInstance();
 
@@ -14,13 +15,26 @@ export interface CellProps {
   description: string;
   imageUrl: string;
   full_explanation: string;
+  links: any;
+  created_at: any;
 }
 
 const Cell: React.FC<CellProps> = React.memo(
-  ({ title, description, imageUrl, id, full_explanation }) => {
+  ({
+    title,
+    description,
+    imageUrl,
+    id,
+    full_explanation,
+    links,
+    created_at,
+  }) => {
     const navigation = useNavigation<MainStackNavigationProp>();
     const [liked, setLiked] = useState<boolean>(false);
     const [saved, setSaved] = useState<boolean>(false);
+    const timeFromNow = (timestamp: any) => {
+      return moment(timestamp).fromNow();
+    };
 
     const handleLikePress = async () => {
       if (!liked) {
@@ -69,6 +83,8 @@ const Cell: React.FC<CellProps> = React.memo(
         imageUrl,
         id,
         full_explanation,
+        links,
+        created_at,
       });
       interactionManager.add({ id, type: "post_click" });
     };
@@ -86,7 +102,9 @@ const Cell: React.FC<CellProps> = React.memo(
             >
               {description}
             </Text>
+            <Text style={styles.timeAgo}>{timeFromNow(created_at)}</Text>
           </View>
+
           <View style={styles.imageAndButtonsContainer}>
             <Image source={{ uri: imageUrl }} style={styles.image} />
             <View style={styles.buttonsContainer}>
@@ -116,13 +134,13 @@ const Cell: React.FC<CellProps> = React.memo(
                   <SvgUri
                     width="30"
                     height="30"
-                    uri={`${utils.API_BASE_URL}/assets/save-pressed.png`}
+                    uri={`${utils.API_BASE_URL}/assets/save-pressed.svg`}
                   />
                 ) : (
                   <SvgUri
                     width="30"
                     height="30"
-                    uri={`${utils.API_BASE_URL}/assets/save-unpressed.png`}
+                    uri={`${utils.API_BASE_URL}/assets/save-unpressed.svg`}
                   />
                 )}
               </TouchableOpacity>
@@ -193,6 +211,12 @@ const styles = StyleSheet.create({
     flex: 0.8,
     justifyContent: "space-between",
     alignItems: "center", // Add this to align the image and buttons
+  },
+  timeAgo: {
+    paddingLeft: 10,
+    paddingTop: 18,
+    color: "#888",
+    fontSize: 12,
   },
 });
 
