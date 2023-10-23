@@ -60,11 +60,11 @@ const InnerCell: React.FC<Props> = ({ route }) => {
       unsubscribeBlur();
     };
   }, []);
-  useEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, [navigation]);
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     headerShown: false,
+  //   });
+  // }, [navigation]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
