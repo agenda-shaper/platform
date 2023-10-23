@@ -3,6 +3,7 @@ export const API_BASE_URL =
 export const APP_NAME = "Platform";
 import validator from "validator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+// import { fetch } from "react-native-fetch-api";
 
 // Function to make a GET request
 export const get = async (uri: string) => {

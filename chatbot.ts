@@ -1,5 +1,7 @@
 import EventSource from "react-native-event-source";
 
+//import { fetch } from "react-native-fetch-api";
+
 interface Message {
   role: string;
   content: string;
@@ -25,11 +27,33 @@ export async function sendMessage(messages: Message[]) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(req),
+      //reactNative: { textStreaming: true },
     });
 
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
     }
+    // const reader = res.body.getReader();
+    // const decoder = new TextDecoder("utf-8");
+
+    // reader
+    //   .read()
+    //   .then(function processText({
+    //     done,
+    //     value,
+    //   }: {
+    //     done: boolean;
+    //     value: Uint8Array;
+    //   }) {
+    //     if (done) {
+    //       console.log("Stream complete");
+    //       return;
+    //     }
+
+    //     console.log(decoder.decode(value));
+
+    //     return reader.read().then(processText);
+    //   });
 
     let data = await res.text();
     console.log(data);

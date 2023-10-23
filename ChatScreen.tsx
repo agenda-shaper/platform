@@ -24,13 +24,8 @@ import { sendMessage } from "./chatbot"; // Import the chatbot function
 
 const interactionManager = InteractionManager.getInstance();
 
-interface Message {
-  role: string;
-  content: string;
-}
-
 const ChatScreen = () => {
-  const [isScrolling, setIsScrolling] = useState(false);
+  const [isSending, setIsSending] = useState(false); // Add this line
 
   const insets = useSafeAreaInsets();
   const [chatId, setChatId] = useState(null);
@@ -51,14 +46,28 @@ const ChatScreen = () => {
       console.log((await response.json()).message);
     }
   };
+  const loadLastChat = async () => {
+    // Clear the local state
+    setMessages([]);
+    const response = await utils.get("/chat/last");
+    if (response.ok) {
+      console.log("Loaded chat");
+      const data = await response.json();
+      setChatId(data.chat_id); // Store the chat_id in state
+      setMessages(data.chat_history);
+    } else {
+      console.log((await response.json()).message);
+    }
+  };
   const handleMessageSend = async () => {
-    if (inputMessage.trim() === "") return; // Don't send empty messages
+    if (inputMessage.trim() === "" || isSending) return; // Don't send empty messages or if already sending
+    const message = inputMessage;
     setInputMessage("");
     let newMessages = [
       ...messages,
       {
         role: "user",
-        content: inputMessage,
+        content: message,
       },
       {
         // temp message
@@ -67,10 +76,12 @@ const ChatScreen = () => {
       },
     ];
     setMessages(newMessages);
+    setIsSending(true); // Set isSending to true when sending a message
     const aiRespondedMessages = await sendMessage(newMessages);
     if (aiRespondedMessages) {
       setMessages(aiRespondedMessages);
       const lastTwoMessages = aiRespondedMessages.slice(-2);
+
       // Send the last two messages one by one, including the chat_id
       for (const message of lastTwoMessages) {
         const response = await utils.post("/chat/send", {
@@ -88,10 +99,13 @@ const ChatScreen = () => {
       newMessages.pop();
       newMessages.pop();
       setMessages([...newMessages]);
+      // rollback input
+      setInputMessage(message);
     }
+    setIsSending(false); // Set isSending back to false after message is sent
   };
   useEffect(() => {
-    newChat();
+    loadLastChat();
   }, []); // Empty dependency array ensures this runs only on mount
 
   return (
@@ -100,21 +114,18 @@ const ChatScreen = () => {
       style={styles.container}
       keyboardVerticalOffset={insets.top + 45} // Adjust this value as needed
     >
-      <KeyboardDismissView style={{ flex: 1 }}>
-        <FlatList
-          data={messages}
-          renderItem={({ item }) => (
-            <View
-              style={
-                item.role === "user" ? styles.userMessage : styles.aiMessage
-              }
-            >
-              <Markdown style={customMarkdownStyles}>{item.content}</Markdown>
-            </View>
-          )}
-          keyExtractor={(item, index) => index.toString()}
-        />
-      </KeyboardDismissView>
+      <FlatList
+        keyboardShouldPersistTaps="handled"
+        data={messages}
+        renderItem={({ item }) => (
+          <View
+            style={item.role === "user" ? styles.userMessage : styles.aiMessage}
+          >
+            <Markdown style={customMarkdownStyles}>{item.content}</Markdown>
+          </View>
+        )}
+        keyExtractor={(item, index) => index.toString()}
+      />
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
