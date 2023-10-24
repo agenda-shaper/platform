@@ -134,7 +134,7 @@ const ChatScreen = () => {
           onChangeText={(text) => setInputMessage(text)}
           multiline // This makes the TextInput multiline
         />
-        <TouchableOpacity onPress={handleMessageSend}>
+        <TouchableOpacity onPress={handleMessageSend} disabled={isSending}>
           <SvgUri
             width="28"
             height="28"
