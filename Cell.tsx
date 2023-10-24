@@ -8,6 +8,9 @@ import moment from "moment";
 
 const interactionManager = InteractionManager.getInstance();
 
+interface CellType {
+  cell: CellProps;
+}
 // Define a TypeScript interface for the prop
 export interface CellProps {
   id: string;
@@ -19,138 +22,138 @@ export interface CellProps {
   created_at: any;
 }
 
-const Cell: React.FC<CellProps> = React.memo(
-  ({
+const Cell: React.FC<CellType> = React.memo(({ cell }) => {
+  const {
+    id,
     title,
     description,
     imageUrl,
-    id,
     full_explanation,
     links,
     created_at,
-  }) => {
-    const navigation = useNavigation<MainStackNavigationProp>();
-    const [liked, setLiked] = useState<boolean>(false);
-    const [saved, setSaved] = useState<boolean>(false);
-    const timeFromNow = (timestamp: any) => {
-      return moment(timestamp).fromNow();
-    };
+  } = cell;
 
-    const handleLikePress = async () => {
-      if (!liked) {
-        interactionManager.add({
-          id,
-          type: "like",
-          data: { reaction: "like" },
-        });
-        console.log("Liked:", title);
-        setLiked(true);
-      } else {
-        interactionManager.add({
-          id,
-          type: "like",
-          data: { reaction: "unlike" },
-        });
-        console.log("Unliked:", title);
-        setLiked(false);
-      }
-    };
+  const navigation = useNavigation<MainStackNavigationProp>();
+  const [liked, setLiked] = useState<boolean>(false);
+  const [saved, setSaved] = useState<boolean>(false);
+  const timeFromNow = (timestamp: any) => {
+    return moment(timestamp).fromNow();
+  };
 
-    const handleSavePress = async () => {
-      if (!saved) {
-        interactionManager.add({
-          id,
-          type: "save",
-          data: { reaction: "save" },
-        });
-        console.log("Saved:", title);
-        setSaved(true);
-      } else {
-        interactionManager.add({
-          id,
-          type: "save",
-          data: { reaction: "unsave" },
-        });
-        console.log("Unsaved:", title);
-        setSaved(false);
-      }
-    };
-    // Inside your Cell component
-    const handlePress = () => {
-      navigation.navigate("InnerCell", {
-        title,
-        description,
-        imageUrl,
+  const handleLikePress = async () => {
+    if (!liked) {
+      interactionManager.add({
         id,
-        full_explanation,
-        links,
-        created_at,
+        type: "like",
+        data: { reaction: "like" },
       });
-      interactionManager.add({ id, type: "post_click" });
-    };
-    return (
-      <TouchableOpacity activeOpacity={1} onPress={handlePress}>
-        <View style={styles.container}>
-          <View style={styles.content}>
-            <Text style={styles.title} numberOfLines={3} ellipsizeMode="tail">
-              {title}
-            </Text>
-            <Text
-              style={styles.description}
-              numberOfLines={7}
-              ellipsizeMode="tail"
-            >
-              {description}
-            </Text>
-            <Text style={styles.timeAgo}>{timeFromNow(created_at)}</Text>
-          </View>
+      console.log("Liked:", title);
+      setLiked(true);
+    } else {
+      interactionManager.add({
+        id,
+        type: "like",
+        data: { reaction: "unlike" },
+      });
+      console.log("Unliked:", title);
+      setLiked(false);
+    }
+  };
 
-          <View style={styles.imageAndButtonsContainer}>
-            <Image source={{ uri: imageUrl }} style={styles.image} />
-            <View style={styles.buttonsContainer}>
-              <TouchableOpacity
-                style={[styles.buttonContainer]}
-                onPress={handleLikePress}
-              >
-                {liked ? (
-                  <SvgUri
-                    width="30"
-                    height="30"
-                    uri={`${utils.API_BASE_URL}/assets/like-pressed.svg`}
-                  />
-                ) : (
-                  <SvgUri
-                    width="30"
-                    height="30"
-                    uri={`${utils.API_BASE_URL}/assets/like-unpressed.svg`}
-                  />
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.buttonContainer]}
-                onPress={handleSavePress}
-              >
-                {saved ? (
-                  <SvgUri
-                    width="30"
-                    height="30"
-                    uri={`${utils.API_BASE_URL}/assets/save-pressed.svg`}
-                  />
-                ) : (
-                  <SvgUri
-                    width="30"
-                    height="30"
-                    uri={`${utils.API_BASE_URL}/assets/save-unpressed.svg`}
-                  />
-                )}
-              </TouchableOpacity>
-            </View>
+  const handleSavePress = async () => {
+    if (!saved) {
+      interactionManager.add({
+        id,
+        type: "save",
+        data: { reaction: "save" },
+      });
+      console.log("Saved:", title);
+      setSaved(true);
+    } else {
+      interactionManager.add({
+        id,
+        type: "save",
+        data: { reaction: "unsave" },
+      });
+      console.log("Unsaved:", title);
+      setSaved(false);
+    }
+  };
+  // Inside your Cell component
+  const handlePress = () => {
+    navigation.navigate("InnerCell", {
+      title,
+      description,
+      imageUrl,
+      id,
+      full_explanation,
+      links,
+      created_at,
+    });
+    interactionManager.add({ id, type: "post_click" });
+  };
+  return (
+    <TouchableOpacity activeOpacity={1} onPress={handlePress}>
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <Text style={styles.title} numberOfLines={3} ellipsizeMode="tail">
+            {title}
+          </Text>
+          <Text
+            style={styles.description}
+            numberOfLines={7}
+            ellipsizeMode="tail"
+          >
+            {description}
+          </Text>
+          <Text style={styles.timeAgo}>{timeFromNow(created_at)}</Text>
+        </View>
+
+        <View style={styles.imageAndButtonsContainer}>
+          <Image source={{ uri: imageUrl }} style={styles.image} />
+          <View style={styles.buttonsContainer}>
+            <TouchableOpacity
+              style={[styles.buttonContainer]}
+              onPress={handleLikePress}
+            >
+              {liked ? (
+                <SvgUri
+                  width="30"
+                  height="30"
+                  uri={`${utils.API_BASE_URL}/assets/like-pressed.svg`}
+                />
+              ) : (
+                <SvgUri
+                  width="30"
+                  height="30"
+                  uri={`${utils.API_BASE_URL}/assets/like-unpressed.svg`}
+                />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.buttonContainer]}
+              onPress={handleSavePress}
+            >
+              {saved ? (
+                <SvgUri
+                  width="30"
+                  height="30"
+                  uri={`${utils.API_BASE_URL}/assets/save-pressed.svg`}
+                />
+              ) : (
+                <SvgUri
+                  width="30"
+                  height="30"
+                  uri={`${utils.API_BASE_URL}/assets/save-unpressed.svg`}
+                />
+              )}
+            </TouchableOpacity>
           </View>
         </View>
-      </TouchableOpacity>
-    );
-  }
-);
+      </View>
+    </TouchableOpacity>
+  );
+});
 
 const styles = StyleSheet.create({
   container: {

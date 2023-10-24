@@ -1,7 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import KeyboardDismissView from "react-native-keyboard-dismiss-view";
-
+import React, { useEffect, useState, useRef } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Markdown from "@valasolutions/react-native-markdown";
 import { SvgUri } from "react-native-svg"; // Import SvgUri
@@ -21,10 +18,16 @@ import {
   ScrollView,
 } from "react-native";
 import { sendMessage } from "./chatbot"; // Import the chatbot function
+import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 
 const interactionManager = InteractionManager.getInstance();
 
 const ChatScreen = () => {
+  const [isAtBottom, setIsAtBottom] = useState(true); // Add this state
+
+  const flatListRef = useRef<FlatList>(null); // Add this ref
+
+  const navigation = useNavigation();
   const [isSending, setIsSending] = useState(false); // Add this line
 
   const insets = useSafeAreaInsets();
@@ -77,11 +80,12 @@ const ChatScreen = () => {
     ];
     setMessages(newMessages);
     setIsSending(true); // Set isSending to true when sending a message
+
     const aiRespondedMessages = await sendMessage(newMessages);
     if (aiRespondedMessages) {
       setMessages(aiRespondedMessages);
-      const lastTwoMessages = aiRespondedMessages.slice(-2);
 
+      const lastTwoMessages = aiRespondedMessages.slice(-2);
       // Send the last two messages one by one, including the chat_id
       for (const message of lastTwoMessages) {
         const response = await utils.post("/chat/send", {
@@ -102,12 +106,38 @@ const ChatScreen = () => {
       // rollback input
       setInputMessage(message);
     }
+
     setIsSending(false); // Set isSending back to false after message is sent
   };
   useEffect(() => {
-    loadLastChat();
-  }, []); // Empty dependency array ensures this runs only on mount
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        if (isAtBottom) {
+          setTimeout(() => {
+            if (flatListRef.current) {
+              console.log("scrolling to end");
+              flatListRef.current.scrollToEnd({ animated: true });
+            }
+          }, 10);
+        }
+      }
+    );
 
+    return () => {
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+  useEffect(() => {
+    loadLastChat();
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity onPress={newChat} style={{ paddingLeft: 16 }}>
+          <Text style={{ fontSize: 12, color: "#000" }}>New</Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]); // Empty dependency array ensures this runs only on mount
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -115,16 +145,41 @@ const ChatScreen = () => {
       keyboardVerticalOffset={insets.top + 45} // Adjust this value as needed
     >
       <FlatList
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="handled" // close keyboard on tap - leave on scroll
+        ref={flatListRef}
+        windowSize={10} // performance
+        onScroll={({ nativeEvent }) => {
+          const threshold = 10; // Adjust this value as needed
+          setIsAtBottom(
+            nativeEvent.contentOffset.y +
+              nativeEvent.layoutMeasurement.height +
+              threshold >=
+              nativeEvent.contentSize.height
+          );
+        }}
+        scrollEventThrottle={100}
         data={messages}
-        renderItem={({ item }) => (
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item, index }) => (
           <View
+            onLayout={() => {
+              // Scroll to end if this is a new message and user is at bottom
+              //console.log(isAtBottom);
+              if (isAtBottom) {
+                setTimeout(() => {
+                  if (flatListRef.current) {
+                    console.log("scrolling to end");
+                    flatListRef.current.scrollToEnd({ animated: true });
+                  }
+                }, 10);
+              }
+            }}
             style={item.role === "user" ? styles.userMessage : styles.aiMessage}
           >
-            <Markdown style={customMarkdownStyles}>{item.content}</Markdown>
+            <Text style={styles.text}>{item.content}</Text>
+            {/* removed markdown */}
           </View>
         )}
-        keyExtractor={(item, index) => index.toString()}
       />
       <View style={styles.inputContainer}>
         <TextInput
@@ -136,8 +191,8 @@ const ChatScreen = () => {
         />
         <TouchableOpacity onPress={handleMessageSend} disabled={isSending}>
           <SvgUri
-            width="28"
-            height="28"
+            width="26"
+            height="26"
             uri={`${utils.API_BASE_URL}/assets/chat-send.svg`}
           />
         </TouchableOpacity>
@@ -207,6 +262,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "flex-end",
+  },
+  text: {
+    fontSize: 18,
   },
   userMessage: {
     fontSize: 18, // adjust this value as needed

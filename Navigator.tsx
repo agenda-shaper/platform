@@ -4,6 +4,7 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import ChatScreen from "./ChatScreen";
+import UserPage from "./UserPage";
 import MainScreen from "./MainScreen"; // Import your MainScreen component
 import LoginPage from "./LoginPage"; // Import your LoginPage component
 import RegisterPage from "./RegisterPage"; // Import your RegisterPage component
@@ -45,6 +46,7 @@ const MainNavigator: React.FC = () => {
     <Tab.Navigator>
       <Tab.Screen name="Home" component={MainStackScreen} />
       <Tab.Screen name="Chat" component={ChatScreen} />
+      <Tab.Screen name="User" component={UserPage} />
     </Tab.Navigator>
   );
 };

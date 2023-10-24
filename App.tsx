@@ -5,8 +5,15 @@ import { AuthNavigator, MainNavigator } from "./Navigator";
 import { AuthContext } from "./auth-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import utils from "./utils"; // Import your utils module
+import { UserContext, UserProps } from "./UserContext";
+import UserPage from "./UserPage";
 
 const App: React.FC = () => {
+  const [userData, setUserData] = React.useState<UserProps>({
+    username: "",
+    displayName: "",
+    avatarUrl: "",
+  });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -24,6 +31,13 @@ const App: React.FC = () => {
             const data = await response.json();
             await AsyncStorage.setItem("token", data.token);
             setIsLoggedIn(true);
+            //! FIX
+            setUserData({
+              // Update user data here
+              username: data.username,
+              displayName: data.displayName,
+              avatarUrl: data.avatarUrl,
+            });
           }
         }
       } catch (error) {
@@ -36,9 +50,11 @@ const App: React.FC = () => {
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
-      <NavigationContainer>
-        {isLoggedIn ? <MainNavigator /> : <AuthNavigator />}
-      </NavigationContainer>
+      <UserContext.Provider value={userData}>
+        <NavigationContainer>
+          {isLoggedIn ? <MainNavigator /> : <AuthNavigator />}
+        </NavigationContainer>
+      </UserContext.Provider>
     </AuthContext.Provider>
   );
 };

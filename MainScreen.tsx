@@ -145,17 +145,7 @@ const MainScreen = () => {
       }
     };
   }, []);
-  const renderItem = ({ item }: { item: CellProps }) => (
-    <Cell
-      id={item.id}
-      title={item.title}
-      description={item.description}
-      imageUrl={item.imageUrl}
-      full_explanation={item.full_explanation}
-      links={item.links}
-      created_at={item.created_at}
-    />
-  );
+  const renderItem = ({ item }: { item: CellProps }) => <Cell cell={item} />;
 
   const renderHiddenItem = () => (
     <View style={[styles.rowBack]}>
