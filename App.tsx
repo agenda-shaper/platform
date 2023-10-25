@@ -13,6 +13,7 @@ const App: React.FC = () => {
     username: "",
     displayName: "",
     avatarUrl: "",
+    email: "",
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -31,13 +32,7 @@ const App: React.FC = () => {
             const data = await response.json();
             await AsyncStorage.setItem("token", data.token);
             setIsLoggedIn(true);
-            //! FIX
-            setUserData({
-              // Update user data here
-              username: data.username,
-              displayName: data.displayName,
-              avatarUrl: data.avatarUrl,
-            });
+            setUserData(data.userData);
           }
         }
       } catch (error) {

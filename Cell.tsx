@@ -8,7 +8,7 @@ import moment from "moment";
 
 const interactionManager = InteractionManager.getInstance();
 
-interface CellType {
+export interface CellType {
   cell: CellProps;
 }
 // Define a TypeScript interface for the prop
@@ -45,7 +45,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
       interactionManager.add({
         id,
         type: "like",
-        data: { reaction: "like" },
+        data: { reaction: "liked" },
       });
       console.log("Liked:", title);
       setLiked(true);
@@ -53,7 +53,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
       interactionManager.add({
         id,
         type: "like",
-        data: { reaction: "unlike" },
+        data: { reaction: "unliked" },
       });
       console.log("Unliked:", title);
       setLiked(false);
@@ -65,7 +65,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
       interactionManager.add({
         id,
         type: "save",
-        data: { reaction: "save" },
+        data: { reaction: "saved" },
       });
       console.log("Saved:", title);
       setSaved(true);
@@ -73,7 +73,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
       interactionManager.add({
         id,
         type: "save",
-        data: { reaction: "unsave" },
+        data: { reaction: "unsaved" },
       });
       console.log("Unsaved:", title);
       setSaved(false);
@@ -81,16 +81,14 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
   };
   // Inside your Cell component
   const handlePress = () => {
-    navigation.navigate("InnerCell", {
-      title,
-      description,
-      imageUrl,
+    const source = "main_posts";
+
+    navigation.navigate("InnerCell", { cell, source });
+    interactionManager.add({
       id,
-      full_explanation,
-      links,
-      created_at,
+      type: "post_click",
+      data: { source: source },
     });
-    interactionManager.add({ id, type: "post_click" });
   };
   return (
     <TouchableOpacity activeOpacity={1} onPress={handlePress}>

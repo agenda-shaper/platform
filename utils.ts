@@ -84,7 +84,7 @@ export interface Interaction {
     | "innercell_visibility"
     | "like"
     | "save";
-  data?: object;
+  data?: any;
 }
 
 export class InteractionManager {
@@ -102,11 +102,9 @@ export class InteractionManager {
   // Method to add an interaction
   public add(interaction: Interaction): void {
     // for spam stuff
-    if (interaction.type == "save") {
+    if (interaction.type == "save" || interaction.type == "like") {
       // filter if theres any interactions with the same type and id
       // if yes remove them both because they neutralise
-    } else if ((interaction.type = "like")) {
-      // same here
     }
 
     this.interactions.push(interaction);
@@ -117,17 +115,27 @@ export class InteractionManager {
     this.interactions = this.interactions.filter((i) => i !== interaction);
   }
 
-  // Method to start sending interactions to the server
-  public start(): void {
-    this.intervalId = setInterval(() => {
+  public async send() {
+    try {
       if (this.interactions.length > 0) {
-        // Replace with your actual API call
-        console.log(
-          `Sending ${this.interactions.length} interactions to server:\n`,
-          this.interactions
-        );
-        this.interactions = [];
+        const payload = { interactions: this.interactions };
+        const response = await post("utils/react", payload);
+        if (response.status === 200) {
+          // clear
+          this.interactions = [];
+        } else {
+          throw new Error(await response.text());
+        }
       }
+    } catch (error) {
+      console.error("Error sending interactions:", error);
+    }
+  }
+
+  // Method to start sending interactions to the server
+  public start() {
+    this.intervalId = setInterval(async () => {
+      await this.send();
     }, this.sendInterval);
   }
 

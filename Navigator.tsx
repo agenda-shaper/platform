@@ -11,7 +11,7 @@ import RegisterPage from "./RegisterPage"; // Import your RegisterPage component
 import InnerCell from "./InnerCell"; // Import your RegisterPage component
 import Cell, { CellProps } from "./Cell"; // Import your Cell component
 import { NavigationContainer } from "@react-navigation/native";
-import { MainStackParamList } from "./navigationTypes";
+import { MainStackParamList, UserStackParamList } from "./navigationTypes";
 const Tab = createBottomTabNavigator();
 const AuthStack = createStackNavigator(); // Create a new Stack Navigator
 const MainStack = createStackNavigator<MainStackParamList>();
@@ -27,7 +27,7 @@ const MainStackScreen: React.FC = () => {
       <MainStack.Screen
         name="InnerCell"
         component={InnerCell}
-        options={{ headerShown: true }}
+        options={{ headerShown: false }}
       />
     </MainStack.Navigator>
   );
@@ -41,12 +41,31 @@ const AuthNavigator: React.FC = () => {
     </AuthStack.Navigator>
   );
 };
+const UserStack = createStackNavigator<UserStackParamList>();
+
+const UserStackScreen: React.FC = () => {
+  return (
+    <UserStack.Navigator>
+      <UserStack.Screen
+        name="User"
+        component={UserPage}
+        options={{ headerShown: false }}
+      />
+      <UserStack.Screen
+        name="InnerCell"
+        component={InnerCell}
+        options={{ headerShown: false }}
+      />
+    </UserStack.Navigator>
+  );
+};
+
 const MainNavigator: React.FC = () => {
   return (
     <Tab.Navigator>
       <Tab.Screen name="Home" component={MainStackScreen} />
       <Tab.Screen name="Chat" component={ChatScreen} />
-      <Tab.Screen name="User" component={UserPage} />
+      <Tab.Screen name="User" component={UserStackScreen} />
     </Tab.Navigator>
   );
 };

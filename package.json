@@ -43,6 +43,7 @@
     "react-native-swipe-gestures": "^1.0.5",
     "react-native-swipe-list-view": "^3.2.9",
     "react-native-swipeable": "^0.6.0",
+    "react-native-tab-view": "^3.5.2",
     "react-native-webview": "13.2.2",
     "semver": "^7.5.4",
     "stream-browserify": "^3.0.0",

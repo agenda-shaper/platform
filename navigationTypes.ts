@@ -28,7 +28,14 @@ export type MainTabNavigationProp = BottomTabNavigationProp<MainTabParamList>;
 export type MainStackParamList = {
   Main: undefined;
   Screen: { InnerCell: undefined };
-  InnerCell: CellProps;
+  InnerCell: { cell: CellProps; source: string };
 };
+
+export type UserStackParamList = {
+  User: undefined;
+  InnerCell: { cell: CellProps; source: string };
+};
+
+export type UserStackNavigationProp = StackNavigationProp<UserStackParamList>;
 
 export type MainStackNavigationProp = StackNavigationProp<MainStackParamList>;

@@ -10,8 +10,9 @@ import {
   Linking,
 } from "react-native";
 import { RouteProp, useNavigation } from "@react-navigation/native";
-import { MainStackParamList } from "./navigationTypes";
 import { InteractionManager } from "./utils";
+import { CellProps } from "./Cell";
+import { MainStackParamList } from "./navigationTypes";
 
 // Define a new type for your route prop
 type InnerCellRouteProp = RouteProp<MainStackParamList, "InnerCell">;
@@ -20,8 +21,8 @@ type InnerCellRouteProp = RouteProp<MainStackParamList, "InnerCell">;
 type Props = {
   route: InnerCellRouteProp;
 };
-
 const InnerCell: React.FC<Props> = ({ route }) => {
+  const { cell, source } = route.params;
   const {
     title,
     description,
@@ -30,8 +31,8 @@ const InnerCell: React.FC<Props> = ({ route }) => {
     full_explanation,
     links,
     created_at,
-  } = route.params;
-  console.log(links);
+  } = cell;
+
   const navigation = useNavigation();
   const interactionManager = InteractionManager.getInstance();
   const startTimeRef = useRef<number | null>(null);
@@ -49,7 +50,7 @@ const InnerCell: React.FC<Props> = ({ route }) => {
         interactionManager.add({
           id,
           type: "innercell_visibility",
-          data: { visible_ms: timeSpent },
+          data: { visible_ms: timeSpent, source: source },
         });
         console.log(`User spent ${timeSpent} ms on inner cell ${id}`);
       }
@@ -82,36 +83,7 @@ const InnerCell: React.FC<Props> = ({ route }) => {
             </Text>
           ))}
       </ScrollView>
-      <View style={styles.buttonsContainer}>
-        <TouchableOpacity
-          style={[styles.buttonsContainer]}
-          //onPress={handleLikePress}
-        >
-          {/* {liked ? (
-            <SvgUri
-              ...
-            />
-          ) : (
-            <SvgUri
-             ...
-            />
-          )} */}
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.buttonsContainer]}
-          //onPress={handleSavePress}
-        >
-          {/* {saved ? (
-            <SvgUri
-              ...
-            />
-          ) : (
-            <SvgUri
-             ...
-            />
-          )} */}
-        </TouchableOpacity>
-      </View>
+      <View style={styles.buttonsContainer}></View>
     </SafeAreaView>
   );
 };

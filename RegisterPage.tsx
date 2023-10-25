@@ -21,6 +21,7 @@ const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [displayName, setdisplayName] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(""); // Add state for error message
 
@@ -49,6 +50,10 @@ const RegisterPage = () => {
         "Password must be between 8 and 64 characters long",
       ],
       [password === repeatPassword, "Passwords do not match"],
+      [
+        utils.validator.isLength(displayName, { min: 3, max: 20 }),
+        "Password must be between 3 and 20 characters long",
+      ],
     ];
     for (let [check, message] of checks) {
       if (!check) {
@@ -59,7 +64,7 @@ const RegisterPage = () => {
     try {
       const response = await utils.auth({
         action: "register",
-        data: { email, username, password },
+        data: { email, username, password, displayName },
       });
       if (response.ok) {
         const data = await response.json();

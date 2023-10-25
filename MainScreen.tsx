@@ -101,7 +101,7 @@ const MainScreen = () => {
   };
 
   // Fetch data from your API here
-  const fetchData = async () => {
+  const fetchCells = async () => {
     try {
       console.log("fetching recommended");
       const response = await utils.get("/cells/fetch"); // Replace with your actual API endpoint
@@ -133,7 +133,7 @@ const MainScreen = () => {
     const unsubscribeFocus = navigation.addListener("focus", () => {
       onActive();
     });
-    fetchData();
+    fetchCells();
 
     return () => {
       unsubscribeBlur();
