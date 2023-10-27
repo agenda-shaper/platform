@@ -77,9 +77,9 @@ const UserPage: React.FC = () => {
         renderTabBar={(props) => (
           <TabBar
             {...props}
-            indicatorStyle={{ backgroundColor: "black" }} // Gray indicator for the active tab
-            style={{ backgroundColor: "white" }} // Transparent background
-            labelStyle={{ color: "black" }} // Transparent labels
+            indicatorStyle={{ backgroundColor: "black" }} // Black indicator for the active tab
+            style={{ backgroundColor: "white" }}
+            labelStyle={{ color: "black" }}
           />
         )}
       />
