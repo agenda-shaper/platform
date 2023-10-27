@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 16,
+    padding: 12,
     borderBottomWidth: 1,
     borderColor: "#ccc",
     backgroundColor: "white",
@@ -46,15 +46,15 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     fontSize: 16,
-    paddingRight: 20,
+    padding: 8,
     fontWeight: "bold",
     textAlign: "left",
     marginBottom: 8,
   },
   image: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 60,
+    height: 60,
+    borderRadius: 8,
   },
 });
 export default MiniCell;

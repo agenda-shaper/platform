@@ -6,7 +6,6 @@ import { AuthContext } from "./auth-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import utils from "./utils"; // Import your utils module
 import { UserContext, UserProps } from "./UserContext";
-import UserPage from "./UserPage";
 
 const App: React.FC = () => {
   const [userData, setUserData] = React.useState<UserProps>({

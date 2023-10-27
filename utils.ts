@@ -119,12 +119,16 @@ export class InteractionManager {
     try {
       if (this.interactions.length > 0) {
         const payload = { interactions: this.interactions };
-        const response = await post("utils/react", payload);
+        console.log(payload);
+
+        const response = await post("/utils/react", payload);
         if (response.status === 200) {
           // clear
           this.interactions = [];
         } else {
-          throw new Error(await response.text());
+          console.log("non 200");
+          const data = await response.json();
+          throw new Error(data);
         }
       }
     } catch (error) {
@@ -134,9 +138,11 @@ export class InteractionManager {
 
   // Method to start sending interactions to the server
   public start() {
-    this.intervalId = setInterval(async () => {
+    const sendAndScheduleNext = async () => {
       await this.send();
-    }, this.sendInterval);
+      this.intervalId = setTimeout(sendAndScheduleNext, this.sendInterval);
+    };
+    sendAndScheduleNext();
   }
 
   // Method to stop sending interactions to the server

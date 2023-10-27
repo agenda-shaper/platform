@@ -11,9 +11,14 @@ import RegisterPage from "./RegisterPage"; // Import your RegisterPage component
 import InnerCell from "./InnerCell"; // Import your RegisterPage component
 import Cell, { CellProps } from "./Cell"; // Import your Cell component
 import { NavigationContainer } from "@react-navigation/native";
-import { MainStackParamList, UserStackParamList } from "./navigationTypes";
-const Tab = createBottomTabNavigator();
-const AuthStack = createStackNavigator(); // Create a new Stack Navigator
+import {
+  MainStackParamList,
+  UserStackParamList,
+  MainTabParamList,
+  AuthStackParamList,
+} from "./navigationTypes";
+const Tab = createBottomTabNavigator<MainTabParamList>();
+const AuthStack = createStackNavigator<AuthStackParamList>(); // Create a new Stack Navigator
 const MainStack = createStackNavigator<MainStackParamList>();
 
 const MainStackScreen: React.FC = () => {

@@ -17,7 +17,7 @@ export type AuthNavigationProp = StackNavigationProp<AuthStackParamList>;
 
 // Define a type for your main tab navigation structure
 export type MainTabParamList = {
-  Main: undefined;
+  Home: undefined;
   Chat: undefined;
   User: undefined;
   // Add more tab screens here for your navigation
@@ -32,7 +32,7 @@ export type MainStackParamList = {
 };
 
 export type UserStackParamList = {
-  User: undefined;
+  UserPage: undefined;
   InnerCell: { cell: CellProps; source: string };
 };
 

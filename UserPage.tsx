@@ -1,10 +1,18 @@
 // UserPage.tsx
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { UserContext } from "./UserContext";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
-
-import { View, Text, Image, StyleSheet, Dimensions } from "react-native";
+import utils from "./utils"; // Import your utils
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Dimensions,
+  ScrollView,
+} from "react-native";
 import MiniCell from "./MiniCell";
+import { CellProps } from "./Cell";
 
 const demoCell = {
   id: "1",
@@ -15,8 +23,28 @@ const demoCell = {
   links: ["https://example.com/link1", "https://example.com/link2"],
   created_at: new Date().toISOString(),
 };
+const SavedRoute = () => {
+  const [savedCells, setSavedCells] = useState<CellProps[]>([]);
 
-const SavedRoute = () => <MiniCell cell={demoCell} />;
+  const fetchSavedCells = async () => {
+    const res = await utils.get("/users/fetch_saved");
+    if (res.status === 200) {
+      const data = await res.json();
+      setSavedCells(data.saved_cells);
+    }
+  };
+  useEffect(() => {
+    fetchSavedCells();
+  }, []);
+
+  return (
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      {savedCells.map((cell) => (
+        <MiniCell key={cell.id} cell={cell} />
+      ))}
+    </ScrollView>
+  );
+};
 
 const UploadedRoute = () => <MiniCell cell={demoCell} />;
 
