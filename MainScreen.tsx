@@ -56,7 +56,7 @@ const MainScreen = () => {
         } else if (!change.isViewable && timers.current[change.item.id]) {
           const visibleTime = Date.now() - timers.current[change.item.id];
           interactionManager.add({
-            id: change.item.id,
+            post_id: change.item.id,
             type: "post_visibility",
             data: { visible_ms: visibleTime },
           });
@@ -77,7 +77,7 @@ const MainScreen = () => {
       if (timers.current[id]) {
         const visibleTime = Date.now() - timers.current[id];
         interactionManager.add({
-          id,
+          post_id: id,
           type: "post_visibility",
           data: { visible_ms: visibleTime },
         });
@@ -172,10 +172,10 @@ const MainScreen = () => {
         initialNumToRender={10} // Render only the first 10 items initially
         //onRowDidOpen={onSwipeValueChange} // Add this line
 
-        // onViewableItemsChanged={onViewableItemsChanged}
-        // viewabilityConfig={{
-        //   itemVisiblePercentThreshold: 20,
-        // }}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={{
+          itemVisiblePercentThreshold: 20,
+        }}
       />
     </View>
   );

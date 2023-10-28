@@ -43,7 +43,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
   const handleLikePress = async () => {
     if (!liked) {
       interactionManager.add({
-        id,
+        post_id: id,
         type: "like",
         data: { reaction: "liked" },
       });
@@ -51,7 +51,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
       setLiked(true);
     } else {
       interactionManager.add({
-        id,
+        post_id: id,
         type: "like",
         data: { reaction: "unliked" },
       });
@@ -63,7 +63,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
   const handleSavePress = async () => {
     if (!saved) {
       interactionManager.add({
-        id,
+        post_id: id,
         type: "save",
         data: { reaction: "saved" },
       });
@@ -71,7 +71,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
       setSaved(true);
     } else {
       interactionManager.add({
-        id,
+        post_id: id,
         type: "save",
         data: { reaction: "unsaved" },
       });
@@ -85,7 +85,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
 
     navigation.navigate("InnerCell", { cell, source });
     interactionManager.add({
-      id,
+      post_id: id,
       type: "post_click",
       data: { source: source },
     });
@@ -99,7 +99,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
           </Text>
           <Text
             style={styles.description}
-            numberOfLines={7}
+            numberOfLines={8}
             ellipsizeMode="tail"
           >
             {description}
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "#ccc",
     minHeight: 260,
-    maxHeight: 280,
+    maxHeight: 300,
     backgroundColor: "white",
   },
   content: {
@@ -173,14 +173,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     paddingRight: 20,
-    paddingLeft: 10,
+    paddingLeft: 8,
     fontWeight: "bold",
     textAlign: "left", // This will center the text
 
     marginBottom: 8,
   },
   description: {
-    paddingLeft: 10,
+    paddingLeft: 8,
     paddingRight: 20,
     textAlign: "left", // This will center the text
     fontSize: 16,
@@ -190,31 +190,30 @@ const styles = StyleSheet.create({
     //flex: 0.8, // adjust this value to change the size of the image
     aspectRatio: 1,
     borderRadius: 8,
-    marginBottom: 8,
+    marginVertical: 8,
     height: 120,
   },
   buttonsContainer: {
     flexDirection: "row",
     justifyContent: "space-between", // Change this to 'space-between' to distribute the buttons evenly
     marginTop: 8,
-    marginBottom: 0,
     //flex: 0.8,
-    width: "85%", // Reduce this to make the buttons smaller
+    width: "92%", // Reduce this to make the buttons smaller
   },
   buttonContainer: {
-    flex: 2, // Add this to make the TouchableOpacity elements take up full space
+    flex: 0.8, // Add this to make the TouchableOpacity elements take up full space
     alignItems: "center", // Center the text horizontally
     justifyContent: "center", // Center the text vertically
     aspectRatio: 1, // Add this to make the buttons square
-    margin: 3,
+    padding: 15,
   },
   imageAndButtonsContainer: {
-    flex: 0.8,
+    flex: 1,
     justifyContent: "space-between",
     alignItems: "center", // Add this to align the image and buttons
   },
   timeAgo: {
-    paddingLeft: 10,
+    paddingLeft: 8,
     paddingTop: 18,
     color: "#888",
     fontSize: 12,

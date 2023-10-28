@@ -50,9 +50,9 @@ const UserStack = createStackNavigator<UserStackParamList>();
 
 const UserStackScreen: React.FC = () => {
   return (
-    <UserStack.Navigator>
+    <UserStack.Navigator initialRouteName="UserPage">
       <UserStack.Screen
-        name="User"
+        name="UserPage"
         component={UserPage}
         options={{ headerShown: false }}
       />

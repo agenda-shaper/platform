@@ -15,7 +15,7 @@ const MiniCell: React.FC<CellType> = React.memo(({ cell }) => {
     const source = "saved_posts";
     navigation.navigate("InnerCell", { cell, source });
     interactionManager.add({
-      id,
+      post_id: id,
       type: "post_click",
       data: { source: source },
     });

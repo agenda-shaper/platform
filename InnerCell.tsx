@@ -12,7 +12,11 @@ import {
 import { RouteProp, useNavigation } from "@react-navigation/native";
 import { InteractionManager } from "./utils";
 import { CellProps } from "./Cell";
-import { MainStackParamList } from "./navigationTypes";
+import {
+  MainStackParamList,
+  MainStackNavigationProp,
+  MainTabNavigationProp,
+} from "./navigationTypes";
 
 // Define a new type for your route prop
 type InnerCellRouteProp = RouteProp<MainStackParamList, "InnerCell">;
@@ -33,7 +37,8 @@ const InnerCell: React.FC<Props> = ({ route }) => {
     created_at,
   } = cell;
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<MainStackNavigationProp>();
+
   const interactionManager = InteractionManager.getInstance();
   const startTimeRef = useRef<number | null>(null);
   useEffect(() => {
@@ -48,7 +53,7 @@ const InnerCell: React.FC<Props> = ({ route }) => {
       if (startTimeRef.current) {
         const timeSpent = Date.now() - startTimeRef.current;
         interactionManager.add({
-          id,
+          post_id: id,
           type: "innercell_visibility",
           data: { visible_ms: timeSpent, source: source },
         });
@@ -61,11 +66,6 @@ const InnerCell: React.FC<Props> = ({ route }) => {
       unsubscribeBlur();
     };
   }, []);
-  // useEffect(() => {
-  //   navigation.setOptions({
-  //     headerShown: false,
-  //   });
-  // }, [navigation]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -105,8 +105,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 16,
+    marginBottom: 18,
     alignSelf: "center",
+    marginHorizontal: 4,
   },
   fullExplanation: {
     fontSize: 16,

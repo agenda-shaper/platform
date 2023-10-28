@@ -1,5 +1,4 @@
 // navigationTypes.ts
-
 import { StackNavigationProp } from "@react-navigation/stack";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { CellProps } from "./Cell"; // Import your Cell component

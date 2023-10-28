@@ -14,15 +14,6 @@ import {
 import MiniCell from "./MiniCell";
 import { CellProps } from "./Cell";
 
-const demoCell = {
-  id: "1",
-  title: "Demo Title",
-  description: "Demo Description",
-  imageUrl: "https://via.placeholder.com/150", // Replace with your image URL
-  full_explanation: "This is a full explanation of the demo cell.",
-  links: ["https://example.com/link1", "https://example.com/link2"],
-  created_at: new Date().toISOString(),
-};
 const SavedRoute = () => {
   const [savedCells, setSavedCells] = useState<CellProps[]>([]);
 
@@ -46,8 +37,28 @@ const SavedRoute = () => {
   );
 };
 
-const UploadedRoute = () => <MiniCell cell={demoCell} />;
+const UploadedRoute = () => {
+  const [uploadedCells, setUploadedCells] = useState<CellProps[]>([]);
 
+  const fetchUploadedCells = async () => {
+    const res = await utils.get("/users/fetch_uploaded");
+    if (res.status === 200) {
+      const data = await res.json();
+      setUploadedCells(data.saved_cells);
+    }
+  };
+  useEffect(() => {
+    fetchUploadedCells();
+  }, []);
+
+  return (
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      {uploadedCells.map((cell) => (
+        <MiniCell key={cell.id} cell={cell} />
+      ))}
+    </ScrollView>
+  );
+};
 const renderScene = SceneMap({
   saved: SavedRoute,
   uploaded: UploadedRoute,
@@ -60,7 +71,7 @@ const UserPage: React.FC = () => {
 
   const [routes] = React.useState([
     { key: "saved", title: "Saved Posts" },
-    { key: "uploaded", title: "Uploaded Posts" },
+    // { key: "uploaded", title: "Uploaded Posts" },
   ]);
   return (
     <View style={{ flex: 1 }}>

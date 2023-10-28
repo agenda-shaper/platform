@@ -28,7 +28,7 @@ const ChatScreen = () => {
   const flatListRef = useRef<FlatList>(null); // Add this ref
 
   const navigation = useNavigation();
-  const [isSending, setIsSending] = useState(false); // Add this line
+  const [sendDisabled, setSendDisabled] = useState(true); // Add this line
 
   const insets = useSafeAreaInsets();
   const [chatId, setChatId] = useState(null);
@@ -45,6 +45,7 @@ const ChatScreen = () => {
       console.log("Started new chat");
       const data = await response.json();
       setChatId(data.chat_id); // Store the chat_id in state
+      setSendDisabled(false);
     } else {
       console.log((await response.json()).message);
     }
@@ -57,6 +58,7 @@ const ChatScreen = () => {
       console.log("Loaded chat");
       const data = await response.json();
       setChatId(data.chat_id); // Store the chat_id in state
+      console.log(data.chat_id);
       setMessages(data.chat_history);
       setTimeout(() => {
         if (flatListRef.current) {
@@ -64,12 +66,13 @@ const ChatScreen = () => {
           flatListRef.current.scrollToEnd({ animated: false });
         }
       }, 50);
+      setSendDisabled(false);
     } else {
       console.log((await response.json()).message);
     }
   };
   const handleMessageSend = async () => {
-    if (inputMessage.trim() === "" || isSending) return; // Don't send empty messages or if already sending
+    if (inputMessage.trim() === "" || sendDisabled) return; // Don't send empty messages or if already sending
     const message = inputMessage;
     setInputMessage("");
     let newMessages = [
@@ -85,7 +88,7 @@ const ChatScreen = () => {
       },
     ];
     setMessages(newMessages);
-    setIsSending(true); // Set isSending to true when sending a message
+    setSendDisabled(true); // Set isSending to true when sending a message
 
     const aiRespondedMessages = await sendMessage(newMessages);
     if (aiRespondedMessages) {
@@ -113,7 +116,7 @@ const ChatScreen = () => {
       setInputMessage(message);
     }
 
-    setIsSending(false); // Set isSending back to false after message is sent
+    setSendDisabled(false); // Set isSending back to false after message is sent
   };
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -195,12 +198,20 @@ const ChatScreen = () => {
           onChangeText={(text) => setInputMessage(text)}
           multiline // This makes the TextInput multiline
         />
-        <TouchableOpacity onPress={handleMessageSend} disabled={isSending}>
-          <SvgUri
-            width="26"
-            height="26"
-            uri={`${utils.API_BASE_URL}/assets/chat-send.svg`}
-          />
+        <TouchableOpacity onPress={handleMessageSend} disabled={sendDisabled}>
+          {sendDisabled ? (
+            <SvgUri
+              width="26"
+              height="26"
+              uri={`${utils.API_BASE_URL}/assets/chat-send-disabled.svg`}
+            />
+          ) : (
+            <SvgUri
+              width="26"
+              height="26"
+              uri={`${utils.API_BASE_URL}/assets/chat-send-enabled.svg`}
+            />
+          )}
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

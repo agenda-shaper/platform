@@ -77,7 +77,7 @@ const utils = {
 };
 
 export interface Interaction {
-  id: string;
+  post_id: string;
   type:
     | "post_click"
     | "post_visibility"
