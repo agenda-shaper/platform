@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     borderRadius: 8,
     marginBottom: 8,
-    height: 100,
+    height: 120,
   },
   buttonsContainer: {
     flexDirection: "row",
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 0,
     //flex: 0.8,
-    width: "90%", // Reduce this to make the buttons smaller
+    width: "85%", // Reduce this to make the buttons smaller
   },
   buttonContainer: {
     flex: 2, // Add this to make the TouchableOpacity elements take up full space

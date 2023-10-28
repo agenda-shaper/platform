@@ -58,6 +58,12 @@ const ChatScreen = () => {
       const data = await response.json();
       setChatId(data.chat_id); // Store the chat_id in state
       setMessages(data.chat_history);
+      setTimeout(() => {
+        if (flatListRef.current) {
+          console.log("scrolling to end instantly");
+          flatListRef.current.scrollToEnd({ animated: false });
+        }
+      }, 50);
     } else {
       console.log((await response.json()).message);
     }
