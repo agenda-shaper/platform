@@ -1,4 +1,4 @@
-export const API_BASE_URL = "https://gateapp.vercel.app/";
+export const API_BASE_URL = "https://gateapp.vercel.app";
 export const APP_NAME = "Platform";
 import validator from "validator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -58,7 +58,7 @@ export const auth = async (payload: any) => {
       },
       body: JSON.stringify(payload),
     });
-
+    console.log(response);
     return response;
   } catch (error) {
     throw error; // Throw the error to be handled by the caller

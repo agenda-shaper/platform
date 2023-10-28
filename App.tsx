@@ -20,6 +20,7 @@ const App: React.FC = () => {
     const checkToken = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
+        console.log(token);
 
         if (token) {
           // Check if the token is valid
@@ -32,6 +33,8 @@ const App: React.FC = () => {
             await AsyncStorage.setItem("token", data.token);
             setIsLoggedIn(true);
             setUserData(data.userData);
+          } else {
+            console.error(await response.json());
           }
         }
       } catch (error) {
