@@ -128,7 +128,7 @@ const ChatScreen = () => {
               console.log("scrolling to end");
               flatListRef.current.scrollToEnd({ animated: true });
             }
-          }, 10);
+          }, 50);
         }
       }
     );

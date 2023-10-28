@@ -6,68 +6,67 @@ interface Message {
   role: string;
   content: string;
 }
+const maxRetries = 1;
 
 export async function sendMessage(messages: Message[]) {
-  // Create a new request with the entire conversation history
-  const req = {
-    key: "", // Replace with your key
-    messages: messages,
-    model: { id: "gpt-3.5-turbo", name: "GPT-3.5" },
-    prompt:
-      "You are an AI Chatbot powered by GPT 4. Follow the user's instructions carefully. Respond using markdown.",
-    temperature: 0.7,
-  };
-
-  try {
-    // Send the request to the chatbot
-    const res = await fetch("https://chat.aivvm.com/api/chat", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(req),
-      //reactNative: { textStreaming: true },
-    });
-
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
-    }
-    // const reader = res.body.getReader();
-    // const decoder = new TextDecoder("utf-8");
-
-    // reader
-    //   .read()
-    //   .then(function processText({
-    //     done,
-    //     value,
-    //   }: {
-    //     done: boolean;
-    //     value: Uint8Array;
-    //   }) {
-    //     if (done) {
-    //       console.log("Stream complete");
-    //       return;
-    //     }
-
-    //     console.log(decoder.decode(value));
-
-    //     return reader.read().then(processText);
-    //   });
-
-    let data = await res.text();
-    console.log(data);
-
-    const aiResponse: Message = {
-      role: "assistant",
-      content: data,
+  let retryCount = 0;
+  while (retryCount < maxRetries) {
+    const req = {
+      messages: messages,
+      model: "gpt-3.5-turbo",
+      temperature: 0.8,
+      presence_penalty: 0,
+      top_p: 1,
+      frequency_penalty: 0,
+      stream: false,
     };
 
-    // pop the temp msg
-    messages.pop();
+    try {
+      // Send the request to the chatbot
+      const res = await fetch("https://ai.fakeopen.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          authority: "ai.fakeopen.com",
+          accept: "*/*",
+          "accept-language":
+            "en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3",
+          authorization:
+            "Bearer pk-this-is-a-real-free-pool-token-for-everyone",
+          "content-type": "application/json",
+          origin: "https://chat.geekgpt.org",
+          referer: "https://chat.geekgpt.org/",
+          "sec-ch-ua":
+            '"Chromium";v="118", "Google Chrome";v="118", "Not=A?Brand";v="99"',
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": '"macOS"',
+          "sec-fetch-dest": "empty",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-site": "cross-site",
+          "user-agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+        },
+        body: JSON.stringify(req),
+        //reactNative: { textStreaming: true },
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
 
-    return [...messages, aiResponse];
-  } catch (error) {
-    console.error("Error:", error);
+      const responseBody = await res.json();
+      const aiResponseContent = responseBody.choices[0].message.content;
+      console.log(aiResponseContent);
+
+      const aiResponse: Message = {
+        role: "assistant",
+        content: aiResponseContent,
+      };
+
+      // pop the temp msg
+      messages.pop();
+
+      return [...messages, aiResponse];
+    } catch (error) {
+      console.error("Error:", error);
+    }
   }
 }
