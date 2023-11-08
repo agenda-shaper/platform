@@ -3,6 +3,8 @@ import React, { useContext, useState, useEffect } from "react";
 import { UserContext } from "./UserContext";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import utils from "./utils"; // Import your utils
+import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { UserStackNavigationProp } from "./navigationTypes";
 import {
   View,
   Text,
@@ -10,6 +12,7 @@ import {
   StyleSheet,
   Dimensions,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import MiniCell from "./MiniCell";
 import { CellProps } from "./Cell";
@@ -66,6 +69,8 @@ const renderScene = SceneMap({
 const initialLayout = { width: Dimensions.get("window").width };
 
 const UserPage: React.FC = () => {
+  const navigation = useNavigation<UserStackNavigationProp>();
+
   const { username, displayName, avatarUrl } = useContext(UserContext);
   const [index, setIndex] = React.useState(0);
 
@@ -76,6 +81,9 @@ const UserPage: React.FC = () => {
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.container}>
+        <TouchableOpacity onPress={() => navigation.navigate("CreatePost")}>
+          <Text style={styles.createButton}>Create</Text>
+        </TouchableOpacity>
         <Image source={{ uri: avatarUrl }} style={styles.avatar} />
         <Text style={styles.displayName}>{displayName}</Text>
         <Text style={styles.username}>@{username}</Text>
@@ -107,6 +115,11 @@ const styles = StyleSheet.create({
   tabview: {
     flex: 1,
     width: "100%",
+  },
+  createButton: {
+    marginRight: 16,
+    fontSize: 18,
+    color: "blue",
   },
   container: {
     flexDirection: "column",

@@ -8,7 +8,8 @@ import UserPage from "./UserPage";
 import MainScreen from "./MainScreen"; // Import your MainScreen component
 import LoginPage from "./LoginPage"; // Import your LoginPage component
 import RegisterPage from "./RegisterPage"; // Import your RegisterPage component
-import InnerCell from "./InnerCell"; // Import your RegisterPage component
+import InnerCell from "./InnerCell";
+import CreatePost from "./CreatePost";
 import Cell, { CellProps } from "./Cell"; // Import your Cell component
 import { NavigationContainer } from "@react-navigation/native";
 import {
@@ -59,6 +60,11 @@ const UserStackScreen: React.FC = () => {
       <UserStack.Screen
         name="InnerCell"
         component={InnerCell}
+        options={{ headerShown: false }}
+      />
+      <UserStack.Screen
+        name="CreatePost"
+        component={CreatePost}
         options={{ headerShown: false }}
       />
     </UserStack.Navigator>

@@ -3,12 +3,12 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import utils, { InteractionManager } from "./utils"; // Import your utility module
 import { CellType } from "./Cell";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
-import { MainStackNavigationProp } from "./navigationTypes";
+import { UserStackNavigationProp } from "./navigationTypes";
 
 const interactionManager = InteractionManager.getInstance();
 
 const MiniCell: React.FC<CellType> = React.memo(({ cell }) => {
-  const navigation = useNavigation<MainStackNavigationProp>();
+  const navigation = useNavigation<UserStackNavigationProp>();
 
   const { id, title, imageUrl } = cell;
   const handlePress = () => {

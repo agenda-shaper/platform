@@ -26,13 +26,14 @@ export type MainTabNavigationProp = BottomTabNavigationProp<MainTabParamList>;
 
 export type MainStackParamList = {
   Main: undefined;
-  Screen: { InnerCell: undefined };
+  //Screen: { InnerCell: undefined };
   InnerCell: { cell: CellProps; source: string };
 };
 
 export type UserStackParamList = {
   UserPage: undefined;
   InnerCell: { cell: CellProps; source: string };
+  CreatePost: undefined;
 };
 
 export type UserStackNavigationProp = StackNavigationProp<UserStackParamList>;
