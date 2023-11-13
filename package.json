@@ -55,7 +55,10 @@
     "web-streams-polyfill": "^3.2.1",
     "winston": "^3.10.0",
     "xml2js": "^0.6.2",
-    "expo-file-system": "~15.4.4"
+    "expo-file-system": "~15.4.4",
+    "react-native-web": "~0.19.6",
+    "react-dom": "18.2.0",
+    "@expo/webpack-config": "^19.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
