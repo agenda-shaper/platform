@@ -1,4 +1,4 @@
-export const API_BASE_URL = "https://gateapp.vercel.app/api";
+export const API_BASE_URL = "https://gateapp.vercel.app";
 export const APP_NAME = "Platform";
 import validator from "validator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
