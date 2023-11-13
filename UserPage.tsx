@@ -24,7 +24,9 @@ const SavedRoute = () => {
     const res = await utils.get("/users/fetch_saved");
     if (res.status === 200) {
       const data = await res.json();
-      setSavedCells(data.saved_cells);
+      if (data.cells.length > 0) {
+        setSavedCells(data.cells);
+      }
     }
   };
   useEffect(() => {
@@ -47,7 +49,9 @@ const UploadedRoute = () => {
     const res = await utils.get("/users/fetch_uploaded");
     if (res.status === 200) {
       const data = await res.json();
-      setUploadedCells(data.saved_cells);
+      if (data.cells.length > 0) {
+        setUploadedCells(data.cells);
+      }
     }
   };
   useEffect(() => {
@@ -76,17 +80,17 @@ const UserPage: React.FC = () => {
 
   const [routes] = React.useState([
     { key: "saved", title: "Saved Posts" },
-    // { key: "uploaded", title: "Uploaded Posts" },
+    { key: "uploaded", title: "Uploaded Posts" },
   ]);
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.container}>
-        <TouchableOpacity onPress={() => navigation.navigate("CreatePost")}>
-          <Text style={styles.createButton}>Create</Text>
-        </TouchableOpacity>
         <Image source={{ uri: avatarUrl }} style={styles.avatar} />
         <Text style={styles.displayName}>{displayName}</Text>
         <Text style={styles.username}>@{username}</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("CreatePost")}>
+          <Text style={styles.createButton}>Create</Text>
+        </TouchableOpacity>
       </View>
       <TabView
         navigationState={{ index, routes }}
@@ -112,15 +116,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  createButton: {
+    fontSize: 18,
+    color: "black", // changing color to black
+    borderWidth: 1, // adding an outline
+    borderRadius: 8, // smoothing corners
+    borderColor: "black", // setting the border color to black
+    paddingHorizontal: 12, // optional padding for better appearance
+    paddingVertical: 6, // optional padding for better appearance
+    marginBottom: 8, // optional margin for spacing
+    textAlign: "center", // center the text inside the button
+    //fontFamily: "font-used-in-SavedPosts-field", // applying the same font used in "Saved Posts"
+  },
   tabview: {
     flex: 1,
     width: "100%",
   },
-  createButton: {
-    marginRight: 16,
-    fontSize: 18,
-    color: "blue",
-  },
+
   container: {
     flexDirection: "column",
     alignItems: "center",

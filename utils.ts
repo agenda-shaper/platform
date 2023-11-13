@@ -3,6 +3,7 @@ export const APP_NAME = "Platform";
 import validator from "validator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // import { fetch } from "react-native-fetch-api";
+import * as FileSystem from "expo-file-system";
 
 // Function to make a GET request
 export const get = async (uri: string) => {
@@ -23,6 +24,45 @@ export const get = async (uri: string) => {
     throw error; // Throw the error to be handled by the caller
   }
 };
+
+const convertImageToBase64 = async (localUri: string) => {
+  try {
+    const base64 = await FileSystem.readAsStringAsync(localUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    return base64;
+  } catch (error) {
+    throw new Error("Error converting image to base64: " + error);
+  }
+};
+
+export async function uploadImage(localUri: string): Promise<any> {
+  const imageBase64 = await convertImageToBase64(localUri);
+
+  const formData = new FormData();
+  formData.append("image", imageBase64);
+
+  const response = await fetch(
+    "https://api.imgbb.com/1/upload?key=c16460ec60fe42c07eb757018ea9e5dd",
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to upload image" + response.status);
+  }
+
+  const data = await response.json();
+
+  if (data.success) {
+    return data.data.url;
+  } else {
+    console.error("Error uploading image:", data);
+    return null;
+  }
+}
 
 // Function to make a POST request
 export const post = async (uri: string, payload: any) => {

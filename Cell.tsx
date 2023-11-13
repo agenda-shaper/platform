@@ -201,10 +201,10 @@ const styles = StyleSheet.create({
     width: "92%", // Reduce this to make the buttons smaller
   },
   buttonContainer: {
-    flex: 0.8, // Add this to make the TouchableOpacity elements take up full space
-    alignItems: "center", // Center the text horizontally
-    justifyContent: "center", // Center the text vertically
-    aspectRatio: 1, // Add this to make the buttons square
+    flex: 0.8,
+    alignItems: "center",
+    justifyContent: "center",
+    aspectRatio: 1,
     padding: 15,
   },
   imageAndButtonsContainer: {
