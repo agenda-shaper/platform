@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import utils, { InteractionManager } from "./utils"; // Import your utility module
-import { SvgUri } from "react-native-svg"; // Import SvgUri
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 import { MainStackNavigationProp } from "./navigationTypes";
 import moment from "moment";
+import { like, save } from "./assets/icons"; // Import the SVG components
 
 const interactionManager = InteractionManager.getInstance();
 
@@ -115,17 +115,9 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
               onPress={handleLikePress}
             >
               {liked ? (
-                <SvgUri
-                  width="30"
-                  height="30"
-                  uri={`${utils.API_BASE_URL}/assets/like-pressed.svg`}
-                />
+                <like.on width="30" height="30" />
               ) : (
-                <SvgUri
-                  width="30"
-                  height="30"
-                  uri={`${utils.API_BASE_URL}/assets/like-unpressed.svg`}
-                />
+                <like.off width="30" height="30" />
               )}
             </TouchableOpacity>
             <TouchableOpacity
@@ -133,17 +125,9 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
               onPress={handleSavePress}
             >
               {saved ? (
-                <SvgUri
-                  width="30"
-                  height="30"
-                  uri={`${utils.API_BASE_URL}/assets/save-pressed.svg`}
-                />
+                <save.on width="30" height="30" />
               ) : (
-                <SvgUri
-                  width="30"
-                  height="30"
-                  uri={`${utils.API_BASE_URL}/assets/save-unpressed.svg`}
-                />
+                <save.off width="30" height="30" />
               )}
             </TouchableOpacity>
           </View>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Markdown from "@valasolutions/react-native-markdown";
-import { SvgUri } from "react-native-svg"; // Import SvgUri
 import utils, { InteractionManager } from "./utils"; // Import your utility module
 import {
   View,
@@ -19,6 +18,7 @@ import {
 } from "react-native";
 import { sendMessage } from "./chatbot"; // Import the chatbot function
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { chat_send } from "./assets/icons"; // Import the SVG components
 
 const interactionManager = InteractionManager.getInstance();
 
@@ -200,17 +200,9 @@ const ChatScreen = () => {
         />
         <TouchableOpacity onPress={handleMessageSend} disabled={sendDisabled}>
           {sendDisabled ? (
-            <SvgUri
-              width="26"
-              height="26"
-              uri={`${utils.API_BASE_URL}/assets/chat-send-disabled.svg`}
-            />
+            <chat_send.on width="27" height="27" />
           ) : (
-            <SvgUri
-              width="26"
-              height="26"
-              uri={`${utils.API_BASE_URL}/assets/chat-send-enabled.svg`}
-            />
+            <chat_send.off width="27" height="27" />
           )}
         </TouchableOpacity>
       </View>
