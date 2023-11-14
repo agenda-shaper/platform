@@ -198,11 +198,15 @@ const ChatScreen = () => {
           onChangeText={(text) => setInputMessage(text)}
           multiline // This makes the TextInput multiline
         />
-        <TouchableOpacity onPress={handleMessageSend} disabled={sendDisabled}>
+        <TouchableOpacity
+          onPress={handleMessageSend}
+          disabled={sendDisabled}
+          style={styles.sendButton}
+        >
           {sendDisabled ? (
-            <chat_send.on width="27" height="27" />
+            <chat_send.off width="50" height="50" />
           ) : (
-            <chat_send.off width="27" height="27" />
+            <chat_send.on width="50" height="50" />
           )}
         </TouchableOpacity>
       </View>
@@ -268,6 +272,9 @@ const customMarkdownStyles = {
 };
 
 const styles = StyleSheet.create({
+  sendButton: {
+    width: 27,
+  },
   container: {
     flex: 1,
     justifyContent: "flex-end",

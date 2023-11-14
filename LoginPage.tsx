@@ -69,41 +69,41 @@ const LoginPage = () => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
-      >
-        <View>
-          <Text style={styles.heading}>Log In </Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Email or Username"
-            value={identifier}
-            onChangeText={(text) => setIdentifier(text)}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            secureTextEntry
-            value={password}
-            onChangeText={(text) => setPassword(text)}
-          />
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Log In</Text>
-          </TouchableOpacity>
-          {errorMessage ? ( // Display the error message conditionally
-            <Text style={styles.errorMessage}>{errorMessage}</Text>
-          ) : null}
-          <Text style={styles.registerText}>
-            Don't have an account?{" "}
-            <Text style={{ color: "blue" }} onPress={navigateToRegister}>
-              Register
-            </Text>
+    // <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <View>
+        <Text style={styles.heading}>Log In </Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Email or Username"
+          value={identifier}
+          onChangeText={(text) => setIdentifier(text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+        />
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Log In</Text>
+        </TouchableOpacity>
+        {errorMessage ? ( // Display the error message conditionally
+          <Text style={styles.errorMessage}>{errorMessage}</Text>
+        ) : null}
+        <Text style={styles.registerText}>
+          Don't have an account?{" "}
+          <Text style={{ color: "blue" }} onPress={navigateToRegister}>
+            Register
           </Text>
-        </View>
-      </KeyboardAvoidingView>
-    </TouchableWithoutFeedback>
+        </Text>
+      </View>
+    </KeyboardAvoidingView>
+    // </TouchableWithoutFeedback>
   );
 };
 
