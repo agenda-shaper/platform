@@ -1,9 +1,38 @@
-export const API_BASE_URL = "https://gateapp.vercel.app";
+export const API_BASE_URL = "https://gateapi.vercel.app";
 export const APP_NAME = "Platform";
 import validator from "validator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // import { fetch } from "react-native-fetch-api";
 import * as FileSystem from "expo-file-system";
+import { Platform } from "react-native";
+import { CellProps } from "./Cell";
+interface Message {
+  role: string;
+  content: string;
+}
+
+export async function sendMessage(
+  chat_id: string,
+  messages: Message[],
+  context_cell?: CellProps
+) {
+  const payload = { chat_id, messages, context_cell };
+  try {
+    const response: any = await post("/chat/send", payload);
+    if (response.ok) {
+      const data = await response.json();
+      const aiResponse: Message = data.message;
+      return aiResponse;
+    } else {
+      const errorData = await response.json();
+      console.error(errorData);
+      return null;
+    }
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
 
 // Function to make a GET request
 export const get = async (uri: string) => {
@@ -27,15 +56,20 @@ export const get = async (uri: string) => {
 
 const convertImageToBase64 = async (localUri: string) => {
   try {
-    const base64 = await FileSystem.readAsStringAsync(localUri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    return base64;
+    if (Platform.OS === "web") {
+      // On web, the localUri is already a base64 string
+      const base64Index = localUri.indexOf("base64,");
+      return localUri.substring(base64Index + "base64,".length);
+    } else {
+      const base64 = await FileSystem.readAsStringAsync(localUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      return base64;
+    }
   } catch (error) {
     throw new Error("Error converting image to base64: " + error);
   }
 };
-
 export async function uploadImage(localUri: string): Promise<any> {
   const imageBase64 = await convertImageToBase64(localUri);
 
@@ -122,7 +156,8 @@ export interface Interaction {
     | "post_visibility"
     | "innercell_visibility"
     | "like"
-    | "save";
+    | "save"
+    | "ask";
   data?: any;
 }
 

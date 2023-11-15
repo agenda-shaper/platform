@@ -7,7 +7,7 @@ import { UserStackNavigationProp } from "./navigationTypes";
 
 const interactionManager = InteractionManager.getInstance();
 
-const MiniCell: React.FC<CellType> = React.memo(({ cell }) => {
+const MiniCell: React.FC<CellType> = React.memo(({ cell, source }) => {
   const navigation = useNavigation<UserStackNavigationProp>();
 
   const { id, title, imageUrl } = cell;
@@ -26,9 +26,13 @@ const MiniCell: React.FC<CellType> = React.memo(({ cell }) => {
       onPress={handlePress}
       style={styles.container}
     >
-      <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">
-        {title}
-      </Text>
+      <View style={styles.textContainer}>
+        <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">
+          {title}
+        </Text>
+        {source && <Text style={styles.contextText}>Context</Text>}
+      </View>
+
       <Image source={{ uri: imageUrl }} style={styles.image} />
     </TouchableOpacity>
   );
@@ -43,13 +47,20 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     backgroundColor: "white",
   },
-  title: {
+  textContainer: {
     flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  contextText: {
+    fontSize: 14,
+    marginTop: 8,
+    fontWeight: "normal",
+    color: "gray",
+  },
+  title: {
     fontSize: 16,
-    padding: 8,
     fontWeight: "bold",
-    textAlign: "left",
-    marginBottom: 8,
   },
   image: {
     width: 60,
@@ -57,4 +68,5 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
 });
+
 export default MiniCell;

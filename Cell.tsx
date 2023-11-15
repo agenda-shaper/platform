@@ -2,16 +2,19 @@ import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import utils, { InteractionManager } from "./utils"; // Import your utility module
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
-import { MainStackNavigationProp } from "./navigationTypes";
+import {
+  MainStackNavigationProp,
+  MainTabNavigationProp,
+} from "./navigationTypes";
 import moment from "moment";
-import { like, save } from "./assets/icons"; // Import the SVG components
+import { like, save, ai } from "./assets/icons"; // Import the SVG components
 
 const interactionManager = InteractionManager.getInstance();
 
 export interface CellType {
   cell: CellProps;
+  source?: string;
 }
-// Define a TypeScript interface for the prop
 export interface CellProps {
   id: string;
   title: string;
@@ -34,6 +37,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
   } = cell;
 
   const navigation = useNavigation<MainStackNavigationProp>();
+  const tabNavigation = useNavigation<MainTabNavigationProp>();
   const [liked, setLiked] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
   const timeFromNow = (timestamp: any) => {
@@ -58,6 +62,13 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
       console.log("Unliked:", title);
       setLiked(false);
     }
+  };
+  const handleAskAIPress = async () => {
+    interactionManager.add({
+      post_id: id,
+      type: "ask",
+    });
+    tabNavigation.navigate("Chat", { cell: cell });
   };
 
   const handleSavePress = async () => {
@@ -130,6 +141,12 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
                 <save.off width="30" height="30" />
               )}
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.buttonContainer]}
+              onPress={handleAskAIPress}
+            >
+              <ai.ask width="30" height="30" />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -155,7 +172,7 @@ const styles = StyleSheet.create({
     flex: 2,
   },
   title: {
-    fontSize: 18,
+    fontSize: 16,
     paddingRight: 20,
     paddingLeft: 8,
     fontWeight: "bold",
@@ -167,7 +184,7 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     paddingRight: 20,
     textAlign: "left", // This will center the text
-    fontSize: 16,
+    fontSize: 15,
     color: "#888",
   },
   image: {
@@ -179,18 +196,20 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     flexDirection: "row",
-    justifyContent: "space-between", // Change this to 'space-between' to distribute the buttons evenly
+    justifyContent: "space-around", // This will distribute the space around the buttons evenly
     marginTop: 8,
-    //flex: 0.8,
-    width: "92%", // Reduce this to make the buttons smaller
+    alignItems: "center", // This will center the buttons vertically
   },
+
   buttonContainer: {
-    flex: 0.8,
+    width: 40, // specify the width
+    height: 40, // specify the height
     alignItems: "center",
     justifyContent: "center",
     aspectRatio: 1,
-    padding: 15,
+    padding: 8,
   },
+
   imageAndButtonsContainer: {
     flex: 1,
     justifyContent: "space-between",

@@ -13,9 +13,27 @@ const App: React.FC = () => {
     displayName: "",
     avatarUrl: "",
     email: "",
+    tempUser: false,
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const tempRegister = async () => {
+    console.log("temp registering");
+    // no token so not logged in
+    // register with temp account
+    const payload = { action: "temp_register" };
 
+    const response = await utils.auth(payload);
+    if (response.status === 200) {
+      // update token
+      const data = await response.json();
+      await AsyncStorage.setItem("token", data.token);
+      await AsyncStorage.setItem("tempUser", "true");
+      setIsLoggedIn(true);
+      setUserData(data.userData);
+    } else {
+      console.error(await response.json());
+    }
+  };
   useEffect(() => {
     const checkToken = async () => {
       try {
@@ -36,6 +54,8 @@ const App: React.FC = () => {
           } else {
             console.error(await response.json());
           }
+        } else {
+          await tempRegister();
         }
       } catch (error) {
         console.error("Error checking token:", error);

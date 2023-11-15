@@ -8,6 +8,7 @@ export interface UserProps {
   displayName: string;
   avatarUrl: string;
   email: string;
+  tempUser: Boolean;
 }
 
 // Create the context with default initial data
@@ -16,4 +17,5 @@ export const UserContext = React.createContext<UserProps>({
   displayName: "",
   avatarUrl: "",
   email: "",
+  tempUser: false,
 });

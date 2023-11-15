@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useContext, useState, useRef } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Markdown from "@valasolutions/react-native-markdown";
-import utils, { InteractionManager } from "./utils"; // Import your utility module
+import utils, { InteractionManager, sendMessage } from "./utils"; // Import your utility module
 import {
   View,
   Text,
@@ -15,14 +15,27 @@ import {
   Platform,
   TouchableOpacity,
   ScrollView,
+  Image,
 } from "react-native";
-import { sendMessage } from "./chatbot"; // Import the chatbot function
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 import { chat_send } from "./assets/icons"; // Import the SVG components
+import { CellType } from "./Cell";
+import MiniCell from "./MiniCell";
+import { RouteProp } from "@react-navigation/native";
+import { MainTabParamList } from "./navigationTypes";
+import { UserContext } from "./UserContext";
+const aiAvatar = require("./assets/AILogo.png");
 
+interface ChatScreenProps {
+  route: RouteProp<MainTabParamList, "Chat">;
+}
+const AIAvatar = () => <Image source={aiAvatar} style={styles.avatar} />;
 const interactionManager = InteractionManager.getInstance();
+const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
+  const { displayName, avatarUrl } = useContext(UserContext);
 
-const ChatScreen = () => {
+  const [cell, setCell] = useState(route.params?.cell);
+
   const [isAtBottom, setIsAtBottom] = useState(true); // Add this state
 
   const flatListRef = useRef<FlatList>(null); // Add this ref
@@ -46,6 +59,7 @@ const ChatScreen = () => {
       const data = await response.json();
       setChatId(data.chat_id); // Store the chat_id in state
       setSendDisabled(false);
+      setCell(undefined); // Use setCell to update the value of cell
     } else {
       console.log((await response.json()).message);
     }
@@ -72,52 +86,46 @@ const ChatScreen = () => {
     }
   };
   const handleMessageSend = async () => {
-    if (inputMessage.trim() === "" || sendDisabled) return; // Don't send empty messages or if already sending
+    if (inputMessage.trim() === "" || sendDisabled || !chatId) return; // Don't send empty messages or if already sending or if chatid null
     const message = inputMessage;
     setInputMessage("");
+    setSendDisabled(true); // Set isSending to true when sending a message
     let newMessages = [
       ...messages,
       {
         role: "user",
         content: message,
       },
-      {
-        // temp message
-        role: "assistant",
-        content: "...",
-      },
     ];
+    const messagesToSend = newMessages.slice(-15); // Create a new copy of the last 15 messages
+
+    // temp message
+    newMessages.push({ role: "assistant", content: "..." });
     setMessages(newMessages);
-    setSendDisabled(true); // Set isSending to true when sending a message
+    console.log("sending messages: ", messagesToSend);
 
-    const aiRespondedMessages = await sendMessage(newMessages);
-    if (aiRespondedMessages) {
-      setMessages(aiRespondedMessages);
-
-      const lastTwoMessages = aiRespondedMessages.slice(-2);
-      // Send the last two messages one by one, including the chat_id
-      for (const message of lastTwoMessages) {
-        const response = await utils.post("/chat/send", {
-          chat_id: chatId, // Include the chat_id
-          message: message,
-        });
-        if (response.ok) {
-          console.log("Saving successful");
-        } else {
-          console.log((await response.json()).message);
-        }
-      }
+    const aiRespondedMessage = await sendMessage(chatId, messagesToSend, cell);
+    // pop the temp message
+    newMessages.pop();
+    if (aiRespondedMessage) {
+      setMessages([...newMessages, aiRespondedMessage]);
+      console.log(aiRespondedMessage);
     } else {
-      // err
-      newMessages.pop();
+      // error
+
+      // pop the user message
       newMessages.pop();
       setMessages([...newMessages]);
+
       // rollback input
       setInputMessage(message);
     }
 
     setSendDisabled(false); // Set isSending back to false after message is sent
   };
+  useEffect(() => {
+    setCell(route.params?.cell);
+  }, [route.params?.cell]);
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -137,11 +145,12 @@ const ChatScreen = () => {
       keyboardDidShowListener.remove();
     };
   }, []);
+
   useEffect(() => {
     loadLastChat();
     navigation.setOptions({
-      headerLeft: () => (
-        <TouchableOpacity onPress={newChat} style={{ paddingLeft: 16 }}>
+      headerRight: () => (
+        <TouchableOpacity onPress={newChat} style={{ paddingRight: 22 }}>
           <Text style={{ fontSize: 12, color: "#000" }}>New</Text>
         </TouchableOpacity>
       ),
@@ -153,6 +162,7 @@ const ChatScreen = () => {
       style={styles.container}
       keyboardVerticalOffset={insets.top + 45} // Adjust this value as needed
     >
+      {cell && <MiniCell cell={cell} source="chat_context" />}
       <FlatList
         keyboardShouldPersistTaps="handled" // close keyboard on tap - leave on scroll
         ref={flatListRef}
@@ -185,6 +195,16 @@ const ChatScreen = () => {
             }}
             style={item.role === "user" ? styles.userMessage : styles.aiMessage}
           >
+            <View style={styles.messageHeader}>
+              {item.role === "user" ? (
+                <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+              ) : (
+                <AIAvatar />
+              )}
+              <Text style={styles.roleName}>
+                {item.role === "user" ? displayName : "Gate AI"}
+              </Text>
+            </View>
             <Text style={styles.text}>{item.content}</Text>
             {/* removed markdown */}
           </View>
@@ -213,63 +233,6 @@ const ChatScreen = () => {
     </KeyboardAvoidingView>
   );
 };
-const customMarkdownStyles = {
-  // Text
-  text: {
-    fontSize: 18,
-  },
-
-  // Headings
-  heading1: {
-    flexDirection: "row",
-    fontSize: 32,
-  },
-  heading2: {
-    flexDirection: "row",
-    fontSize: 26,
-  },
-  heading3: {
-    flexDirection: "row",
-    fontSize: 22,
-  },
-  heading4: {
-    flexDirection: "row",
-    fontSize: 20,
-  },
-  heading5: {
-    flexDirection: "row",
-    fontSize: 18,
-  },
-  heading6: {
-    flexDirection: "row",
-    fontSize: 16,
-  },
-
-  // Lists
-  bullet_list_icon: {
-    marginLeft: 10,
-    marginRight: 10,
-    fontSize: 18,
-  },
-
-  // Code
-  code_inline: {
-    borderWidth: 1,
-    borderColor: "#CCCCCC",
-    backgroundColor: "#f5f5f5",
-    padding: 10,
-    borderRadius: 4,
-    fontSize: 18, // adjust this value as needed
-    ...Platform.select({
-      ["ios"]: {
-        fontFamily: "Courier",
-      },
-      ["android"]: {
-        fontFamily: "monospace",
-      },
-    }),
-  },
-};
 
 const styles = StyleSheet.create({
   sendButton: {
@@ -280,28 +243,43 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   text: {
-    fontSize: 18,
+    fontSize: 15,
+    marginHorizontal: 36,
   },
   userMessage: {
-    fontSize: 18, // adjust this value as needed
-    alignSelf: "flex-end",
-    backgroundColor: "#e3f2fd",
+    fontSize: 15,
+    alignSelf: "flex-start",
+    backgroundColor: "transparent", // change this to 'white' for a white background
     padding: 8,
     marginVertical: 8,
-    marginRight: 8,
-    marginLeft: 64, // Adjust this to control message width
     borderRadius: 8,
   },
   aiMessage: {
-    fontSize: 18, // adjust this value as needed
+    fontSize: 15,
     alignSelf: "flex-start",
-    backgroundColor: "#fde3fd",
+    backgroundColor: "transparent", // change this to 'white' for a white background
     padding: 8,
     marginVertical: 4,
-    marginLeft: 8,
-    marginRight: 64, // Adjust this to control message width
     borderRadius: 8,
   },
+
+  messageHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  avatar: {
+    width: 20,
+    height: 20,
+    borderRadius: 15,
+    marginRight: 10,
+    marginLeft: 6,
+  },
+  roleName: {
+    fontSize: 15,
+    fontWeight: "bold",
+  },
+
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -309,14 +287,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   input: {
-    fontSize: 18, // adjust this value as needed
+    fontSize: 14, // adjust this value as needed
     flex: 1,
     marginRight: 8,
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 16,
     padding: 8,
-    maxHeight: 100, // Set your desired max height here
+    height: 40, // Set your desired max height here
   },
 });
 

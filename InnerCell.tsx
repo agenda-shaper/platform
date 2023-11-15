@@ -103,14 +103,14 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     marginBottom: 18,
     alignSelf: "center",
     marginHorizontal: 4,
   },
   fullExplanation: {
-    fontSize: 16,
+    fontSize: 15,
     marginHorizontal: 6,
     //color: "#888",
   },

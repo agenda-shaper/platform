@@ -14,7 +14,6 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import utils, { InteractionManager, uploadImage } from "./utils"; // Import your utility module
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
-
 const CreatePost: React.FC = () => {
   const navigation = useNavigation();
 
@@ -69,60 +68,60 @@ const CreatePost: React.FC = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <TouchableOpacity activeOpacity={1} onPress={Keyboard.dismiss}>
-        <View style={styles.container}>
-          <View style={styles.content}>
-            <TextInput
-              style={[styles.title, { maxHeight: 70 }]}
-              onChangeText={setTitle}
-              value={title}
-              placeholder="Title"
-              numberOfLines={3}
-              multiline
-              maxLength={100}
-            />
-            <TextInput
-              style={[styles.description, { maxHeight: 140 }]}
-              onChangeText={setDescription}
-              value={description}
-              placeholder="Description"
-              numberOfLines={8}
-              multiline
-              maxLength={500}
-            />
-          </View>
-          <View style={styles.imageAndButtonsContainer}>
-            <TouchableOpacity onPress={pickImage}>
-              {image ? (
-                <Image source={{ uri: image }} style={styles.image} />
-              ) : (
-                <Image
-                  source={{
-                    uri: `${utils.API_BASE_URL}/assets/placeholder-img.png`,
-                  }}
-                  style={styles.image}
-                />
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.explanationContainer}>
+      {/* <TouchableOpacity activeOpacity={1} onPress={Keyboard.dismiss}> */}
+      <View style={styles.container}>
+        <View style={styles.content}>
           <TextInput
-            style={[styles.input, { maxHeight: 140 }]}
-            onChangeText={setExplanation}
-            value={explanation}
-            placeholder="Full Explanation"
-            scrollEnabled={true}
+            style={[styles.title, { maxHeight: 70 }]}
+            onChangeText={setTitle}
+            value={title}
+            placeholder="Title"
+            numberOfLines={3}
             multiline
-            maxLength={10000}
-            //editable // Ensure the TextInput is editable
+            maxLength={100}
           />
-
-          <TouchableOpacity onPress={handleCreatePost}>
-            <Text style={styles.createButton}>Create</Text>
+          <TextInput
+            style={[styles.description, { maxHeight: 140 }]}
+            onChangeText={setDescription}
+            value={description}
+            placeholder="Description"
+            numberOfLines={8}
+            multiline
+            maxLength={500}
+          />
+        </View>
+        <View style={styles.imageAndButtonsContainer}>
+          <TouchableOpacity onPress={pickImage}>
+            {image ? (
+              <Image source={{ uri: image }} style={styles.image} />
+            ) : (
+              <Image
+                source={{
+                  uri: `${utils.API_BASE_URL}/assets/placeholder-img.png`,
+                }}
+                style={styles.image}
+              />
+            )}
           </TouchableOpacity>
         </View>
-      </TouchableOpacity>
+      </View>
+      <View style={styles.explanationContainer}>
+        <TextInput
+          style={[styles.input, { maxHeight: 140 }]}
+          onChangeText={setExplanation}
+          value={explanation}
+          placeholder="Full Explanation"
+          scrollEnabled={true}
+          multiline
+          maxLength={10000}
+          //editable // Ensure the TextInput is editable
+        />
+
+        <TouchableOpacity onPress={handleCreatePost}>
+          <Text style={styles.createButton}>Create</Text>
+        </TouchableOpacity>
+      </View>
+      {/* </TouchableOpacity> */}
     </View>
   );
 };
