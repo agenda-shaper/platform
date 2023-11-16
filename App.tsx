@@ -6,8 +6,10 @@ import { AuthContext } from "./auth-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import utils from "./utils"; // Import your utils module
 import { UserContext, UserProps } from "./UserContext";
+import { isMobile } from "react-device-detect";
 
 const App: React.FC = () => {
+  const discordInviteLink = "https://discord.com/invite/qcsCKat7zS";
   const [userData, setUserData] = React.useState<UserProps>({
     username: "",
     displayName: "",
@@ -65,7 +67,7 @@ const App: React.FC = () => {
     checkToken();
   }, []);
 
-  return (
+  return isMobile ? (
     <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
       <UserContext.Provider value={userData}>
         <NavigationContainer>
@@ -73,6 +75,20 @@ const App: React.FC = () => {
         </NavigationContainer>
       </UserContext.Provider>
     </AuthContext.Provider>
+  ) : (
+    <div style={{ textAlign: "center", marginTop: "50px" }}>
+      <h1>This app is intended for mobile devices.</h1>
+      <p>
+        Please open your browser's developer tools and enable the mobile view.
+      </p>
+      <p>
+        For info:
+        <br />
+        <a href={discordInviteLink} target="_blank" rel="noopener noreferrer">
+          Discord
+        </a>
+      </p>
+    </div>
   );
 };
 

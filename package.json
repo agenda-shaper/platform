@@ -30,6 +30,7 @@
     "moment": "^2.29.4",
     "node-fetch": "^3.3.2",
     "react": "18.2.0",
+    "react-device-detect": "^2.2.3",
     "react-dom": "18.2.0",
     "react-markdown": "^9.0.1",
     "react-native-app-auth": "^7.0.0",
