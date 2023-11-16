@@ -1,6 +1,10 @@
 import React, { useEffect, useContext, useState, useRef } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Markdown from "@valasolutions/react-native-markdown";
+//import Markdown from "@valasolutions/react-native-markdown";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+
 import utils, { InteractionManager, sendMessage } from "./utils"; // Import your utility module
 import {
   View,
@@ -25,6 +29,40 @@ import { RouteProp } from "@react-navigation/native";
 import { MainTabParamList } from "./navigationTypes";
 import { UserContext } from "./UserContext";
 const aiAvatar = require("./assets/AILogo.png");
+
+const TextComponent = ({
+  node,
+  ...props
+}: {
+  node: any;
+  children: any;
+  key?: string;
+}) => <Text style={styles.text} {...props} />;
+
+const components = {
+  p: TextComponent,
+  h1: TextComponent,
+  h2: TextComponent,
+  h3: TextComponent,
+  h4: TextComponent,
+  h5: TextComponent,
+  h6: TextComponent,
+  strong: TextComponent,
+  del: TextComponent,
+  em: TextComponent,
+  img: TextComponent,
+  ul: TextComponent,
+  ol: TextComponent,
+  li: TextComponent,
+  code: TextComponent,
+  pre: TextComponent,
+  blockquote: TextComponent,
+  hr: TextComponent,
+  th: TextComponent,
+  td: TextComponent,
+  tr: TextComponent,
+  table: TextComponent,
+};
 
 interface ChatScreenProps {
   route: RouteProp<MainTabParamList, "Chat">;
@@ -205,11 +243,34 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
                 {item.role === "user" ? displayName : "Gate AI"}
               </Text>
             </View>
-            <Text style={styles.text}>{item.content}</Text>
-            {/* removed markdown */}
+            <View style={styles.text}>
+              <Markdown remarkPlugins={[remarkGfm]}>{item.content}</Markdown>
+              {/* removed markdown  style={styles.text}   */}
+            </View>
           </View>
         )}
       />
+      {!isAtBottom && (
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            flexDirection: "row",
+            marginBottom: 20,
+            backgroundColor: "transparent",
+          }}
+          onPress={() => {
+            if (flatListRef.current) {
+              console.log("scrolling to end");
+              flatListRef.current.scrollToEnd({ animated: true });
+            }
+          }}
+        >
+          {/* Replace "Scroll to bottom" with your SVG */}
+          <Text>Scroll to Bottom</Text>
+        </TouchableOpacity>
+      )}
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -245,6 +306,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 15,
     marginHorizontal: 36,
+    fontFamily: "System",
   },
   userMessage: {
     fontSize: 15,
