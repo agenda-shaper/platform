@@ -16,6 +16,7 @@ import { SwipeListView } from "react-native-swipe-list-view";
 const interactionManager = InteractionManager.getInstance();
 
 const MainScreen = () => {
+  // Inside your component
   const navigation = useNavigation<MainStackNavigationProp>();
 
   const timerId = useRef<number | null>(null);

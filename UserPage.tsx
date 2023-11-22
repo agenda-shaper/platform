@@ -72,8 +72,10 @@ const renderScene = SceneMap({
 });
 const initialLayout = { width: Dimensions.get("window").width };
 
-const UserPage: React.FC = () => {
+const UserPage: React.FC<{ user_id?: string }> = ({ user_id }) => {
   const navigation = useNavigation<UserStackNavigationProp>();
+  // if loggen in and usercontext loaded and also the id = your own id - then load this
+  // if not - user is just public - just load his name and info different rendering stuff
 
   const { username, displayName, avatarUrl } = useContext(UserContext);
   const [index, setIndex] = React.useState(0);

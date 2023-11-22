@@ -8,16 +8,21 @@ import UserPage from "./UserPage";
 import MainScreen from "./MainScreen"; // Import your MainScreen component
 import LoginPage from "./LoginPage"; // Import your LoginPage component
 import RegisterPage from "./RegisterPage"; // Import your RegisterPage component
-import InnerCell from "./InnerCell";
+import InnerCell, { Props } from "./InnerCell";
 import CreatePost from "./CreatePost";
+import { Linking } from "react-native";
+
 import Cell, { CellProps } from "./Cell"; // Import your Cell component
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import {
   MainStackParamList,
   UserStackParamList,
   MainTabParamList,
   AuthStackParamList,
+  MainStackNavigationProp,
+  MainTabNavigationProp,
 } from "./navigationTypes";
+
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>(); // Create a new Stack Navigator
 const MainStack = createStackNavigator<MainStackParamList>();
@@ -32,7 +37,7 @@ const MainStackScreen: React.FC = () => {
       />
       <MainStack.Screen
         name="InnerCell"
-        component={InnerCell}
+        component={(props: Props) => <InnerCell {...props} />}
         options={{ headerShown: false }}
       />
     </MainStack.Navigator>
@@ -59,7 +64,7 @@ const UserStackScreen: React.FC = () => {
       />
       <UserStack.Screen
         name="InnerCell"
-        component={InnerCell}
+        component={(props: Props) => <InnerCell {...props} />}
         options={{ headerShown: false }}
       />
       <UserStack.Screen
@@ -71,7 +76,41 @@ const UserStackScreen: React.FC = () => {
   );
 };
 
-const MainNavigator: React.FC = () => {
+const MainNavigator: React.FC<{ navigationRef: any }> = ({ navigationRef }) => {
+  // Get the initial URL
+  Linking.getInitialURL().then((initialUrl) => {
+    if (initialUrl) {
+      // Create a new URL object
+      const url = new URL(initialUrl);
+
+      // Log the path
+      console.log("Path: ", url.pathname);
+      navigate(url.pathname);
+    }
+  });
+  function navigate(url_path: string) {
+    // Split the path by "/"
+    const pathParts = url_path.split("/");
+
+    switch (pathParts[1]) {
+      case "posts":
+        const post_id = pathParts[2];
+        if (post_id) {
+          navigationRef.current?.navigate("InnerCell", { post_id });
+        }
+
+        break;
+      case "users":
+        const user_id = pathParts[2];
+        if (user_id) {
+          navigationRef.current?.navigate("User", { user_id });
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
   return (
     <Tab.Navigator>
       <Tab.Screen name="Home" component={MainStackScreen} />

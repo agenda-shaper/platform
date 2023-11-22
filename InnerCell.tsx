@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ScrollView,
   View,
@@ -10,13 +10,13 @@ import {
   Linking,
 } from "react-native";
 import { RouteProp, useNavigation } from "@react-navigation/native";
-import { InteractionManager } from "./utils";
 import { CellProps } from "./Cell";
 import {
   MainStackParamList,
   MainStackNavigationProp,
   MainTabNavigationProp,
 } from "./navigationTypes";
+import utils, { InteractionManager } from "./utils"; // Import your utility module
 
 // Define a new type for your route prop
 type InnerCellRouteProp = RouteProp<MainStackParamList, "InnerCell">;
@@ -26,21 +26,25 @@ type Props = {
   route: InnerCellRouteProp;
 };
 const InnerCell: React.FC<Props> = ({ route }) => {
-  const { cell, source } = route.params;
-  const {
-    title,
-    description,
-    imageUrl,
-    id,
-    full_explanation,
-    links,
-    created_at,
-  } = cell;
+  const { cell: cellProp, post_id } = route.params;
+  const source = !route.params.source ? "web" : route.params.source;
+  const [cell, setCell] = useState(cellProp);
 
+  const fetchCellData = async () => {
+    const response = await utils.get(`/cells/${post_id}`);
+    const data = await response.json();
+    setCell(data.cell);
+  };
   const navigation = useNavigation<MainStackNavigationProp>();
 
   const interactionManager = InteractionManager.getInstance();
   const startTimeRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!cell && post_id) {
+      fetchCellData();
+    }
+  }, []);
   useEffect(() => {
     const unsubscribeFocus = navigation.addListener("focus", () => {
       // Start the timer when the page comes into focus
@@ -53,11 +57,15 @@ const InnerCell: React.FC<Props> = ({ route }) => {
       if (startTimeRef.current) {
         const timeSpent = Date.now() - startTimeRef.current;
         interactionManager.add({
-          post_id: id,
+          post_id: cell?.id || post_id || "0",
           type: "innercell_visibility",
           data: { visible_ms: timeSpent, source: source },
         });
-        console.log(`User spent ${timeSpent} ms on inner cell ${id}`);
+        console.log(
+          `User spent ${timeSpent} ms on inner cell ${
+            cell?.id || post_id || "0"
+          }`
+        );
       }
     });
 
@@ -67,13 +75,16 @@ const InnerCell: React.FC<Props> = ({ route }) => {
     };
   }, []);
 
+  if (!cell) {
+    return null; // Don't render anything while loading
+  }
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.fullExplanation}>{full_explanation}</Text>
-        {links &&
-          links.map((link: string, index: any) => (
+        <Text style={styles.title}>{cell.title}</Text>
+        <Text style={styles.fullExplanation}>{cell.full_explanation}</Text>
+        {cell.links &&
+          cell.links.map((link: string, index: any) => (
             <Text
               key={index}
               style={styles.link}

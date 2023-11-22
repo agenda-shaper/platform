@@ -57,6 +57,7 @@
     "react-native-tab-view": "^3.5.2",
     "react-native-web": "~0.19.6",
     "react-native-webview": "13.2.2",
+    "react-router-dom": "^6.19.0",
     "react-syntax-highlighter": "^15.5.0",
     "remark-gfm": "^4.0.0",
     "semver": "^7.5.4",

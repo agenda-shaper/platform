@@ -7,6 +7,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import utils from "./utils"; // Import your utils module
 import { UserContext, UserProps } from "./UserContext";
 import { isMobile } from "react-device-detect";
+import { Linking } from "react-native";
+import { NavigationContainerRef } from "@react-navigation/native";
+import { MainTabParamList } from "./navigationTypes";
+
+export const navigationRef =
+  React.createRef<NavigationContainerRef<MainTabParamList>>();
 
 const App: React.FC = () => {
   const discordInviteLink = "https://discord.com/invite/qcsCKat7zS";
@@ -17,6 +23,7 @@ const App: React.FC = () => {
     email: "",
     tempUser: false,
   });
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const tempRegister = async () => {
     console.log("temp registering");
@@ -70,8 +77,9 @@ const App: React.FC = () => {
   return isMobile ? (
     <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
       <UserContext.Provider value={userData}>
-        <NavigationContainer>
-          {isLoggedIn ? <MainNavigator /> : <AuthNavigator />}
+        <NavigationContainer ref={navigationRef}>
+          {/* {isLoggedIn ? <MainNavigator /> : <AuthNavigator />} */}
+          <MainNavigator navigationRef={navigationRef} />
         </NavigationContainer>
       </UserContext.Provider>
     </AuthContext.Provider>
