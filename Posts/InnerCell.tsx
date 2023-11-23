@@ -22,6 +22,7 @@ import {
   MainTabNavigationProp,
 } from "../Navigation/navigationTypes";
 import utils, { InteractionManager } from "../Misc/utils"; // Import your utility module
+import { isMobile } from "react-device-detect";
 
 // Define a new type for your route prop
 type InnerCellRouteProp = RouteProp<MainStackParamList, "InnerCell">;
@@ -37,6 +38,7 @@ const InnerCell: React.FC<Props> = ({ route }) => {
     ? route.params.post_id
     : route.params.cell?.id;
   const [cell, setCell] = useState(cellProp);
+  const styles = isMobile ? mobileStyles : desktopStyles;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -121,9 +123,43 @@ const InnerCell: React.FC<Props> = ({ route }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const mobileStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
+  },
+  container: {
+    padding: 16,
+  },
+  link: {
+    color: "blue",
+    textDecorationLine: "underline",
+    marginTop: 18,
+    marginHorizontal: 6,
+  },
+
+  title: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 18,
+    alignSelf: "center",
+    marginHorizontal: 4,
+  },
+  fullExplanation: {
+    fontSize: 15,
+    marginHorizontal: 6,
+    //color: "#888",
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 10,
+  },
+});
+const desktopStyles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    width: "30%", // Make the list take up the full width of its container
+    alignSelf: "center",
   },
   container: {
     padding: 16,

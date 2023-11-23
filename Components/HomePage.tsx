@@ -205,7 +205,6 @@ const desktopStyles = StyleSheet.create({
     // alignItems: "center", // Center children along the cross-axis
     // justifyContent: "center", // Center children along the main-axis
   },
-
   list: {
     width: "30%", // Make the list take up the full width of its container
     alignSelf: "center",

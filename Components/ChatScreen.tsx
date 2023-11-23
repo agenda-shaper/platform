@@ -29,7 +29,7 @@ import MiniCell from "../Posts/MiniCell";
 import { RouteProp } from "@react-navigation/native";
 import { MainTabParamList } from "../Navigation/navigationTypes";
 import { UserContext } from "../User/UserContext";
-const aiAvatar = require("./assets/gate_ai_logo.png");
+const aiAvatar = require("../assets/gate_ai_logo.png");
 
 const TextComponent = ({
   node,

@@ -7,7 +7,7 @@ import {
   DesktopMainNavigator,
 } from "./Navigation/Navigator";
 import { AuthContext } from "./Auth/auth-context";
-import { View } from "react-native";
+import { View, ScrollView, SafeAreaView } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import utils from "./Misc/utils"; // Import your utils module
 import { UserContext, UserProps } from "./User/UserContext";
@@ -87,12 +87,12 @@ const App: React.FC = () => {
           {isMobile ? (
             <MobileMainNavigator navigationRef={navigationRef} />
           ) : (
-            <View style={{ flex: 1 }}>
+            <>
               <TopBar />
               <View style={{ flex: 1 }}>
                 <DesktopMainNavigator navigationRef={navigationRef} />
               </View>
-            </View>
+            </>
           )}
         </NavigationContainer>
       </UserContext.Provider>
