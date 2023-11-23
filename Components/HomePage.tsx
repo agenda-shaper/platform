@@ -164,47 +164,29 @@ const HomePage = () => {
   }, []);
   const renderItem = ({ item }: { item: CellProps }) => <Cell cell={item} />;
   return (
-    <View
-      style={styles.container}
-      onTouchStart={() => {
-        // if (wasIdle) {
-        //   onActive(); // Call onActive when user becomes active after being idle
-        // }
-      }}
-    >
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.list}
-        renderItem={renderItem}
-        //renderHiddenItem={renderHiddenItem}
-        initialNumToRender={10} // Render only the first 10 items initially
-        //onRowDidOpen={onSwipeValueChange} // Add this line
+    <FlatList
+      data={data}
+      keyExtractor={(item) => item.id.toString()}
+      contentContainerStyle={styles.list}
+      renderItem={renderItem}
+      //renderHiddenItem={renderHiddenItem}
+      initialNumToRender={10} // Render only the first 10 items initially
+      //onRowDidOpen={onSwipeValueChange} // Add this line
 
-        // onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{
-          itemVisiblePercentThreshold: 20,
-        }}
-      />
-    </View>
+      // onViewableItemsChanged={onViewableItemsChanged}
+      viewabilityConfig={{
+        itemVisiblePercentThreshold: 20,
+      }}
+    />
   );
 };
 
 const mobileStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   list: {
     paddingVertical: 16,
   },
 });
 const desktopStyles = StyleSheet.create({
-  container: {
-    //flex: 1,
-    // padding: 20,
-    // alignItems: "center", // Center children along the cross-axis
-    // justifyContent: "center", // Center children along the main-axis
-  },
   list: {
     width: "30%", // Make the list take up the full width of its container
     alignSelf: "center",

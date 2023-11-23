@@ -45,6 +45,7 @@ const TopBar: React.FC = React.memo(() => {
 const styles = StyleSheet.create({
   container: {
     // position: "absolute", // Add this line
+
     // top: 0, // Add this line
     // left: 0, // Add this line
     // right: 0, // Add this line

@@ -10,8 +10,10 @@ import LoginPage from "../Auth/LoginPage"; // Import your LoginPage component
 import RegisterPage from "../Auth/RegisterPage"; // Import your RegisterPage component
 import InnerCell, { Props } from "../Posts/InnerCell";
 import CreatePost from "../User/CreatePost";
-import { Linking } from "react-native";
+import { View, Image, TouchableOpacity, StyleSheet } from "react-native";
 
+import { Linking } from "react-native";
+import TopBar from "../Misc/DesktopTopbar";
 import Cell, { CellProps } from "../Posts/Cell"; // Import your Cell component
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import {
@@ -126,16 +128,19 @@ const DesktopMainNavigator: React.FC<{ navigationRef: any }> = ({
   });
 
   return (
-    <DesktopStack.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-      initialRouteName="Home"
-    >
-      <DesktopStack.Screen name="Home" component={MainStackScreen} />
-      {/* /<DesktopStack.Screen name="Chat" component={ChatScreen} /> */}
-      <DesktopStack.Screen name="Users" component={UserStackScreen} />
-    </DesktopStack.Navigator>
+    <View style={{ flex: 1 }}>
+      <TopBar />
+      <DesktopStack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+        initialRouteName="Home"
+      >
+        <DesktopStack.Screen name="Home" component={MainStackScreen} />
+        {/* /<DesktopStack.Screen name="Chat" component={ChatScreen} /> */}
+        <DesktopStack.Screen name="Users" component={UserStackScreen} />
+      </DesktopStack.Navigator>
+    </View>
   );
 };
 function navigateUrl(url_path: string, navigationRef: any) {

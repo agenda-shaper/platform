@@ -87,12 +87,7 @@ const App: React.FC = () => {
           {isMobile ? (
             <MobileMainNavigator navigationRef={navigationRef} />
           ) : (
-            <>
-              <TopBar />
-              <View style={{ flex: 1 }}>
-                <DesktopMainNavigator navigationRef={navigationRef} />
-              </View>
-            </>
+            <DesktopMainNavigator navigationRef={navigationRef} />
           )}
         </NavigationContainer>
       </UserContext.Provider>
