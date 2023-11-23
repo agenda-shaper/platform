@@ -1,9 +1,13 @@
 // UserPage.tsx
 import React, { useContext, useState, useEffect } from "react";
-import { UserContext } from "./UserContext";
+import { UserContext, UserProps } from "./UserContext";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import utils from "./utils"; // Import your utils
-import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import {
+  RouteProp,
+  useNavigation,
+  useFocusEffect,
+} from "@react-navigation/native";
 import { UserStackNavigationProp } from "./navigationTypes";
 import {
   View,
@@ -13,9 +17,15 @@ import {
   Dimensions,
   ScrollView,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import MiniCell from "./MiniCell";
 import { CellProps } from "./Cell";
+import {
+  MainStackParamList,
+  MainStackNavigationProp,
+  MainTabNavigationProp,
+} from "./navigationTypes";
 
 const SavedRoute = () => {
   const [savedCells, setSavedCells] = useState<CellProps[]>([]);
@@ -70,15 +80,85 @@ const renderScene = SceneMap({
   saved: SavedRoute,
   uploaded: UploadedRoute,
 });
-const initialLayout = { width: Dimensions.get("window").width };
-
-const UserPage: React.FC<{ user_id?: string }> = ({ user_id }) => {
-  const navigation = useNavigation<UserStackNavigationProp>();
-  // if loggen in and usercontext loaded and also the id = your own id - then load this
-  // if not - user is just public - just load his name and info different rendering stuff
-
-  const { username, displayName, avatarUrl } = useContext(UserContext);
+const fetchUserInfo = async (user_id: string) => {
+  console.log("fetching info");
+  const response = await utils.post("/users/load_info", { user_id });
+  const data = await response.json();
+  console.log(data);
+  return data.userData;
+};
+const PublicUserRoute = (
+  navigation: UserStackNavigationProp,
+  passed_user_id: string
+) => {
+  console.log("public user route");
+  useFocusEffect(
+    React.useCallback(() => {
+      if (Platform.OS === "web") {
+        // Change the URL without causing a navigation event
+        window.history.pushState(null, "", `/users/${passed_user_id}`);
+      }
+    }, [])
+  );
+  const [userInfo, setUserInfo] = useState<UserProps | null>(null);
   const [index, setIndex] = React.useState(0);
+  const [routes] = React.useState([
+    { key: "uploaded", title: "Uploaded Posts" },
+  ]);
+  useEffect(() => {
+    console.log("fetching");
+    if (!userInfo) {
+      fetchUserInfo(passed_user_id).then((data) => {
+        console.log(data);
+        setUserInfo(data);
+      });
+    }
+  }, []);
+  if (!userInfo) {
+    return null; // Don't render anything while loading
+  }
+  navigation.setOptions({ title: userInfo.displayName });
+
+  return (
+    <View style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <Image source={{ uri: userInfo.avatarUrl }} style={styles.avatar} />
+        <Text style={styles.displayName}>{userInfo.displayName}</Text>
+        <Text style={styles.username}>@{userInfo.username}</Text>
+      </View>
+      {/* <TabView
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        initialLayout={initialLayout}
+        renderTabBar={(props) => (
+          <TabBar
+            {...props}
+            indicatorStyle={{ backgroundColor: "black" }} // Black indicator for the active tab
+            style={{ backgroundColor: "white" }}
+            labelStyle={{ color: "black" }}
+          />
+        )}
+      /> */}
+    </View>
+  );
+};
+
+const SelfUserRoute = (navigation: UserStackNavigationProp) => {
+  console.log("self route");
+  const { user_id, username, displayName, avatarUrl } = useContext(UserContext);
+  navigation.setOptions({ title: displayName });
+
+  console.log(user_id, username, displayName, avatarUrl, "STUFF");
+  const [index, setIndex] = React.useState(0);
+  useFocusEffect(
+    React.useCallback(() => {
+      if (Platform.OS === "web") {
+        // Change the URL without causing a navigation event
+        window.history.pushState(null, "", `/users/${user_id}`);
+      }
+    }, [])
+  );
 
   const [routes] = React.useState([
     { key: "saved", title: "Saved Posts" },
@@ -110,6 +190,33 @@ const UserPage: React.FC<{ user_id?: string }> = ({ user_id }) => {
       />
     </View>
   );
+};
+
+const initialLayout = { width: Dimensions.get("window").width };
+
+// Define a new type for your route prop
+type UserRouteProp = RouteProp<MainStackParamList, "Users">;
+
+// Add the new route prop to your component props
+export type UserRouteProps = {
+  route?: UserRouteProp;
+};
+const UserPage: React.FC<UserRouteProps> = ({ route }) => {
+  let passed_user_id = undefined;
+  if (route) {
+    passed_user_id = route.params?.passed_user_id;
+  }
+
+  console.log("passed_user_id: ", passed_user_id);
+  const navigation = useNavigation<UserStackNavigationProp>();
+  console.log("checking");
+
+  if (passed_user_id) {
+    return PublicUserRoute(navigation, passed_user_id);
+  } else {
+    console.log("SelfUserRoute");
+    return SelfUserRoute(navigation);
+  }
 };
 
 const styles = StyleSheet.create({

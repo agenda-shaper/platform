@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { Helmet } from "react-helmet-async";
 
 import utils, { InteractionManager, sendMessage } from "./utils"; // Import your utility module
 import {
@@ -21,14 +22,14 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { useNavigation, useFocusEffect } from "@react-navigation/native"; // Import useNavigation
 import { chat_send } from "./assets/icons"; // Import the SVG components
 import { CellType } from "./Cell";
 import MiniCell from "./MiniCell";
 import { RouteProp } from "@react-navigation/native";
 import { MainTabParamList } from "./navigationTypes";
 import { UserContext } from "./UserContext";
-const aiAvatar = require("./assets/AILogo.png");
+const aiAvatar = require("./assets/gate_ai_logo.png");
 
 const TextComponent = ({
   node,
@@ -69,7 +70,16 @@ interface ChatScreenProps {
 }
 const AIAvatar = () => <Image source={aiAvatar} style={styles.avatar} />;
 const interactionManager = InteractionManager.getInstance();
+
 const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
+  useFocusEffect(
+    React.useCallback(() => {
+      if (Platform.OS === "web") {
+        // Change the URL without causing a navigation event
+        window.history.pushState(null, "", `/chat`);
+      }
+    }, [])
+  );
   const { displayName, avatarUrl } = useContext(UserContext);
 
   const [cell, setCell] = useState(route.params?.cell);

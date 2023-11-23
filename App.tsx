@@ -1,27 +1,35 @@
 // App.tsx
 import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { AuthNavigator, MainNavigator } from "./Navigator";
+import {
+  AuthNavigator,
+  MobileMainNavigator,
+  DesktopMainNavigator,
+} from "./Navigator";
 import { AuthContext } from "./auth-context";
+import { View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import utils from "./utils"; // Import your utils module
 import { UserContext, UserProps } from "./UserContext";
 import { isMobile } from "react-device-detect";
-import { Linking } from "react-native";
 import { NavigationContainerRef } from "@react-navigation/native";
-import { MainTabParamList } from "./navigationTypes";
+import { MainTabParamList, DesktopParamList } from "./navigationTypes";
+import TopBar from "./DesktopTopbar";
+import HomePage from "./HomePage";
 
-export const navigationRef =
+export const mobileNavigationRef =
   React.createRef<NavigationContainerRef<MainTabParamList>>();
+export const desktopNavigationRef =
+  React.createRef<NavigationContainerRef<DesktopParamList>>();
 
 const App: React.FC = () => {
   const discordInviteLink = "https://discord.com/invite/qcsCKat7zS";
   const [userData, setUserData] = React.useState<UserProps>({
+    user_id: "",
     username: "",
     displayName: "",
     avatarUrl: "",
     email: "",
-    tempUser: false,
   });
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -74,29 +82,26 @@ const App: React.FC = () => {
     checkToken();
   }, []);
 
-  return isMobile ? (
+  return (
     <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
       <UserContext.Provider value={userData}>
-        <NavigationContainer ref={navigationRef}>
-          {/* {isLoggedIn ? <MainNavigator /> : <AuthNavigator />} */}
-          <MainNavigator navigationRef={navigationRef} />
-        </NavigationContainer>
+        {isMobile ? (
+          <NavigationContainer>
+            {/* {isLoggedIn ? <MainNavigator /> : <AuthNavigator />} */}
+            <MobileMainNavigator navigationRef={mobileNavigationRef} />
+          </NavigationContainer>
+        ) : (
+          <NavigationContainer>
+            <View style={{ flex: 1 }}>
+              <TopBar />
+              <View style={{ flex: 1 }}>
+                <DesktopMainNavigator navigationRef={desktopNavigationRef} />
+              </View>
+            </View>
+          </NavigationContainer>
+        )}
       </UserContext.Provider>
     </AuthContext.Provider>
-  ) : (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1>This app is intended for mobile devices.</h1>
-      <p>
-        Please open your browser's developer tools and enable the mobile view.
-      </p>
-      <p>
-        For info:
-        <br />
-        <a href={discordInviteLink} target="_blank" rel="noopener noreferrer">
-          Discord
-        </a>
-      </p>
-    </div>
   );
 };
 

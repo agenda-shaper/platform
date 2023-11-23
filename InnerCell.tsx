@@ -8,8 +8,13 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Linking,
+  Platform,
 } from "react-native";
-import { RouteProp, useNavigation } from "@react-navigation/native";
+import {
+  RouteProp,
+  useNavigation,
+  useFocusEffect,
+} from "@react-navigation/native";
 import { CellProps } from "./Cell";
 import {
   MainStackParamList,
@@ -22,18 +27,30 @@ import utils, { InteractionManager } from "./utils"; // Import your utility modu
 type InnerCellRouteProp = RouteProp<MainStackParamList, "InnerCell">;
 
 // Add the new route prop to your component props
-type Props = {
+export type Props = {
   route: InnerCellRouteProp;
 };
 const InnerCell: React.FC<Props> = ({ route }) => {
-  const { cell: cellProp, post_id } = route.params;
+  const { cell: cellProp } = route.params;
   const source = !route.params.source ? "web" : route.params.source;
+  const post_id = !route.params.cell?.id
+    ? route.params.post_id
+    : route.params.cell?.id;
   const [cell, setCell] = useState(cellProp);
 
-  const fetchCellData = async () => {
-    const response = await utils.get(`/cells/${post_id}`);
+  useFocusEffect(
+    React.useCallback(() => {
+      if (Platform.OS === "web") {
+        // Change the URL without causing a navigation event
+        window.history.pushState(null, "", `/posts/${post_id}`);
+      }
+    }, [])
+  );
+
+  const fetchCellData = async (post_id: string) => {
+    const response = await utils.post("/cells/load_info", { post_id });
     const data = await response.json();
-    setCell(data.cell);
+    return data.cellData;
   };
   const navigation = useNavigation<MainStackNavigationProp>();
 
@@ -42,9 +59,12 @@ const InnerCell: React.FC<Props> = ({ route }) => {
 
   useEffect(() => {
     if (!cell && post_id) {
-      fetchCellData();
+      fetchCellData(post_id).then((data) => {
+        setCell(data);
+      });
     }
   }, []);
+
   useEffect(() => {
     const unsubscribeFocus = navigation.addListener("focus", () => {
       // Start the timer when the page comes into focus
@@ -78,6 +98,8 @@ const InnerCell: React.FC<Props> = ({ route }) => {
   if (!cell) {
     return null; // Don't render anything while loading
   }
+  navigation.setOptions({ title: cell.title });
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>

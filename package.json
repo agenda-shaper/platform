@@ -1,12 +1,13 @@
 {
-  "name": "platform",
+  "name": "gate",
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "start": "npx expo start",
+    "android": "npx expo start --android",
+    "ios": "npx expo start --ios",
+    "web": "npx expo start --web",
+    "webbl": "npx expo export:web "
   },
   "dependencies": {
     "@expo/webpack-config": "^19.0.0",
@@ -32,6 +33,8 @@
     "react": "18.2.0",
     "react-device-detect": "^2.2.3",
     "react-dom": "18.2.0",
+    "react-helmet": "^6.1.0",
+    "react-helmet-async": "^2.0.1",
     "react-markdown": "^9.0.1",
     "react-native-app-auth": "^7.0.0",
     "react-native-event-source": "^1.1.0",
@@ -70,12 +73,15 @@
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
+    "@babel/preset-typescript": "^7.23.3",
     "@types/react": "~18.2.14",
+    "@types/react-helmet": "^6.1.9",
     "@types/react-native": "^0.72.2",
     "@types/react-native-event-source": "^1.1.0",
     "@types/react-syntax-highlighter": "^15.5.10",
     "@types/text-encoding": "^0.0.38",
     "@types/validator": "^13.11.2",
+    "babel-plugin-transform-remove-console": "^6.9.4",
     "react-native-svg-transformer": "^1.1.0",
     "typescript": "^5.1.3"
   },

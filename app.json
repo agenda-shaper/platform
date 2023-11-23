@@ -1,27 +1,25 @@
 {
   "expo": {
-    "name": "platform",
-    "slug": "platform",
+    "name": "Gate",
+    "slug": "Gate",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.aicorp.platform",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "bundleIdentifier": "com.aicorp.gate"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff",
-        "googleServicesFile": "./google-services.json"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#ffffff"
       }
     },
     "web": {

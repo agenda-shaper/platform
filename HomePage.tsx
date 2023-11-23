@@ -6,18 +6,34 @@ import {
   StyleSheet,
   Dimensions,
   ViewToken,
+  Platform,
 } from "react-native";
 import Cell, { CellProps } from "./Cell"; // Import your Cell component
 import utils, { InteractionManager } from "./utils"; // Import your utility module
-import { useNavigation } from "@react-navigation/native"; // Import useNavigation
-import { MainStackNavigationProp } from "./navigationTypes";
+import { useNavigation, useFocusEffect } from "@react-navigation/native"; // Import useNavigation
+import {
+  MainStackNavigationProp,
+  DesktopNavigationProp,
+} from "./navigationTypes";
 import { SwipeListView } from "react-native-swipe-list-view";
+import { Helmet } from "react-helmet";
 
 const interactionManager = InteractionManager.getInstance();
 
-const MainScreen = () => {
+const HomePage = () => {
+  useFocusEffect(
+    React.useCallback(() => {
+      if (Platform.OS === "web") {
+        // Change the URL without causing a navigation event
+        window.history.pushState(null, "", `/home`);
+        console.log("running web");
+      }
+    }, [])
+  );
   // Inside your component
-  const navigation = useNavigation<MainStackNavigationProp>();
+  const mobileNav = useNavigation<MainStackNavigationProp>();
+  const desktopNav = useNavigation<DesktopNavigationProp>();
+  const navigation = useNavigation();
 
   const timerId = useRef<number | null>(null);
   const [timeForInactivityInSecond, setTimeForInactivityInSecond] =
@@ -27,7 +43,9 @@ const MainScreen = () => {
   const timers = useRef<{ [id: string]: number }>({});
   const [visiblePosts, setVisiblePosts] = useState<ViewToken[]>([]);
   const [listData, setListData] = React.useState(data); // Add this line
-
+  useEffect(() => {
+    document.title = "Your Page Title";
+  }, []);
   const onSwipeValueChange = (swipeData: any) => {
     const { key, value } = swipeData;
     console.log(swipeData);
@@ -111,7 +129,7 @@ const MainScreen = () => {
 
       const { cells } = result;
       setData(cells);
-      resetInactivityTimeout();
+      // resetInactivityTimeout();
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -125,55 +143,46 @@ const MainScreen = () => {
       }
     }, timeForInactivityInSecond * 1000);
   };
+  useEffect(() => {
+    // const unsubscribeBlur = mobileNav.addListener("blur", () => {
+    //   onIdle();
+    // });
 
-  React.useEffect(() => {
-    const unsubscribeBlur = navigation.addListener("blur", () => {
-      onIdle();
-    });
-
-    const unsubscribeFocus = navigation.addListener("focus", () => {
-      onActive();
-    });
+    // const unsubscribeFocus = mobileNav.addListener("focus", () => {
+    //   onActive();
+    // });
     fetchCells();
 
-    return () => {
-      unsubscribeBlur();
-      unsubscribeFocus();
-      // Clean up any remaining timers
-      if (timerId.current) clearTimeout(timerId.current);
-      for (let id in timers.current) {
-        if (timers.current[id]) clearTimeout(timers.current[id]);
-      }
-    };
+    // return () => {
+    //   unsubscribeBlur();
+    //   unsubscribeFocus();
+    //   // Clean up any remaining timers
+    //   if (timerId.current) clearTimeout(timerId.current);
+    //   for (let id in timers.current) {
+    //     if (timers.current[id]) clearTimeout(timers.current[id]);
+    //   }
+    // };
   }, []);
   const renderItem = ({ item }: { item: CellProps }) => <Cell cell={item} />;
-
-  const renderHiddenItem = () => (
-    <View style={[styles.rowBack]}>
-      <Text>Ask AI</Text>
-      <Text>See Less</Text>
-    </View>
-  );
-
   return (
     <View
       style={styles.container}
       onTouchStart={() => {
-        if (wasIdle) {
-          onActive(); // Call onActive when user becomes active after being idle
-        }
+        // if (wasIdle) {
+        //   onActive(); // Call onActive when user becomes active after being idle
+        // }
       }}
     >
       <FlatList
         data={data}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={desktopStyles.list}
         renderItem={renderItem}
         //renderHiddenItem={renderHiddenItem}
         initialNumToRender={10} // Render only the first 10 items initially
         //onRowDidOpen={onSwipeValueChange} // Add this line
 
-        onViewableItemsChanged={onViewableItemsChanged}
+        // onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={{
           itemVisiblePercentThreshold: 20,
         }}
@@ -189,14 +198,14 @@ const styles = StyleSheet.create({
   list: {
     paddingVertical: 16,
   },
-  rowBack: {
-    alignItems: "center",
-    backgroundColor: "#DDD",
+});
+const desktopStyles = StyleSheet.create({
+  container: {
     flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 12,
+    padding: 20,
+  },
+  list: {
+    flexGrow: 1,
   },
 });
-
-export default MainScreen;
+export default HomePage;
