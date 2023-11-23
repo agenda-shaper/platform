@@ -4,6 +4,8 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import ChatScreen from "../Components/ChatScreen";
+
+import DesktopChat from "../Components/DesktopChat";
 import UserPage from "../User/UserPage";
 import HomePage from "../Components/HomePage"; // Import your MainScreen component
 import LoginPage from "../Auth/LoginPage"; // Import your LoginPage component
@@ -128,19 +130,23 @@ const DesktopMainNavigator: React.FC<{ navigationRef: any }> = ({
   });
 
   return (
-    <View style={{ flex: 1 }}>
-      <TopBar />
-      <DesktopStack.Navigator
-        screenOptions={{
-          headerShown: false,
-        }}
-        initialRouteName="Home"
-      >
-        <DesktopStack.Screen name="Home" component={MainStackScreen} />
-        {/* /<DesktopStack.Screen name="Chat" component={ChatScreen} /> */}
-        <DesktopStack.Screen name="Users" component={UserStackScreen} />
-      </DesktopStack.Navigator>
-    </View>
+    <>
+      <View style={{ flex: 1 }}>
+        <TopBar />
+
+        <DesktopStack.Navigator
+          screenOptions={{
+            headerShown: false,
+          }}
+          initialRouteName="Home"
+        >
+          <DesktopStack.Screen name="Home" component={MainStackScreen} />
+          {/* /<DesktopStack.Screen name="Chat" component={ChatScreen} /> */}
+          <DesktopStack.Screen name="Users" component={UserStackScreen} />
+        </DesktopStack.Navigator>
+      </View>
+      <DesktopChat />
+    </>
   );
 };
 function navigateUrl(url_path: string, navigationRef: any) {

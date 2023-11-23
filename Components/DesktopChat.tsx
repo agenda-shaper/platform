@@ -72,15 +72,15 @@ interface ChatScreenProps {
 const AIAvatar = () => <Image source={aiAvatar} style={styles.avatar} />;
 const interactionManager = InteractionManager.getInstance();
 
-const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
-  useFocusEffect(
-    React.useCallback(() => {
-      if (Platform.OS === "web") {
-        // Change the URL without causing a navigation event
-        window.history.pushState(null, "", `/chat`);
-      }
-    }, [])
-  );
+const DesktopChat: React.FC<ChatScreenProps> = ({ route }) => {
+  //   useFocusEffect(
+  //     React.useCallback(() => {
+  //       if (Platform.OS === "web") {
+  //         // Change the URL without causing a navigation event
+  //         window.history.pushState(null, "", `/chat`);
+  //       }
+  //     }, [])
+  //   );
 
   const { displayName, avatarUrl } = useContext(UserContext);
 
@@ -92,7 +92,6 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
 
   const navigation = useNavigation();
   const [sendDisabled, setSendDisabled] = useState(true); // Add this line
-  const insets = useSafeAreaInsets();
   const [chatId, setChatId] = useState(null);
 
   const [messages, setMessages] = useState<{ role: string; content: string }[]>(
@@ -197,20 +196,16 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
 
   useEffect(() => {
     loadLastChat();
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity onPress={newChat} style={{ paddingRight: 22 }}>
-          <Text style={{ fontSize: 12, color: "#000" }}>New</Text>
-        </TouchableOpacity>
-      ),
-    });
+    // navigation.setOptions({
+    //   headerRight: () => (
+    //     <TouchableOpacity onPress={newChat} style={{ paddingRight: 22 }}>
+    //       <Text style={{ fontSize: 12, color: "#000" }}>New</Text>
+    //     </TouchableOpacity>
+    //   ),
+    // });
   }, [navigation]); // Empty dependency array ensures this runs only on mount
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-      keyboardVerticalOffset={insets.top + 45} // Adjust this value as needed
-    >
+    <View style={styles.container}>
       {cell && <MiniCell cell={cell} source="chat_context" />}
       <FlatList
         keyboardShouldPersistTaps="handled" // close keyboard on tap - leave on scroll
@@ -302,7 +297,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
           )}
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 const styles = StyleSheet.create({
@@ -370,4 +365,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChatScreen;
+export default DesktopChat;
