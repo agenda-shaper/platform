@@ -20,8 +20,8 @@ import {
   MainStackParamList,
   MainStackNavigationProp,
   MainTabNavigationProp,
-} from "./navigationTypes";
-import utils, { InteractionManager } from "./utils"; // Import your utility module
+} from "../Navigation/navigationTypes";
+import utils, { InteractionManager } from "../Misc/utils"; // Import your utility module
 
 // Define a new type for your route prop
 type InnerCellRouteProp = RouteProp<MainStackParamList, "InnerCell">;

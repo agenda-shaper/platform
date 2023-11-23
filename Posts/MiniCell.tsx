@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import utils, { InteractionManager } from "./utils"; // Import your utility module
+import utils, { InteractionManager } from "../Misc/utils"; // Import your utility module
 import { CellType } from "./Cell";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
-import { UserStackNavigationProp } from "./navigationTypes";
+import { UserStackNavigationProp } from "../Navigation/navigationTypes";
 
 const interactionManager = InteractionManager.getInstance();
 

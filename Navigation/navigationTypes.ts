@@ -1,8 +1,8 @@
 // navigationTypes.ts
 import { StackNavigationProp } from "@react-navigation/stack";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import { CellProps } from "./Cell"; // Import your Cell component
-import { UserProps } from "./UserContext"; // Import your Cell component
+import { CellProps } from "../Posts/Cell"; // Import your Cell component
+import { UserProps } from "../User/UserContext"; // Import your Cell component
 
 // Define a type for your authentication stack navigation structure
 export type AuthStackParamList = {
@@ -25,14 +25,14 @@ export type MainTabParamList = {
 export type MainTabNavigationProp = BottomTabNavigationProp<MainTabParamList>;
 
 export type MainStackParamList = {
-  Main: undefined;
+  Home: undefined;
   Users: { passed_user_id?: string };
   //Screen: { InnerCell: undefined };
   InnerCell: { cell?: CellProps; source?: string; post_id?: string };
 };
 
 export type UserStackParamList = {
-  UserPage: undefined;
+  User: undefined;
   InnerCell: { cell: CellProps; source: string };
   CreatePost: undefined;
 };
@@ -42,9 +42,3 @@ export type UserStackNavigationProp = StackNavigationProp<UserStackParamList>;
 export type MainStackNavigationProp = StackNavigationProp<MainStackParamList>;
 
 //* was all mobile now desktop
-
-export type DesktopParamList = {
-  Home: undefined;
-  User: undefined;
-};
-export type DesktopNavigationProp = StackNavigationProp<DesktopParamList>;

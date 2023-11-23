@@ -1,8 +1,8 @@
 import React, { useState, useContext } from "react";
-import utils from "./utils"; // Import your utils module
+import utils from "../Misc/utils"; // Import your utils module
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
-import { AuthNavigationProp } from "./navigationTypes";
+import { AuthNavigationProp } from "../Navigation/navigationTypes";
 
 import {
   View,

@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { Helmet } from "react-helmet-async";
 
-import utils, { InteractionManager, sendMessage } from "./utils"; // Import your utility module
+import utils, { InteractionManager, sendMessage } from "../Misc/utils"; // Import your utility module
 import {
   View,
   Text,
@@ -23,12 +23,12 @@ import {
   Image,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native"; // Import useNavigation
-import { chat_send } from "./assets/icons"; // Import the SVG components
-import { CellType } from "./Cell";
-import MiniCell from "./MiniCell";
+import { chat_send } from "../assets/icons"; // Import the SVG components
+import { CellType } from "../Posts/Cell";
+import MiniCell from "../Posts/MiniCell";
 import { RouteProp } from "@react-navigation/native";
-import { MainTabParamList } from "./navigationTypes";
-import { UserContext } from "./UserContext";
+import { MainTabParamList } from "../Navigation/navigationTypes";
+import { UserContext } from "../User/UserContext";
 const aiAvatar = require("./assets/gate_ai_logo.png");
 
 const TextComponent = ({

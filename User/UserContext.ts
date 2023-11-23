@@ -1,6 +1,6 @@
 // UserContext.ts
 import React from "react";
-import { CellProps } from "./Cell";
+import { CellProps } from "../Posts/Cell";
 
 // Define a TypeScript interface for the user data
 export interface UserProps {

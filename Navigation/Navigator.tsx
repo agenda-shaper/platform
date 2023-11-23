@@ -3,16 +3,16 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
-import ChatScreen from "./ChatScreen";
-import UserPage from "./UserPage";
-import HomePage from "./HomePage"; // Import your MainScreen component
-import LoginPage from "./LoginPage"; // Import your LoginPage component
-import RegisterPage from "./RegisterPage"; // Import your RegisterPage component
-import InnerCell, { Props } from "./InnerCell";
-import CreatePost from "./CreatePost";
+import ChatScreen from "../Components/ChatScreen";
+import UserPage from "../User/UserPage";
+import HomePage from "../Components/HomePage"; // Import your MainScreen component
+import LoginPage from "../Auth/LoginPage"; // Import your LoginPage component
+import RegisterPage from "../Auth/RegisterPage"; // Import your RegisterPage component
+import InnerCell, { Props } from "../Posts/InnerCell";
+import CreatePost from "../User/CreatePost";
 import { Linking } from "react-native";
 
-import Cell, { CellProps } from "./Cell"; // Import your Cell component
+import Cell, { CellProps } from "../Posts/Cell"; // Import your Cell component
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import {
   MainStackParamList,
@@ -21,9 +21,8 @@ import {
   AuthStackParamList,
   MainStackNavigationProp,
   MainTabNavigationProp,
-  DesktopNavigationProp,
-  DesktopParamList,
 } from "./navigationTypes";
+import { post } from "../Misc/utils";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>(); // Create a new Stack Navigator
@@ -31,9 +30,9 @@ const MainStack = createStackNavigator<MainStackParamList>();
 
 const MainStackScreen: React.FC = () => {
   return (
-    <MainStack.Navigator initialRouteName="Main">
+    <MainStack.Navigator initialRouteName="Home">
       <MainStack.Screen
-        name="Main"
+        name="Home"
         component={HomePage}
         options={{ headerShown: false }}
       />
@@ -65,9 +64,9 @@ const UserStackScreen: React.FC<{ passed_user_id?: string }> = ({
   passed_user_id,
 }) => {
   return (
-    <UserStack.Navigator initialRouteName="UserPage">
+    <UserStack.Navigator initialRouteName="User">
       <UserStack.Screen
-        name="UserPage"
+        name="User"
         component={UserPage}
         options={{ headerShown: false }}
       />
@@ -96,37 +95,9 @@ const MobileMainNavigator: React.FC<{ navigationRef: any }> = ({
 
       // Log the path
       console.log("Path: ", url.pathname);
-      navigate(url.pathname);
+      navigateUrl(url.pathname, navigationRef);
     }
   });
-  function navigate(url_path: string) {
-    // Split the path by "/"
-    const pathParts = url_path.split("/");
-
-    switch (pathParts[1].toLowerCase()) {
-      case "posts":
-        const post_id = pathParts[2];
-        if (post_id) {
-          navigationRef.current?.navigate("InnerCell", { post_id });
-        }
-
-        break;
-      case "users":
-        const user_id = pathParts[2];
-        if (user_id) {
-          console.log("user", user_id);
-          navigationRef.current?.navigate("Users", {
-            passed_user_id: user_id,
-          });
-        }
-        break;
-      case "chat":
-        navigationRef.current?.navigate("Chat");
-        break;
-      default:
-        break;
-    }
-  }
 
   return (
     <Tab.Navigator>
@@ -137,7 +108,7 @@ const MobileMainNavigator: React.FC<{ navigationRef: any }> = ({
   );
 };
 
-const DesktopStack = createStackNavigator<DesktopParamList>();
+const DesktopStack = createStackNavigator<MainStackParamList>();
 
 const DesktopMainNavigator: React.FC<{ navigationRef: any }> = ({
   navigationRef,
@@ -150,45 +121,52 @@ const DesktopMainNavigator: React.FC<{ navigationRef: any }> = ({
 
       // Log the path
       console.log("Path: ", url.pathname);
-      navigate(url.pathname);
+      navigateUrl(url.pathname, navigationRef);
     }
   });
-  function navigate(url_path: string) {
-    // Split the path by "/"
-    const pathParts = url_path.split("/");
-
-    switch (pathParts[1].toLowerCase()) {
-      case "posts":
-        const post_id = pathParts[2];
-        if (post_id) {
-          navigationRef.current?.navigate("InnerCell", { post_id });
-        }
-
-        break;
-      case "users":
-        const user_id = pathParts[2];
-        if (user_id) {
-          console.log("user", user_id);
-          navigationRef.current?.navigate("Users", {
-            passed_user_id: user_id,
-          });
-        }
-        break;
-      case "chat":
-        navigationRef.current?.navigate("Chat");
-        break;
-      default:
-        break;
-    }
-  }
 
   return (
-    <DesktopStack.Navigator>
+    <DesktopStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+      initialRouteName="Home"
+    >
       <DesktopStack.Screen name="Home" component={MainStackScreen} />
       {/* /<DesktopStack.Screen name="Chat" component={ChatScreen} /> */}
-      <DesktopStack.Screen name="User" component={UserStackScreen} />
+      <DesktopStack.Screen name="Users" component={UserStackScreen} />
     </DesktopStack.Navigator>
   );
 };
+function navigateUrl(url_path: string, navigationRef: any) {
+  // Split the path by "/"
+  const pathParts = url_path.split("/");
+  console.log("should be navigating: ", pathParts);
 
+  switch (pathParts[1].toLowerCase()) {
+    case "posts":
+      const post_id = pathParts[2];
+      console.log(pathParts);
+      if (post_id) {
+        console.log("posts: ", post_id);
+        navigationRef.current?.navigate("InnerCell", { post_id });
+      }
+
+      break;
+    case "users":
+      const user_id = pathParts[2];
+      if (user_id) {
+        console.log("user", user_id);
+        navigationRef.current?.navigate("Users", {
+          passed_user_id: user_id,
+        });
+      }
+      break;
+    case "chat":
+      navigationRef.current?.navigate("Chat");
+      break;
+    default:
+      break;
+  }
+}
 export { AuthNavigator, MobileMainNavigator, DesktopMainNavigator };

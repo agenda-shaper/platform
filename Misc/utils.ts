@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // import { fetch } from "react-native-fetch-api";
 import * as FileSystem from "expo-file-system";
 import { Platform } from "react-native";
-import { CellProps } from "./Cell";
+import { CellProps } from "../Posts/Cell";
 interface Message {
   role: string;
   content: string;

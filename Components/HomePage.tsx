@@ -8,15 +8,13 @@ import {
   ViewToken,
   Platform,
 } from "react-native";
-import Cell, { CellProps } from "./Cell"; // Import your Cell component
-import utils, { InteractionManager } from "./utils"; // Import your utility module
+import Cell, { CellProps } from "../Posts/Cell"; // Import your Cell component
+import utils, { InteractionManager } from "../Misc/utils"; // Import your utility module
 import { useNavigation, useFocusEffect } from "@react-navigation/native"; // Import useNavigation
-import {
-  MainStackNavigationProp,
-  DesktopNavigationProp,
-} from "./navigationTypes";
+import { MainStackNavigationProp } from "../Navigation/navigationTypes";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { Helmet } from "react-helmet";
+import { isMobile } from "react-device-detect";
 
 const interactionManager = InteractionManager.getInstance();
 
@@ -31,9 +29,10 @@ const HomePage = () => {
     }, [])
   );
   // Inside your component
-  const mobileNav = useNavigation<MainStackNavigationProp>();
-  const desktopNav = useNavigation<DesktopNavigationProp>();
-  const navigation = useNavigation();
+  // const mobileNav = useNavigation<MainStackNavigationProp>();
+  // const desktopNav = useNavigation<DesktopNavigationProp>();
+  // const navigation = useNavigation();
+  const styles = isMobile ? mobileStyles : desktopStyles;
 
   const timerId = useRef<number | null>(null);
   const [timeForInactivityInSecond, setTimeForInactivityInSecond] =
@@ -176,7 +175,7 @@ const HomePage = () => {
       <FlatList
         data={data}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={desktopStyles.list}
+        contentContainerStyle={styles.list}
         renderItem={renderItem}
         //renderHiddenItem={renderHiddenItem}
         initialNumToRender={10} // Render only the first 10 items initially
@@ -191,7 +190,7 @@ const HomePage = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const mobileStyles = StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -201,11 +200,16 @@ const styles = StyleSheet.create({
 });
 const desktopStyles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 20,
+    //flex: 1,
+    // padding: 20,
+    // alignItems: "center", // Center children along the cross-axis
+    // justifyContent: "center", // Center children along the main-axis
   },
+
   list: {
-    flexGrow: 1,
+    width: "30%", // Make the list take up the full width of its container
+    alignSelf: "center",
   },
 });
+
 export default HomePage;

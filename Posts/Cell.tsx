@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import utils, { InteractionManager } from "./utils"; // Import your utility module
+import utils, { InteractionManager } from "../Misc/utils"; // Import your utility module
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 import {
   MainStackNavigationProp,
   MainTabNavigationProp,
-} from "./navigationTypes";
+} from "../Navigation/navigationTypes";
 import moment from "moment";
-import { like, save, ai } from "./assets/icons"; // Import the SVG components
+import { like, save, ai } from "../assets/icons"; // Import the SVG components
 
 const interactionManager = InteractionManager.getInstance();
 

@@ -5,22 +5,20 @@ import {
   AuthNavigator,
   MobileMainNavigator,
   DesktopMainNavigator,
-} from "./Navigator";
-import { AuthContext } from "./auth-context";
+} from "./Navigation/Navigator";
+import { AuthContext } from "./Auth/auth-context";
 import { View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import utils from "./utils"; // Import your utils module
-import { UserContext, UserProps } from "./UserContext";
+import utils from "./Misc/utils"; // Import your utils module
+import { UserContext, UserProps } from "./User/UserContext";
 import { isMobile } from "react-device-detect";
 import { NavigationContainerRef } from "@react-navigation/native";
-import { MainTabParamList, DesktopParamList } from "./navigationTypes";
-import TopBar from "./DesktopTopbar";
-import HomePage from "./HomePage";
+import { MainTabParamList } from "./Navigation/navigationTypes";
+import TopBar from "./Misc/DesktopTopbar";
+import HomePage from "./Components/HomePage";
 
-export const mobileNavigationRef =
+export const navigationRef =
   React.createRef<NavigationContainerRef<MainTabParamList>>();
-export const desktopNavigationRef =
-  React.createRef<NavigationContainerRef<DesktopParamList>>();
 
 const App: React.FC = () => {
   const discordInviteLink = "https://discord.com/invite/qcsCKat7zS";
@@ -85,21 +83,18 @@ const App: React.FC = () => {
   return (
     <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
       <UserContext.Provider value={userData}>
-        {isMobile ? (
-          <NavigationContainer>
-            {/* {isLoggedIn ? <MainNavigator /> : <AuthNavigator />} */}
-            <MobileMainNavigator navigationRef={mobileNavigationRef} />
-          </NavigationContainer>
-        ) : (
-          <NavigationContainer>
+        <NavigationContainer ref={navigationRef}>
+          {isMobile ? (
+            <MobileMainNavigator navigationRef={navigationRef} />
+          ) : (
             <View style={{ flex: 1 }}>
               <TopBar />
               <View style={{ flex: 1 }}>
-                <DesktopMainNavigator navigationRef={desktopNavigationRef} />
+                <DesktopMainNavigator navigationRef={navigationRef} />
               </View>
             </View>
-          </NavigationContainer>
-        )}
+          )}
+        </NavigationContainer>
       </UserContext.Provider>
     </AuthContext.Provider>
   );

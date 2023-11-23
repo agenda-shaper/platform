@@ -2,13 +2,13 @@
 import React, { useContext, useState, useEffect } from "react";
 import { UserContext, UserProps } from "./UserContext";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
-import utils from "./utils"; // Import your utils
+import utils from "../Misc/utils"; // Import your utils
 import {
   RouteProp,
   useNavigation,
   useFocusEffect,
 } from "@react-navigation/native";
-import { UserStackNavigationProp } from "./navigationTypes";
+import { UserStackNavigationProp } from "../Navigation/navigationTypes";
 import {
   View,
   Text,
@@ -19,13 +19,13 @@ import {
   TouchableOpacity,
   Platform,
 } from "react-native";
-import MiniCell from "./MiniCell";
-import { CellProps } from "./Cell";
+import MiniCell from "../Posts/MiniCell";
+import { CellProps } from "../Posts/Cell";
 import {
   MainStackParamList,
   MainStackNavigationProp,
   MainTabNavigationProp,
-} from "./navigationTypes";
+} from "../Navigation/navigationTypes";
 
 const SavedRoute = () => {
   const [savedCells, setSavedCells] = useState<CellProps[]>([]);

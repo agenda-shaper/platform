@@ -12,7 +12,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import utils, { InteractionManager, uploadImage } from "./utils"; // Import your utility module
+import utils, { InteractionManager, uploadImage } from "../Misc/utils"; // Import your utility module
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 const CreatePost: React.FC = () => {
   const navigation = useNavigation();
