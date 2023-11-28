@@ -29,7 +29,7 @@ import { CellType } from "../Posts/Cell";
 import MiniCell from "../Posts/MiniCell";
 import { RouteProp } from "@react-navigation/native";
 import { MainTabParamList } from "../Navigation/navigationTypes";
-import { UserContext } from "../User/UserContext";
+import { UserContext, ChatContext } from "../Misc/Contexts";
 const aiAvatar = require("../assets/gate_ai_logo.png");
 
 const TextComponent = ({
@@ -65,14 +65,12 @@ const components = {
   tr: TextComponent,
   table: TextComponent,
 };
-
-interface ChatScreenProps {
-  route?: RouteProp<MainTabParamList, "Chat">;
-}
 const AIAvatar = () => <Image source={aiAvatar} style={styles.avatar} />;
 const interactionManager = InteractionManager.getInstance();
 
-const DesktopChat: React.FC<ChatScreenProps> = ({ route }) => {
+const DesktopChat: React.FC = () => {
+  const { chatData, setChatData } = React.useContext(ChatContext);
+
   //   useFocusEffect(
   //     React.useCallback(() => {
   //       if (Platform.OS === "web") {
@@ -83,8 +81,6 @@ const DesktopChat: React.FC<ChatScreenProps> = ({ route }) => {
   //   );
 
   const { displayName, avatarUrl } = useContext(UserContext);
-
-  const [cell, setCell] = useState(route?.params?.cell);
 
   const [isAtBottom, setIsAtBottom] = useState(true); // Add this state
 
@@ -107,7 +103,7 @@ const DesktopChat: React.FC<ChatScreenProps> = ({ route }) => {
       const data = await response.json();
       setChatId(data.chat_id); // Store the chat_id in state
       setSendDisabled(false);
-      setCell(undefined); // Use setCell to update the value of cell
+      setChatData(undefined); // Use setCell to update the value of cell
     } else {
       console.log((await response.json()).message);
     }
@@ -152,7 +148,11 @@ const DesktopChat: React.FC<ChatScreenProps> = ({ route }) => {
     setMessages(newMessages);
     console.log("sending messages: ", messagesToSend);
 
-    const aiRespondedMessage = await sendMessage(chatId, messagesToSend, cell);
+    const aiRespondedMessage = await sendMessage(
+      chatId,
+      messagesToSend,
+      chatData
+    );
     // pop the temp message
     newMessages.pop();
     if (aiRespondedMessage) {
@@ -171,9 +171,7 @@ const DesktopChat: React.FC<ChatScreenProps> = ({ route }) => {
 
     setSendDisabled(false); // Set isSending back to false after message is sent
   };
-  useEffect(() => {
-    setCell(route?.params?.cell);
-  }, [route?.params?.cell]);
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -205,97 +203,122 @@ const DesktopChat: React.FC<ChatScreenProps> = ({ route }) => {
     // });
   }, [navigation]); // Empty dependency array ensures this runs only on mount
   return (
-    <View style={styles.container}>
-      {cell && <MiniCell cell={cell} source="chat_context" />}
-      <FlatList
-        keyboardShouldPersistTaps="handled" // close keyboard on tap - leave on scroll
-        ref={flatListRef}
-        windowSize={10} // performance
-        onScroll={({ nativeEvent }) => {
-          const threshold = 10; // Adjust this value as needed
-          setIsAtBottom(
-            nativeEvent.contentOffset.y +
-              nativeEvent.layoutMeasurement.height +
-              threshold >=
-              nativeEvent.contentSize.height
-          );
-        }}
-        scrollEventThrottle={100}
-        data={messages}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item, index }) => (
-          <View
-            onLayout={() => {
-              // Scroll to end if this is a new message and user is at bottom
-              //console.log(isAtBottom);
-              if (isAtBottom) {
-                setTimeout(() => {
-                  if (flatListRef.current) {
-                    console.log("scrolling to end");
-                    flatListRef.current.scrollToEnd({ animated: true });
-                  }
-                }, 10);
+    <View style={styles.wholeContainer}>
+      <View style={styles.container}>
+        {chatData && <MiniCell cell={chatData} source="chat_context" />}
+        <FlatList
+          //style={{ height: 300 }} // adjust this as needed
+          keyboardShouldPersistTaps="handled" // close keyboard on tap - leave on scroll
+          ref={flatListRef}
+          windowSize={10} // performance
+          onScroll={({ nativeEvent }) => {
+            const threshold = 10; // Adjust this value as needed
+            setIsAtBottom(
+              nativeEvent.contentOffset.y +
+                nativeEvent.layoutMeasurement.height +
+                threshold >=
+                nativeEvent.contentSize.height
+            );
+          }}
+          scrollEventThrottle={100}
+          data={messages}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item, index }) => (
+            <View
+              onLayout={() => {
+                // Scroll to end if this is a new message and user is at bottom
+                //console.log(isAtBottom);
+                if (isAtBottom) {
+                  setTimeout(() => {
+                    if (flatListRef.current) {
+                      console.log("scrolling to end");
+                      flatListRef.current.scrollToEnd({ animated: true });
+                    }
+                  }, 10);
+                }
+              }}
+              style={
+                item.role === "user" ? styles.userMessage : styles.aiMessage
+              }
+            >
+              <View style={styles.messageHeader}>
+                {item.role === "user" ? (
+                  <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+                ) : (
+                  <AIAvatar />
+                )}
+                <Text style={styles.roleName}>
+                  {item.role === "user" ? displayName : "Gate AI"}
+                </Text>
+              </View>
+              <View style={styles.text}>
+                <Markdown remarkPlugins={[remarkGfm]}>{item.content}</Markdown>
+                {/* removed markdown  style={styles.text}   */}
+              </View>
+            </View>
+          )}
+        />
+        {!isAtBottom && (
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              flexDirection: "row",
+              marginBottom: 20,
+              backgroundColor: "transparent",
+            }}
+            onPress={() => {
+              if (flatListRef.current) {
+                console.log("scrolling to end");
+                flatListRef.current.scrollToEnd({ animated: true });
               }
             }}
-            style={item.role === "user" ? styles.userMessage : styles.aiMessage}
           >
-            <View style={styles.messageHeader}>
-              {item.role === "user" ? (
-                <Image source={{ uri: avatarUrl }} style={styles.avatar} />
-              ) : (
-                <AIAvatar />
-              )}
-              <Text style={styles.roleName}>
-                {item.role === "user" ? displayName : "Gate AI"}
-              </Text>
-            </View>
-            <View style={styles.text}>
-              <Markdown remarkPlugins={[remarkGfm]}>{item.content}</Markdown>
-              {/* removed markdown  style={styles.text}   */}
-            </View>
-          </View>
+            {/* Replace "Scroll to bottom" with your SVG */}
+            <Text>Scroll to Bottom</Text>
+          </TouchableOpacity>
         )}
-      />
-      {!isAtBottom && (
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            flexDirection: "row",
-            marginBottom: 20,
-            backgroundColor: "transparent",
-          }}
-          onPress={() => {
-            if (flatListRef.current) {
-              console.log("scrolling to end");
-              flatListRef.current.scrollToEnd({ animated: true });
-            }
-          }}
-        >
-          {/* Replace "Scroll to bottom" with your SVG */}
-          <Text>Scroll to Bottom</Text>
-        </TouchableOpacity>
-      )}
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Message"
-          value={inputMessage}
-          onChangeText={(text) => setInputMessage(text)}
-          multiline // This makes the TextInput multiline
-        />
-        <TouchableOpacity
-          onPress={handleMessageSend}
-          disabled={sendDisabled}
-          style={styles.sendButton}
-        >
-          {sendDisabled ? (
-            <chat_send.off width="50" height="50" />
-          ) : (
-            <chat_send.on width="50" height="50" />
-          )}
-        </TouchableOpacity>
+        <View style={styles.inputContainer}>
+          <textarea
+            style={{
+              fontSize: 14,
+              flex: 1,
+              marginRight: 8,
+              borderColor: "#ccc",
+              borderWidth: 1,
+              borderRadius: 16,
+              padding: 8,
+              height: 40,
+              resize: "none",
+              maxHeight: 100,
+              overflow: "auto",
+            }}
+            placeholder="Message"
+            value={inputMessage}
+            //onChangeText={(text) => setInputMessage(text)}
+            onChange={(e) => setInputMessage(e.target.value)}
+            //multiline // This makes the TextInput multiline
+
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleMessageSend();
+              }
+            }}
+          />
+          <TouchableOpacity
+            onPress={handleMessageSend}
+            disabled={sendDisabled}
+            style={styles.sendButton}
+          >
+            {sendDisabled ? (
+              <chat_send.off width="50" height="50" />
+            ) : (
+              <chat_send.on width="50" height="50" />
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -304,9 +327,20 @@ const styles = StyleSheet.create({
   sendButton: {
     width: 27,
   },
+  wholeContainer: {
+    width: "28%",
+
+    height: "97%", // adjust this as needed
+
+    position: "absolute",
+    right: 32,
+    bottom: 10,
+  },
   container: {
     flex: 1,
     justifyContent: "flex-end",
+    backgroundColor: "white",
+    borderRadius: 10,
   },
   text: {
     fontSize: 15,
@@ -352,16 +386,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-  },
-  input: {
-    fontSize: 14, // adjust this value as needed
-    flex: 1,
-    marginRight: 8,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 8,
-    height: 40, // Set your desired max height here
   },
 });
 

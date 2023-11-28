@@ -4,7 +4,7 @@ import { AuthNavigator } from "../Navigation/Navigator";
 import { AuthContext } from "../Auth/auth-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import utils from "./utils"; // Import your utils module
-import { UserContext, UserProps } from "../User/UserContext";
+import { UserContext, UserProps } from "./Contexts";
 import { isMobile } from "react-device-detect";
 import { NavigationContainerRef } from "@react-navigation/native";
 import { MainTabParamList } from "../Navigation/navigationTypes";

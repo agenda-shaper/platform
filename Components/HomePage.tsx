@@ -188,7 +188,7 @@ const mobileStyles = StyleSheet.create({
 });
 const desktopStyles = StyleSheet.create({
   list: {
-    width: "50%", // Make the list take up the full width of its container
+    width: "40%", // Make the list take up the full width of its container
     alignSelf: "center",
   },
 });

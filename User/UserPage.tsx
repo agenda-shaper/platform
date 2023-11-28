@@ -1,6 +1,6 @@
 // UserPage.tsx
 import React, { useContext, useState, useEffect } from "react";
-import { UserContext, UserProps } from "./UserContext";
+import { UserContext, UserProps } from "../Misc/Contexts";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import utils from "../Misc/utils"; // Import your utils
 import {

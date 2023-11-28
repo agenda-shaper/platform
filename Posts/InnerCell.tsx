@@ -23,6 +23,11 @@ import {
 } from "../Navigation/navigationTypes";
 import utils, { InteractionManager } from "../Misc/utils"; // Import your utility module
 import { isMobile } from "react-device-detect";
+declare global {
+  interface Window {
+    __CELL_DATA__: any | undefined;
+  }
+}
 
 // Define a new type for your route prop
 type InnerCellRouteProp = RouteProp<MainStackParamList, "InnerCell">;
@@ -61,9 +66,18 @@ const InnerCell: React.FC<Props> = ({ route }) => {
 
   useEffect(() => {
     if (!cell && post_id) {
-      fetchCellData(post_id).then((data) => {
-        setCell(data);
-      });
+      const html_cell = JSON.parse(window.__CELL_DATA__);
+      if (html_cell) {
+        console.log("fetch cell from HTML");
+
+        setCell(html_cell);
+      } else {
+        // fetch from server
+        console.log("fetch cell from server");
+        fetchCellData(post_id).then((data) => {
+          setCell(data);
+        });
+      }
     }
   }, []);
 

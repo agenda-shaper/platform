@@ -4,7 +4,7 @@ module.exports = function (api) {
     presets: ["babel-preset-expo", "module:@babel/preset-typescript"],
     env: {
       production: {
-        plugins: ["transform-remove-console"],
+        // plugins: ["transform-remove-console"],
       },
     },
   };

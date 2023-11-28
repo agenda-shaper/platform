@@ -7,21 +7,24 @@ import {
   DesktopMainNavigator,
 } from "./Navigation/Navigator";
 import { AuthContext } from "./Auth/auth-context";
-import { View, ScrollView, SafeAreaView } from "react-native";
+import { View, ScrollView, SafeAreaView, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import utils from "./Misc/utils"; // Import your utils module
-import { UserContext, UserProps } from "./User/UserContext";
+import { UserContext, UserProps, ChatContext } from "./Misc/Contexts";
 import { isMobile } from "react-device-detect";
 import { NavigationContainerRef } from "@react-navigation/native";
 import { MainTabParamList } from "./Navigation/navigationTypes";
 import TopBar from "./Misc/DesktopTopbar";
 import HomePage from "./Components/HomePage";
+import { CellProps } from "./Posts/Cell";
 
 export const navigationRef =
   React.createRef<NavigationContainerRef<MainTabParamList>>();
 
 const App: React.FC = () => {
   const discordInviteLink = "https://discord.com/invite/qcsCKat7zS";
+  const [chatData, setChatData] = React.useState<CellProps | undefined>();
+
   const [userData, setUserData] = React.useState<UserProps>({
     user_id: "",
     username: "",
@@ -83,13 +86,15 @@ const App: React.FC = () => {
   return (
     <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
       <UserContext.Provider value={userData}>
-        <NavigationContainer ref={navigationRef}>
-          {isMobile ? (
-            <MobileMainNavigator navigationRef={navigationRef} />
-          ) : (
-            <DesktopMainNavigator navigationRef={navigationRef} />
-          )}
-        </NavigationContainer>
+        <ChatContext.Provider value={{ chatData, setChatData }}>
+          <NavigationContainer ref={navigationRef}>
+            {isMobile ? (
+              <MobileMainNavigator navigationRef={navigationRef} />
+            ) : (
+              <DesktopMainNavigator navigationRef={navigationRef} />
+            )}
+          </NavigationContainer>
+        </ChatContext.Provider>
       </UserContext.Provider>
     </AuthContext.Provider>
   );

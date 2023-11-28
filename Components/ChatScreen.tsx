@@ -29,7 +29,7 @@ import { CellType } from "../Posts/Cell";
 import MiniCell from "../Posts/MiniCell";
 import { RouteProp } from "@react-navigation/native";
 import { MainTabParamList } from "../Navigation/navigationTypes";
-import { UserContext } from "../User/UserContext";
+import { UserContext, ChatContext } from "../Misc/Contexts";
 const aiAvatar = require("../assets/gate_ai_logo.png");
 
 const TextComponent = ({
@@ -65,14 +65,10 @@ const components = {
   tr: TextComponent,
   table: TextComponent,
 };
-
-interface ChatScreenProps {
-  route?: RouteProp<MainTabParamList, "Chat">;
-}
 const AIAvatar = () => <Image source={aiAvatar} style={styles.avatar} />;
 const interactionManager = InteractionManager.getInstance();
 
-const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
+const ChatScreen: React.FC = () => {
   useFocusEffect(
     React.useCallback(() => {
       if (Platform.OS === "web") {
@@ -84,7 +80,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
 
   const { displayName, avatarUrl } = useContext(UserContext);
 
-  const [cell, setCell] = useState(route?.params?.cell);
+  const { chatData, setChatData } = React.useContext(ChatContext);
 
   const [isAtBottom, setIsAtBottom] = useState(true); // Add this state
 
@@ -108,7 +104,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
       const data = await response.json();
       setChatId(data.chat_id); // Store the chat_id in state
       setSendDisabled(false);
-      setCell(undefined); // Use setCell to update the value of cell
+      setChatData(undefined); // Use setCell to update the value of cell
     } else {
       console.log((await response.json()).message);
     }
@@ -153,7 +149,11 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
     setMessages(newMessages);
     console.log("sending messages: ", messagesToSend);
 
-    const aiRespondedMessage = await sendMessage(chatId, messagesToSend, cell);
+    const aiRespondedMessage = await sendMessage(
+      chatId,
+      messagesToSend,
+      chatData
+    );
     // pop the temp message
     newMessages.pop();
     if (aiRespondedMessage) {
@@ -172,9 +172,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
 
     setSendDisabled(false); // Set isSending back to false after message is sent
   };
-  useEffect(() => {
-    setCell(route?.params?.cell);
-  }, [route?.params?.cell]);
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -211,7 +209,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
       style={styles.container}
       keyboardVerticalOffset={insets.top + 45} // Adjust this value as needed
     >
-      {cell && <MiniCell cell={cell} source="chat_context" />}
+      {chatData && <MiniCell cell={chatData} source="chat_context" />}
       <FlatList
         keyboardShouldPersistTaps="handled" // close keyboard on tap - leave on scroll
         ref={flatListRef}

@@ -1,6 +1,6 @@
 // Navigator.tsx
+import React, { useState, useEffect } from "react";
 
-import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import ChatScreen from "../Components/ChatScreen";
@@ -91,17 +91,18 @@ const UserStackScreen: React.FC<{ passed_user_id?: string }> = ({
 const MobileMainNavigator: React.FC<{ navigationRef: any }> = ({
   navigationRef,
 }) => {
-  // Get the initial URL
-  Linking.getInitialURL().then((initialUrl) => {
-    if (initialUrl) {
-      // Create a new URL object
-      const url = new URL(initialUrl);
+  // In your main App component or a component that only mounts once
+  React.useEffect(() => {
+    Linking.getInitialURL().then((initialUrl) => {
+      if (initialUrl) {
+        const pathname = convertUrl(initialUrl);
 
-      // Log the path
-      console.log("Path: ", url.pathname);
-      navigateUrl(url.pathname, navigationRef);
-    }
-  });
+        // Log the path
+        console.log("Path: ", pathname);
+        navigateUrl(pathname, navigationRef);
+      }
+    });
+  }, []); // Empty dependency array ensures this runs only once
 
   return (
     <Tab.Navigator>
@@ -111,45 +112,69 @@ const MobileMainNavigator: React.FC<{ navigationRef: any }> = ({
     </Tab.Navigator>
   );
 };
+const convertUrl = (initialUrl: string) => {
+  // Create a new URL object
+  const url = new URL(initialUrl);
+
+  return url.pathname;
+};
 
 const DesktopStack = createStackNavigator<MainStackParamList>();
 
 const DesktopMainNavigator: React.FC<{ navigationRef: any }> = ({
   navigationRef,
 }) => {
-  // Get the initial URL
-  Linking.getInitialURL().then((initialUrl) => {
-    if (initialUrl) {
-      // Create a new URL object
-      const url = new URL(initialUrl);
+  useEffect(() => {
+    // this will call oneffect
+    window.addEventListener("popstate", handlePopState);
 
-      // Log the path
-      console.log("Path: ", url.pathname);
-      navigateUrl(url.pathname, navigationRef);
-    }
-  });
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  const handlePopState = () => {
+    // Handle your page change here
+    const pathname = convertUrl(window.location.href);
+    console.log("page changed to: ", pathname);
+    navigateUrl(pathname, navigationRef);
+  };
+
+  // In your main App component or a component that only mounts once
+  React.useEffect(() => {
+    Linking.getInitialURL().then((initialUrl) => {
+      if (initialUrl) {
+        const pathname = convertUrl(initialUrl);
+
+        // Log the path
+        console.log("Path: ", pathname);
+        navigateUrl(pathname, navigationRef);
+      }
+    });
+  }, []); // Empty dependency array ensures this runs only once
 
   return (
     <>
       <View style={{ flex: 1 }}>
         <TopBar />
-
-        <DesktopStack.Navigator
-          screenOptions={{
-            headerShown: false,
-          }}
-          initialRouteName="Home"
-        >
-          <DesktopStack.Screen name="Home" component={MainStackScreen} />
-          {/* /<DesktopStack.Screen name="Chat" component={ChatScreen} /> */}
-          <DesktopStack.Screen name="Users" component={UserStackScreen} />
-        </DesktopStack.Navigator>
+        <View style={{ flex: 1 }}>
+          <DesktopStack.Navigator
+            screenOptions={{
+              headerShown: false,
+            }}
+            initialRouteName="Home"
+          >
+            <DesktopStack.Screen name="Home" component={MainStackScreen} />
+            {/* /<DesktopStack.Screen name="Chat" component={ChatScreen} /> */}
+            <DesktopStack.Screen name="Users" component={UserStackScreen} />
+          </DesktopStack.Navigator>
+          <DesktopChat />
+        </View>
       </View>
-      <DesktopChat />
     </>
   );
 };
-function navigateUrl(url_path: string, navigationRef: any) {
+export function navigateUrl(url_path: string, navigationRef: any) {
   // Split the path by "/"
   const pathParts = url_path.split("/");
   console.log("should be navigating: ", pathParts);
@@ -162,6 +187,10 @@ function navigateUrl(url_path: string, navigationRef: any) {
         console.log("posts: ", post_id);
         navigationRef.current?.navigate("InnerCell", { post_id });
       }
+
+      break;
+    case "home":
+      navigationRef.current?.navigate("Home", {});
 
       break;
     case "users":

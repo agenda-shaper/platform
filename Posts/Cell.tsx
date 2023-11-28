@@ -8,6 +8,8 @@ import {
 } from "../Navigation/navigationTypes";
 import moment from "moment";
 import { like, save, ai } from "../assets/icons"; // Import the SVG components
+import { isMobile } from "react-device-detect";
+import { ChatContext } from "../Misc/Contexts";
 
 const interactionManager = InteractionManager.getInstance();
 
@@ -35,6 +37,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
     links,
     created_at,
   } = cell;
+  const { chatData, setChatData } = React.useContext(ChatContext);
 
   const navigation = useNavigation<MainStackNavigationProp>();
   const tabNavigation = useNavigation<MainTabNavigationProp>();
@@ -68,7 +71,12 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
       post_id: id,
       type: "ask",
     });
-    tabNavigation.navigate("Chat", { cell: cell });
+    setChatData(cell);
+    if (isMobile) {
+      tabNavigation.navigate("Chat");
+    } else {
+      //! open window
+    }
   };
 
   const handleSavePress = async () => {
