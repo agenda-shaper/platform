@@ -1,8 +1,7 @@
 import React, { useEffect, useContext, useState, useRef } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 //import Markdown from "@valasolutions/react-native-markdown";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { Helmet } from "react-helmet-async";
 import { isMobile } from "react-device-detect";
@@ -30,6 +29,8 @@ import MiniCell from "../Posts/MiniCell";
 import { RouteProp } from "@react-navigation/native";
 import { MainTabParamList } from "../Navigation/navigationTypes";
 import { UserContext, ChatContext } from "../Misc/Contexts";
+
+
 const aiAvatar = require("../assets/gate_ai_logo.png");
 
 const TextComponent = ({
@@ -252,7 +253,8 @@ const DesktopChat: React.FC = () => {
                 </Text>
               </View>
               <View style={styles.text}>
-                <Markdown remarkPlugins={[remarkGfm]}>{item.content}</Markdown>
+                 <Text >{item.content}</Text>
+                {/* <Markdown remarkPlugins={[remarkGfm]}>{item.content}</Markdown> */}
                 {/* removed markdown  style={styles.text}   */}
               </View>
             </View>

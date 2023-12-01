@@ -18,6 +18,7 @@
     "@types/marked": "^6.0.0",
     "@valasolutions/react-native-markdown": "^1.0.3",
     "babel-plugin-inline-import": "^3.0.0",
+    "devlop": "^1.1.0",
     "expo": "^49.0.13",
     "expo-app-auth": "^9.3.0",
     "expo-auth-session": "~5.0.2",

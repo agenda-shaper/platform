@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity,Platform } from "react-native";
 import utils, { InteractionManager } from "../Misc/utils"; // Import your utility module
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 import {
@@ -38,6 +38,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
     created_at,
   } = cell;
   const { chatData, setChatData } = React.useContext(ChatContext);
+  const isMobileOS = Platform.OS === 'ios' || Platform.OS === 'android' || isMobile;
 
   const navigation = useNavigation<MainStackNavigationProp>();
   const tabNavigation = useNavigation<MainTabNavigationProp>();
@@ -72,10 +73,10 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
       type: "ask",
     });
     setChatData(cell);
-    if (isMobile) {
+    if (isMobileOS) {
       tabNavigation.navigate("Chat");
     } else {
-      //! open window
+      //! open window if not opened
     }
   };
 
@@ -153,7 +154,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
               style={[styles.buttonContainer]}
               onPress={handleAskAIPress}
             >
-              <ai.ask width="30" height="30" />
+              <ai.askAI width="30" height="30" />
             </TouchableOpacity>
           </View>
         </View>

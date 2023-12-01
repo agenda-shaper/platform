@@ -39,7 +39,9 @@ const InnerCell: React.FC<Props> = ({ route }) => {
     ? route.params.post_id
     : route.params.cell?.id;
   const [cell, setCell] = useState(cellProp);
-  const styles = isMobile ? mobileStyles : desktopStyles;
+  const isMobileOS = Platform.OS === 'ios' || Platform.OS === 'android' || isMobile;
+
+  const styles = isMobileOS ? mobileStyles : desktopStyles;
 
   useFocusEffect(
     React.useCallback(() => {

@@ -32,7 +32,8 @@ const HomePage = () => {
   // const mobileNav = useNavigation<MainStackNavigationProp>();
   // const desktopNav = useNavigation<DesktopNavigationProp>();
   // const navigation = useNavigation();
-  const styles = isMobile ? mobileStyles : desktopStyles;
+  const isMobileOS = Platform.OS === 'ios' || Platform.OS === 'android' || isMobile;
+  const styles = isMobileOS ? mobileStyles : desktopStyles;
 
   const timerId = useRef<number | null>(null);
   const [timeForInactivityInSecond, setTimeForInactivityInSecond] =
@@ -43,7 +44,9 @@ const HomePage = () => {
   const [visiblePosts, setVisiblePosts] = useState<ViewToken[]>([]);
   const [listData, setListData] = React.useState(data); // Add this line
   useEffect(() => {
-    document.title = "Your Page Title";
+    if (Platform.OS === "web") {
+      document.title = "Home";
+  }
   }, []);
   const onSwipeValueChange = (swipeData: any) => {
     const { key, value } = swipeData;

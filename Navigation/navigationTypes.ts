@@ -29,6 +29,7 @@ export type MainStackParamList = {
   Users: { passed_user_id?: string };
   //Screen: { InnerCell: undefined };
   InnerCell: { cell?: CellProps; source?: string; post_id?: string };
+  Auth:undefined;
 };
 
 export type UserStackParamList = {

@@ -1,5 +1,5 @@
 // Navigator.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -12,8 +12,8 @@ import LoginPage from "../Auth/LoginPage"; // Import your LoginPage component
 import RegisterPage from "../Auth/RegisterPage"; // Import your RegisterPage component
 import InnerCell, { Props } from "../Posts/InnerCell";
 import CreatePost from "../User/CreatePost";
-import { View, Image, TouchableOpacity, StyleSheet } from "react-native";
-
+import { View, Image, TouchableOpacity, StyleSheet,Platform } from "react-native";
+import { AuthContext } from "../Auth/auth-context";
 import { Linking } from "react-native";
 import TopBar from "../Misc/DesktopTopbar";
 import Cell, { CellProps } from "../Posts/Cell"; // Import your Cell component
@@ -124,12 +124,18 @@ const DesktopStack = createStackNavigator<MainStackParamList>();
 const DesktopMainNavigator: React.FC<{ navigationRef: any }> = ({
   navigationRef,
 }) => {
-  useEffect(() => {
-    // this will call oneffect
-    window.addEventListener("popstate", handlePopState);
 
+  const { isLoggedIn } = useContext(AuthContext); // Get the user image and isUserLoggedIn state from the UserContext
+
+  useEffect(() => {
+
+      // this will call oneffect
+      window.addEventListener("popstate", handlePopState);
+    
     return () => {
+
       window.removeEventListener("popstate", handlePopState);
+    
     };
   }, []);
 
@@ -167,8 +173,11 @@ const DesktopMainNavigator: React.FC<{ navigationRef: any }> = ({
             <DesktopStack.Screen name="Home" component={MainStackScreen} />
             {/* /<DesktopStack.Screen name="Chat" component={ChatScreen} /> */}
             <DesktopStack.Screen name="Users" component={UserStackScreen} />
+            <DesktopStack.Screen name="Auth" component={AuthNavigator} />
           </DesktopStack.Navigator>
-          <DesktopChat />
+          {isLoggedIn && <DesktopChat />} 
+
+          
         </View>
       </View>
     </>

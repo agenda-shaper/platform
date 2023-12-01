@@ -37,6 +37,8 @@ const App: React.FC = () => {
     avatarUrl: "",
     email: "",
   });
+  const isMobileOS = Platform.OS === 'ios' || Platform.OS === 'android' || isMobile;
+  console.log("ismobile os", isMobile);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const tempRegister = async () => {
@@ -93,7 +95,7 @@ const App: React.FC = () => {
       <UserContext.Provider value={userData}>
         <ChatContext.Provider value={{ chatData, setChatData }}>
           <NavigationContainer ref={navigationRef}>
-            {isMobile ? (
+            {isMobileOS ? (
               <MobileMainNavigator navigationRef={navigationRef} />
             ) : (
               <DesktopMainNavigator navigationRef={navigationRef} />
