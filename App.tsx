@@ -17,7 +17,12 @@ import { MainTabParamList } from "./Navigation/navigationTypes";
 import TopBar from "./Misc/DesktopTopbar";
 import HomePage from "./Components/HomePage";
 import { CellProps } from "./Posts/Cell";
-
+declare global {
+  interface Window {
+    __CELL_DATA__: CellProps | undefined;
+    __USER_DATA__: UserProps | undefined;
+  }
+}
 export const navigationRef =
   React.createRef<NavigationContainerRef<MainTabParamList>>();
 

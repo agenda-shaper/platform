@@ -183,7 +183,7 @@ const HomePage = () => {
 
 const mobileStyles = StyleSheet.create({
   list: {
-    paddingVertical: 16,
+    //paddingVertical: 16,
   },
 });
 const desktopStyles = StyleSheet.create({

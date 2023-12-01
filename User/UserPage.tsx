@@ -106,12 +106,19 @@ const PublicUserRoute = (
     { key: "uploaded", title: "Uploaded Posts" },
   ]);
   useEffect(() => {
-    console.log("fetching");
     if (!userInfo) {
-      fetchUserInfo(passed_user_id).then((data) => {
-        console.log(data);
-        setUserInfo(data);
-      });
+      const html_user = window.__USER_DATA__;
+      if (html_user) {
+        console.log("fetched user info from HTML");
+        setUserInfo(html_user);
+      } else {
+        // fetch from server
+        console.log("fetching user info from server");
+        fetchUserInfo(passed_user_id).then((data) => {
+          //console.log(data);
+          setUserInfo(data);
+        });
+      }
     }
   }, []);
   if (!userInfo) {
@@ -203,6 +210,8 @@ export type UserRouteProps = {
 };
 const UserPage: React.FC<UserRouteProps> = ({ route }) => {
   let passed_user_id = undefined;
+  const { user_id } = useContext(UserContext);
+
   if (route) {
     passed_user_id = route.params?.passed_user_id;
   }
@@ -211,7 +220,8 @@ const UserPage: React.FC<UserRouteProps> = ({ route }) => {
   const navigation = useNavigation<UserStackNavigationProp>();
   console.log("checking");
 
-  if (passed_user_id) {
+  // if user id is passed and its not equal to own user
+  if (passed_user_id && passed_user_id != user_id) {
     return PublicUserRoute(navigation, passed_user_id);
   } else {
     console.log("SelfUserRoute");
