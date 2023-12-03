@@ -6,7 +6,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { Helmet } from "react-helmet-async";
 import { isMobile } from "react-device-detect";
 
-import utils, { InteractionManager, sendMessage } from "../Misc/utils"; // Import your utility module
+import utils, { InteractionManager, eventSourceChat, sendMessage } from "../Misc/utils"; // Import your utility module
 import {
   View,
   Text,
@@ -130,16 +130,70 @@ const DesktopChat: React.FC = () => {
       console.log((await response.json()).message);
     }
   };
-  const handleMessageSend = async () => {
-    if (inputMessage.trim() === "" || sendDisabled || !chatId) return; // Don't send empty messages or if already sending or if chatid null
-    const message = inputMessage;
-    setInputMessage("");
-    setSendDisabled(true); // Set isSending to true when sending a message
+  const sendStream = async (userPrompt:string, chatID:string) => {
     let newMessages = [
       ...messages,
       {
         role: "user",
-        content: message,
+        content: userPrompt,
+      },
+    ];
+    const messagesToSend = newMessages.slice(-15); // Create a new copy of the last 15 messages
+
+    // temp message
+    newMessages.push({ role: "assistant", content: "" });
+    setMessages(newMessages);
+    // console.log("sending messages: ", messagesToSend);
+
+    const sse = await eventSourceChat(
+      messagesToSend,
+      chatID,
+      chatData,
+    );
+
+    // listen to incoming messages
+    sse.addEventListener("message", ({ data }) => {
+      if (data) {
+        
+        const json = JSON.parse(data);
+        if (json.close){
+          console.log("Connection closed: ",json.close);
+          sse.removeAllEventListeners();
+          sse.close();
+        } else{
+          const chunk = json.content;
+          console.log(chunk);
+          setMessages(oldMessages => {
+            const newMessages = [...oldMessages];
+            newMessages[newMessages.length - 1].content += chunk;
+            return newMessages;
+          });
+        }
+      }
+    });  
+
+    // Event listener for when an error occurs
+    sse.addEventListener("error", (e) => {
+      console.error("A CHATSTREAM error occurred: ", e);
+      // error
+
+      // pop the user and ai message
+      newMessages.pop();
+      newMessages.pop();
+      setMessages([...newMessages]);
+
+      // rollback input
+      setInputMessage(userPrompt);
+    });
+    
+  };
+
+  const sendNormal = async (userPrompt:string, chatID:string) => {
+    let newMessages = [
+      ...messages,
+      {
+        role: "user",
+        content: userPrompt,
       },
     ];
     const messagesToSend = newMessages.slice(-15); // Create a new copy of the last 15 messages
@@ -148,9 +202,9 @@ const DesktopChat: React.FC = () => {
     newMessages.push({ role: "assistant", content: "..." });
     setMessages(newMessages);
     console.log("sending messages: ", messagesToSend);
-
+    
     const aiRespondedMessage = await sendMessage(
-      chatId,
+      chatID,
       messagesToSend,
       chatData
     );
@@ -167,8 +221,18 @@ const DesktopChat: React.FC = () => {
       setMessages([...newMessages]);
 
       // rollback input
-      setInputMessage(message);
+      setInputMessage(userPrompt);
     }
+    
+  };
+
+  const handleMessageSend = async () => {
+    if (inputMessage.trim() === "" || sendDisabled || !chatId) return; // Don't send empty messages or if already sending or if chatid null
+    const message = inputMessage;
+    setInputMessage("");
+    setSendDisabled(true); // Set isSending to true when sending a message
+
+    await sendNormal(message,chatId);
 
     setSendDisabled(false); // Set isSending back to false after message is sent
   };

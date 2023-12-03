@@ -154,7 +154,7 @@ const Cell: React.FC<CellType> = React.memo(({ cell }) => {
               style={[styles.buttonContainer]}
               onPress={handleAskAIPress}
             >
-              <ai.askAI width="30" height="30" />
+              <ai.ask width="30" height="30" />
             </TouchableOpacity>
           </View>
         </View>

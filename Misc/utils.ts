@@ -10,29 +10,54 @@ interface Message {
   role: string;
   content: string;
 }
+import EventSource from "react-native-sse";
 
-export async function sendMessage(
-  chat_id: string,
-  messages: Message[],
-  context_cell?: CellProps
-) {
-  const payload = { chat_id, messages, context_cell };
-  try {
-    const response: any = await post("/chat/send", payload);
-    if (response.ok) {
-      const data = await response.json();
-      const aiResponse: Message = data.message;
-      return aiResponse;
-    } else {
-      const errorData = await response.json();
-      console.error(errorData);
+  export const eventSourceChat = async (messages: Message[], chat_id: string, context_cell?: CellProps) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        throw new Error("token not set");
+      }
+
+      const context_cellString = JSON.stringify(context_cell);
+      const messagesString = JSON.stringify(messages); 
+
+      const url = `${API_BASE_URL}/chat/send?chat_id=${encodeURIComponent(chat_id)}&messagesString=${encodeURIComponent(messagesString)}&context_cell=${encodeURIComponent(context_cellString)}`;
+      const sse = new EventSource(url,{
+        headers: {
+          Authorization: token,
+        },
+      });
+      return sse;
+    } catch (error) {
+      throw error; // Throw the error to be handled by the caller
+    }
+  };
+
+
+  export async function sendMessage(
+    chat_id: string,
+    messages: Message[],
+    context_cell?: CellProps
+  ) {
+    const payload = { chat_id, messages, context_cell };
+    
+    try {
+      const response: any = await post("/chat/send", payload);
+      if (response.ok) {
+        const data = await response.json();
+        const aiResponse: Message = data.message;
+        return aiResponse;
+      } else {
+        const errorData = await response.json();
+        console.error(errorData);
+        return null;
+      }
+    } catch (error) {
+      console.error(error);
       return null;
     }
-  } catch (error) {
-    console.error(error);
-    return null;
   }
-}
 
 // Function to make a GET request
 export const get = async (uri: string) => {
@@ -40,6 +65,26 @@ export const get = async (uri: string) => {
     const token = await AsyncStorage.getItem("token");
     if (!token) {
       throw new Error("token not set");
+    }
+    const response = await fetch(`${API_BASE_URL}${uri}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error; // Throw the error to be handled by the caller
+  }
+};
+
+// Function to make a GET request
+export const noAuthGet = async (uri: string) => {
+  try {
+    let token = await AsyncStorage.getItem("token");
+    if (!token) {
+      token = "NO_AUTH"
     }
     const response = await fetch(`${API_BASE_URL}${uri}`, {
       method: "GET",
@@ -120,6 +165,7 @@ export const post = async (uri: string, payload: any) => {
   }
 };
 
+
 // Function to make a POST request
 
 // no token needed
@@ -145,6 +191,7 @@ const utils = {
   APP_NAME,
   get,
   post,
+  noAuthGet,
   auth,
   validator,
 };

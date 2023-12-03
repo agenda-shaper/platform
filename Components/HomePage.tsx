@@ -125,12 +125,13 @@ const HomePage = () => {
   const fetchCells = async () => {
     try {
       console.log("fetching recommended");
-      const response = await utils.get("/cells/fetch"); // Replace with your actual API endpoint
+      const response = await utils.noAuthGet("/cells/fetch"); // Replace with your actual API endpoint
       const result = await response.json();
       //console.log(result);
 
       const { cells } = result;
       setData(cells);
+      console.log(cells);
       // resetInactivityTimeout();
     } catch (error) {
       console.error("Error fetching data:", error);
