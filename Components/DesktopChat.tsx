@@ -29,9 +29,34 @@ import MiniCell from "../Posts/MiniCell";
 import { RouteProp } from "@react-navigation/native";
 import { MainTabParamList } from "../Navigation/navigationTypes";
 import { UserContext, ChatContext } from "../Misc/Contexts";
-
-
 const aiAvatar = require("../assets/gate_ai_logo.png");
+
+
+
+
+interface ChatHeaderProps {
+  onNewChat: () => void;
+}
+
+const ChatHeader: React.FC<ChatHeaderProps> = ({ onNewChat }) => {
+  return (
+    <View style={styles.headerContainer}>
+      <Text style={styles.headerTitle}>Chat</Text>
+      <TouchableOpacity onPress={onNewChat} style={styles.newChatButton}>
+        <Text style={styles.newChatButtonText}>New</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+
+
+
+
+
+
+
+
 
 const TextComponent = ({
   node,
@@ -81,7 +106,7 @@ const DesktopChat: React.FC = () => {
   //     }, [])
   //   );
 
-  const { displayName, avatarUrl } = useContext(UserContext);
+  const { displayName, avatarUrl } = useContext(UserContext).userData;
 
   const [isAtBottom, setIsAtBottom] = useState(true); // Add this state
 
@@ -269,7 +294,12 @@ const DesktopChat: React.FC = () => {
   }, [navigation]); // Empty dependency array ensures this runs only on mount
   return (
     <View style={styles.wholeContainer}>
+
       <View style={styles.container}>
+      <View style={styles.headerBackground}>
+        <ChatHeader onNewChat={newChat} />
+      </View>
+
         {chatData && <MiniCell cell={chatData} source="chat_context" />}
         <FlatList
           //style={{ height: 300 }} // adjust this as needed
@@ -395,12 +425,12 @@ const styles = StyleSheet.create({
   },
   wholeContainer: {
     width: "28%",
-
     height: "97%", // adjust this as needed
-
     position: "absolute",
     right: 32,
     bottom: 10,
+    backgroundColor: '#f8f8f8', // moved from headerContainer
+    borderRadius: 10,
   },
   container: {
     flex: 1,
@@ -446,12 +476,35 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "bold",
   },
+  headerBackground: {
+    backgroundColor: '#f8f8f8',
+    borderTopLeftRadius: 10, // match with wholeContainer
+    borderTopRightRadius: 10, // match with wholeContainer
+  },
 
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: 'transparent',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  newChatButton: {
+    padding: 10,
+  },
+  newChatButtonText: {
+    fontSize: 12,
+    color: '#000',
   },
 });
 

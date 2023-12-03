@@ -18,6 +18,7 @@ export const UserContext = React.createContext<UserProps>({
   avatarUrl: "",
   email: undefined,
 });
+
 export interface ChatProps {
   chatData?: CellProps;
   setChatData: React.Dispatch<React.SetStateAction<CellProps | undefined>>;

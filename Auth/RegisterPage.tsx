@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import utils from "../Misc/utils"; // Import your utils module
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
-import { AuthNavigationProp } from "../Navigation/navigationTypes";
+import { AuthNavigationProp,MainStackNavigationProp } from "../Navigation/navigationTypes";
 import {
   View,
   Text,
@@ -16,25 +16,56 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { AuthContext } from "./auth-context"; // Import your AuthContext
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import {UserContext} from "../Misc/Contexts"
+
+
+
 const RegisterPage = () => {
+  // const {setUserData} = useContext(UserContext);
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setdisplayName] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState(""); // Add state for error message
-
+  const [errorMessage, setError] = useState(""); // Add state for error message
+  const mainNavigation = useNavigation<MainStackNavigationProp>();
   const navigation = useNavigation<AuthNavigationProp>();
-
   type Check = [boolean, string];
   const navigateToLogin = () => {
     // Use the navigation object to navigate to the RegisterPage
     navigation.replace("Login");
   };
 
+  const handleGoogleLogin = async (payload: any) => {
+    try {
+      const response = await utils.auth({
+        action: "google_login",
+        data: payload,
+      });
+
+      if (response.ok) {
+        // Login was successful
+        const data = await response.json();
+        console.log("Login successful", data);
+        await AsyncStorage.setItem("token", data.token);
+
+        setIsLoggedIn(true);
+        // setUserData(data.userData);
+        mainNavigation.navigate("Home");
+        // redirect
+      } else {
+        // Login failed, display an error message
+        const errorData = await response.json();
+        setError(errorData.message);
+      }
+    } catch (error) {
+      console.error("Error during Google login", error);
+    }
+  };
   const handleRegister = async () => {
-    setErrorMessage("");
+    setError("");
     const checks: Check[] = [
       [utils.validator.isEmail(email), "Invalid email format"],
       [
@@ -57,7 +88,7 @@ const RegisterPage = () => {
     ];
     for (let [check, message] of checks) {
       if (!check) {
-        setErrorMessage(message);
+        setError(message);
         return;
       }
     }
@@ -74,23 +105,32 @@ const RegisterPage = () => {
         await AsyncStorage.setItem("token", data.token);
 
         setIsLoggedIn(true);
+        // setUserData(data.userData);
+        mainNavigation.navigate("Home");
       } else {
-        setErrorMessage((await response.json()).message);
+        setError((await response.json()).message);
       }
     } catch (error) {
       console.error("Error during registration", error);
-      setErrorMessage("An unknown error occurred during registration");
+      setError("An unknown error occurred during registration");
     }
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    // <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
         <View>
           <Text style={styles.heading}>Register</Text>
+          <View style={styles.googleSignIn}>
+          <GoogleOAuthProvider clientId="204588103385-n5a2hfm0b9tjklv8a8si78l5tfkua245.apps.googleusercontent.com">
+            <GoogleLogin
+              onSuccess={handleGoogleLogin}
+            />
+          </GoogleOAuthProvider>
+        </View>
 
           <TextInput
             style={styles.input}
@@ -135,7 +175,7 @@ const RegisterPage = () => {
           </Text>
         </View>
       </KeyboardAvoidingView>
-    </TouchableWithoutFeedback>
+    // </TouchableWithoutFeedback>
   );
 };
 
@@ -148,6 +188,10 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 24,
     marginBottom: 16,
+    textAlign: "center",
+  },
+  googleSignIn: {
+    marginVertical: 16,
     textAlign: "center",
   },
   input: {

@@ -77,7 +77,7 @@ const ChatScreen: React.FC = () => {
     }, [])
   );
 
-  const { displayName, avatarUrl } = useContext(UserContext);
+  const { displayName, avatarUrl } = useContext(UserContext).userData;
 
   const { chatData, setChatData } = React.useContext(ChatContext);
 

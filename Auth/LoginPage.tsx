@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import utils from "../Misc/utils"; // Import your utils module
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
-import { AuthNavigationProp } from "../Navigation/navigationTypes";
+import { AuthNavigationProp,MainStackNavigationProp } from "../Navigation/navigationTypes";
 
 import {
   View,
@@ -17,19 +17,47 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { AuthContext } from "./auth-context"; // Import your AuthContext
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import {UserContext} from "../Misc/Contexts"
 
 const LoginPage = () => {
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
-
+  //const {setUserData} = useContext(UserContext);
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setError] = useState("");
+  const mainNavigation = useNavigation<MainStackNavigationProp>();
 
   const navigation = useNavigation<AuthNavigationProp>();
 
   const navigateToRegister = () => {
     // Use the navigation object to navigate to the RegisterPage
     navigation.replace("Register");
+  };
+  const handleGoogleLogin = async (payload: any) => {
+    try {
+      const response = await utils.auth({
+        action: "google_login",
+        data: payload,
+      });
+
+      if (response.ok) {
+        // Login was successful
+        const data = await response.json();
+        console.log("Login successful", data);
+        await AsyncStorage.setItem("token", data.token);
+
+        setIsLoggedIn(true);
+        // setUserData(data.userData);
+        mainNavigation.navigate("Home");
+      } else {
+        // Login failed, display an error message
+        const errorData = await response.json();
+        setError(errorData.message);
+      }
+    } catch (error) {
+      console.error("Error during Google login", error);
+    }
   };
 
   const handleLogin = async () => {
@@ -58,6 +86,8 @@ const LoginPage = () => {
         await AsyncStorage.setItem("token", data.token);
 
         setIsLoggedIn(true);
+        //setUserData(data.userData);
+        mainNavigation.navigate("Home");
       } else {
         // Login failed, display an error message
         const errorData = await response.json();
@@ -67,7 +97,7 @@ const LoginPage = () => {
       console.error("Error during login", error);
     }
   };
-
+  
   return (
     // <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <KeyboardAvoidingView
@@ -76,6 +106,13 @@ const LoginPage = () => {
     >
       <View>
         <Text style={styles.heading}>Log In </Text>
+        <View style={styles.googleSignIn}>
+          <GoogleOAuthProvider clientId="204588103385-n5a2hfm0b9tjklv8a8si78l5tfkua245.apps.googleusercontent.com">
+            <GoogleLogin
+              onSuccess={handleGoogleLogin}
+            />
+          </GoogleOAuthProvider>
+        </View>
         <TextInput
           style={styles.input}
           placeholder="Email or Username"
@@ -118,6 +155,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: "center",
   },
+  googleSignIn: {
+    marginVertical: 16,
+    textAlign: "center",
+  },
+  
   input: {
     height: 40,
     borderColor: "#ccc",

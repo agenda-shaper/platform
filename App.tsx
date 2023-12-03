@@ -35,7 +35,7 @@ const App: React.FC = () => {
     username: "",
     displayName: "",
     avatarUrl: "",
-    email: "",
+    email: undefined,
   });
   const isMobileOS = Platform.OS === 'ios' || Platform.OS === 'android' || isMobile;
   console.log("ismobile os", isMobile);

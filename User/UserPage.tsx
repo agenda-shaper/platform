@@ -209,8 +209,8 @@ export type UserRouteProps = {
   route?: UserRouteProp;
 };
 const UserPage: React.FC<UserRouteProps> = ({ route }) => {
-  let passed_user_id = undefined;
-  const { user_id } = useContext(UserContext);
+  let passed_user_id;
+  const { user_id, username, displayName, avatarUrl } = useContext(UserContext);
 
   if (route) {
     passed_user_id = route.params?.passed_user_id;
@@ -219,6 +219,7 @@ const UserPage: React.FC<UserRouteProps> = ({ route }) => {
   console.log("passed_user_id: ", passed_user_id);
   const navigation = useNavigation<UserStackNavigationProp>();
   console.log("checking");
+  console.log("my user id: ",user_id);
 
   // if user id is passed and its not equal to own user
   if (passed_user_id && passed_user_id != user_id) {
