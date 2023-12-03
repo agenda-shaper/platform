@@ -11,10 +11,11 @@ import { View, Image, TouchableOpacity, StyleSheet,Text } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native"; // Import useNavigation
 import { MainStackNavigationProp } from "../Navigation/navigationTypes";
 import { AuthContext } from "../Auth/auth-context";
+const gateLogo = require("../assets/gate-logo.png");
 
-const gateLogo = require("../assets/gate_ai_logo.png");
 
 const TopBar: React.FC = React.memo(() => {
+
   const { avatarUrl } = useContext(UserContext); // Get the user image from the UserContext
   const { isLoggedIn } = useContext(AuthContext); // Get the user image and isUserLoggedIn state from the UserContext
 
@@ -80,8 +81,9 @@ const styles = StyleSheet.create({
   },
   logoImage: {
     borderRadius: 35, // Make the profile image circular
-    width: 35, // Set the width of the profile image
+    width: 35,
     height: 35, // Set the height of the profile image
+    
   },
   loginButton: {
     backgroundColor: "#007BFF", // Set the background color of the button
