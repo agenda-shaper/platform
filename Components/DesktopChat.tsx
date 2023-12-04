@@ -106,7 +106,7 @@ const DesktopChat: React.FC = () => {
   //     }, [])
   //   );
 
-  const { displayName, avatarUrl } = useContext(UserContext).userData;
+  const { displayName, avatarUrl } = useContext(UserContext);
 
   const [isAtBottom, setIsAtBottom] = useState(true); // Add this state
 
