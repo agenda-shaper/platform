@@ -5,7 +5,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { Helmet } from "react-helmet-async";
 import { isMobile } from "react-device-detect";
-
+import { AuthContext } from "../Auth/auth-context";
+import { AuthNavigationProp } from "../Navigation/navigationTypes";
 import utils, { InteractionManager,eventSourceChat,sendMessage } from "../Misc/utils"; // Import your utility module
 import {
   View,
@@ -27,7 +28,7 @@ import { chat_send } from "../assets/icons"; // Import the SVG components
 import { CellType } from "../Posts/Cell";
 import MiniCell from "../Posts/MiniCell";
 import { RouteProp } from "@react-navigation/native";
-import { MainTabParamList } from "../Navigation/navigationTypes";
+import { MainStackNavigationProp } from "../Navigation/navigationTypes";
 import { UserContext, ChatContext } from "../Misc/Contexts";
 const aiAvatar = require("../assets/gate_ai_logo.png");
 
@@ -68,6 +69,7 @@ const AIAvatar = () => <Image source={aiAvatar} style={styles.avatar} />;
 const interactionManager = InteractionManager.getInstance();
 
 const ChatScreen: React.FC = () => {
+  
   useFocusEffect(
     React.useCallback(() => {
       if (Platform.OS === "web") {
@@ -77,6 +79,9 @@ const ChatScreen: React.FC = () => {
     }, [])
   );
 
+  const { isLoggedIn } = useContext(AuthContext);
+  
+  
   const { displayName, avatarUrl } = useContext(UserContext);
 
   const { chatData, setChatData } = React.useContext(ChatContext);
@@ -86,6 +91,11 @@ const ChatScreen: React.FC = () => {
   const flatListRef = useRef<FlatList>(null); // Add this ref
 
   const navigation = useNavigation();
+  const navigationAuth = useNavigation<MainStackNavigationProp>();
+
+  const handleLoginClick = () => {
+    navigationAuth.navigate("Auth");
+  };
   const [sendDisabled, setSendDisabled] = useState(true); // Add this line
   const insets = useSafeAreaInsets();
   const [chatId, setChatId] = useState(null);
@@ -94,6 +104,14 @@ const ChatScreen: React.FC = () => {
     []
   );
   const [inputMessage, setInputMessage] = useState<string>("");
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!isLoggedIn) {
+        handleLoginClick();
+      }
+    }, [isLoggedIn])
+  );
   const newChat = async () => {
     // Clear the local state
     setMessages([]);
@@ -265,7 +283,7 @@ const ChatScreen: React.FC = () => {
         </TouchableOpacity>
       ),
     });
-  }, [navigation]); // Empty dependency array ensures this runs only on mount
+  }, [navigation]);
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}

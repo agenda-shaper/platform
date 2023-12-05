@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback,useContext } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native"; // Imp
 import { MainStackNavigationProp } from "../Navigation/navigationTypes";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { Helmet } from "react-helmet";
+
 import { isMobile } from "react-device-detect";
 
 const interactionManager = InteractionManager.getInstance();
@@ -28,6 +29,8 @@ const HomePage = () => {
       }
     }, [])
   );
+  
+
   // Inside your component
   // const mobileNav = useNavigation<MainStackNavigationProp>();
   // const desktopNav = useNavigation<DesktopNavigationProp>();

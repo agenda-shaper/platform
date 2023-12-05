@@ -3,6 +3,8 @@ import React, { useContext, useState, useEffect } from "react";
 import { UserContext, UserProps } from "../Misc/Contexts";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import utils from "../Misc/utils"; // Import your utils
+import { AuthContext } from "../Auth/auth-context";
+
 import {
   RouteProp,
   useNavigation,
@@ -209,8 +211,22 @@ export type UserRouteProps = {
   route?: UserRouteProp;
 };
 const UserPage: React.FC<UserRouteProps> = ({ route }) => {
+  const navigationAuth = useNavigation<MainStackNavigationProp>();
+  const { isLoggedIn } = useContext(AuthContext);
+  const handleLoginClick = () => {
+    navigationAuth.navigate("Auth");
+  };
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!isLoggedIn) {
+        handleLoginClick();
+      }
+    }, [isLoggedIn])
+  );
   let passed_user_id;
   const { user_id, username, displayName, avatarUrl } = useContext(UserContext);
+
+  
 
   if (route) {
     passed_user_id = route.params?.passed_user_id;

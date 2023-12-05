@@ -12,7 +12,7 @@ import LoginPage from "../Auth/LoginPage"; // Import your LoginPage component
 import RegisterPage from "../Auth/RegisterPage"; // Import your RegisterPage component
 import InnerCell, { Props } from "../Posts/InnerCell";
 import CreatePost from "../User/CreatePost";
-import { View, Image, TouchableOpacity, StyleSheet,Platform } from "react-native";
+import { View, Image, Text, TouchableOpacity, StyleSheet,Platform } from "react-native";
 import { AuthContext } from "../Auth/auth-context";
 import { Linking } from "react-native";
 import TopBar from "../Misc/DesktopTopbar";
@@ -33,6 +33,38 @@ const AuthStack = createStackNavigator<AuthStackParamList>(); // Create a new St
 const MainStack = createStackNavigator<MainStackParamList>();
 
 const MainStackScreen: React.FC = () => {
+  const navigation = useNavigation<MainStackNavigationProp>();
+  const { isLoggedIn } = useContext(AuthContext);
+  useEffect(()=> {
+    navigation.setOptions({
+      headerRight: () => (
+        !isLoggedIn && (
+          <TouchableOpacity style={styles.loginButton} onPress={handleLoginClick}>
+            <Text style={styles.loginButtonText}>Login</Text>
+          </TouchableOpacity>
+        )
+      ),
+    }); 
+  }, [isLoggedIn]);
+  const styles = StyleSheet.create({ 
+    loginButton: {
+    backgroundColor: "#007BFF", // Set the background color of the button
+    paddingVertical: 8, // Add vertical padding
+    paddingHorizontal: 20, // Add horizontal padding
+    borderRadius: 5, // Round the corners
+    marginRight: 15,
+  },
+  loginButtonText: {
+    color: "#FFFFFF", // Set the text color
+    fontSize: 16, // Set the font size
+    fontWeight: "bold", // Make the text bold
+  },
+});
+
+const handleLoginClick = () => {
+  console.log("Login clicked");
+  navigation.navigate("Auth");
+};
   return (
     <MainStack.Navigator initialRouteName="Home">
       <MainStack.Screen
@@ -50,15 +82,20 @@ const MainStackScreen: React.FC = () => {
         component={UserPage}
         options={{ headerShown: false }}
       />
+      <MainStack.Screen name="Auth" component={AuthNavigator} options={{ headerShown: false }} />
     </MainStack.Navigator>
   );
+  
 };
 
 const AuthNavigator: React.FC = () => {
   return (
-    <AuthStack.Navigator>
-      <AuthStack.Screen name="Login" component={LoginPage} />
-      <AuthStack.Screen name="Register" component={RegisterPage} />
+    
+    <AuthStack.Navigator screenOptions={{
+      headerShown: false,
+    }}>
+      <AuthStack.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
+      <AuthStack.Screen name="Register" component={RegisterPage} options={{ headerShown: false }} />
     </AuthStack.Navigator>
   );
 };
@@ -87,10 +124,11 @@ const UserStackScreen: React.FC<{ passed_user_id?: string }> = ({
     </UserStack.Navigator>
   );
 };
-
 const MobileMainNavigator: React.FC<{ navigationRef: any }> = ({
   navigationRef,
 }) => {
+  
+
   // In your main App component or a component that only mounts once
   React.useEffect(() => {
     Linking.getInitialURL().then((initialUrl) => {
@@ -102,7 +140,8 @@ const MobileMainNavigator: React.FC<{ navigationRef: any }> = ({
         navigateUrl(pathname, navigationRef);
       }
     });
-  }, []); // Empty dependency array ensures this runs only once
+
+  }, []);
 
   return (
     <Tab.Navigator>
