@@ -17,6 +17,7 @@ import { MainTabParamList } from "./Navigation/navigationTypes";
 import TopBar from "./Misc/DesktopTopbar";
 import HomePage from "./Components/HomePage";
 import { CellProps } from "./Posts/Cell";
+import { Analytics } from "@vercel/analytics/react";
 declare global {
   interface Window {
     __CELL_DATA__: CellProps | undefined;
@@ -37,7 +38,8 @@ const App: React.FC = () => {
     avatarUrl: "",
     email: undefined,
   });
-  const isMobileOS = Platform.OS === 'ios' || Platform.OS === 'android' || isMobile;
+  const isMobileOS =
+    Platform.OS === "ios" || Platform.OS === "android" || isMobile;
   console.log("ismobile os", isMobile);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -91,19 +93,22 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
-      <UserContext.Provider value={userData}>
-        <ChatContext.Provider value={{ chatData, setChatData }}>
-          <NavigationContainer ref={navigationRef}>
-            {isMobileOS ? (
-              <MobileMainNavigator navigationRef={navigationRef} />
-            ) : (
-              <DesktopMainNavigator navigationRef={navigationRef} />
-            )}
-          </NavigationContainer>
-        </ChatContext.Provider>
-      </UserContext.Provider>
-    </AuthContext.Provider>
+    <>
+      <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+        <UserContext.Provider value={userData}>
+          <ChatContext.Provider value={{ chatData, setChatData }}>
+            <NavigationContainer ref={navigationRef}>
+              {isMobileOS ? (
+                <MobileMainNavigator navigationRef={navigationRef} />
+              ) : (
+                <DesktopMainNavigator navigationRef={navigationRef} />
+              )}
+            </NavigationContainer>
+          </ChatContext.Provider>
+        </UserContext.Provider>
+      </AuthContext.Provider>
+      <Analytics />
+    </>
   );
 };
 
